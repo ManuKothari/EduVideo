@@ -1,5 +1,5 @@
 {
-  "name": "EduVideo",
+  "name": "EduVideo Server",
   "version": "1.0.0",
   "main": "server.js",
   "dependencies": {

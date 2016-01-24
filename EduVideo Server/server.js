@@ -39,21 +39,21 @@ var upload = multer({
 app.post("/video", upload.single('video'), function(req,res) {
 	var gfs = Grid(conn.db);
 
-	console.log(req.file)
-	res.json(req.file)
- // var source = fs.createReadStream('package.json');
+	// console.log(req.file)
+	// res.json(req.file)
+    var source = fs.createReadStream(req.file.path);
 
- //    var target = gfs.createWriteStream({
- //        filename: 'package.json'
- //    });
+     var target = gfs.createWriteStream({
+         filename: req.file.originalname
+     });
 
- //    source.pipe(target);
+     source.pipe(target);
 
- //    target.on('close', function(file) {
- //    	console.log(file._id);
- //    	console.log(JSON.stringify(file))
- //    	res.json({'_id':file._id})
- //    });
+    target.on('close', function(file) {
+    	console.log(file._id);
+    	console.log(JSON.stringify(file))
+    	res.json({'_id':file._id})
+    });
 });
 
 app.use('/',router);
