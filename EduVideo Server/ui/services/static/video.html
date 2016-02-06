@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Video Settings</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet">
+<script src="http://ajax.aspnetcdn.com/ajax/jquery/jquery-1.9.0.js"></script>
+<script src="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+<script src="http://ajax.aspnetcdn.com/ajax/knockout/knockout-2.2.1.js"></script>
+</head>
+<body>
+    <div class="navbar">
+        <div class="navbar-inner">
+            <a class="brand" href="#">Video Settings</a>
+        </div>
+    </div>
+
+    <div id="main" class="container">
+        <!-- Main content here! -->
+        <table class="table table-striped">
+	    <tr><td style="width: 1px;"></td><td><b>Video</b></td><td><b>Options</b></td></tr>
+	    <!-- ko foreach: videos -->
+	    <tr>
+		<td>
+			<p><b data-bind="text: title"></b></p>
+			<p><b data-bind="text: category"></b></p>
+			<p data-bind="text: description"></p>
+			<p data-bind="text: vlength"></p>
+			<p data-bind="text: tags"></p>
+			<p data-bind="text: notes"></p>
+			<p data-bind="text: reference"></p>
+			<p data-bind="text: subtitle"></p>			
+		</td>
+		<td>
+		    <button data-bind="click: $parent.beginEdit" class="btn">Edit</button>
+		    <button data-bind="click: $parent.remove" class="btn">Delete</button>
+		</td>
+	    </tr>
+	    <!-- /ko -->
+	</table>
+	<button data-bind="click: beginAdd" class="btn">Add Video</button>
+
+    </div>
+
+    <div id="add" class="modal hide fade" tabindex="=1" role="dialog" aria-labelledby="addDialogLabel" aria-hidden="true">
+    	<div class="modal-header">
+        	<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        	<h3 id="addDialogLabel">Add Video</h3>
+    	</div>
+   	<div class="modal-body">
+        	<form class="form-horizontal">
+        	    <div class="control-group">
+        	        <label class="control-label" for="inputTitle">Video Title</label>
+        	        <div class="controls">
+        	            <input data-bind="value: title" type="text" id="inputTitle" placeholder="Video Title" style="width: 400px;">
+        	        </div>
+        	    </div>
+        	    <div class="control-group">
+        	        <label class="control-label" for="inputCategory">Category</label>
+        	        <div class="controls">
+        	            <input data-bind="value: category" type="text" id="inputCategory" placeholder="Category" style="width: 600px;">
+        	        </div>
+        	    </div>
+		    <div class="control-group">
+        	        <label class="control-label" for="inputDescription">Description</label>
+        	        <div class="controls">
+        	            <input data-bind="value: description" type="text" id="inputDescription" placeholder="Description" style="width: 400px;">
+        	        </div>
+        	    </div>
+		    <div class="control-group">
+        	        <label class="control-label" for="inputLength">Video Length</label>
+        	        <div class="controls">
+        	            <input data-bind="value: vlength" type="text" id="inputLength" placeholder="Video Length" style="width: 200px;">
+        	        </div>
+        	    </div>
+		    <div class="control-group">
+        	        <label class="control-label" for="inputTags">Additional Tags</label>
+        	        <div class="controls">
+        	            <input data-bind="value: tags" type="text" id="inputTags" placeholder="Additional Tags" style="width: 400px;">
+        	        </div>
+        	    </div>
+		    <div class="control-group">
+        	        <label class="control-label" for="inputNotes">Notes</label>
+        	        <div class="controls">
+        	            <input data-bind="value: notes" type="text" id="inputNotes" placeholder="Notes" style="width: 600px;">
+        	        </div>
+        	    </div>
+		    <div class="control-group">
+        	        <label class="control-label" for="inputReference">Reference</label>
+        	        <div class="controls">
+        	            <input data-bind="value: reference" type="text" id="inputReference" placeholder="Reference" style="width: 600px;">
+        	        </div>
+        	    </div>
+		    <div class="control-group">
+        	        <label class="control-label" for="inputSubtitle">Subtitle</label>
+        	        <div class="controls">
+        	            <input data-bind="value: subtitle" type="text" id="inputSubtitle" placeholder="Subtitle" style="width: 600px;">
+        	        </div>
+        	    </div>
+        	</form>
+    	</div>
+    	<div class="modal-footer">
+        	<button data-bind="click: addVideo" class="btn btn-primary">Add Video</button>
+        	<button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+    	</div>
+    </div>
+
+     <div id="edit" class="modal hide fade" tabindex="=1" role="dialog" aria-labelledby="editDialogLabel" aria-hidden="true">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+            <h3 id="editDialogLabel">Edit Video</h3>
+        </div>
+        <div class="modal-body">
+            <form class="form-horizontal">
+		    <div class="control-group">
+        	        <label class="control-label" for="inputTitle">Video Title</label>
+        	        <div class="controls">
+        	            <input data-bind="value: title" type="text" id="inputTitle" placeholder="Video Title" style="width: 400px;">
+        	        </div>
+        	    </div>
+        	    <div class="control-group">
+        	        <label class="control-label" for="inputCategory">Category</label>
+        	        <div class="controls">
+        	            <input data-bind="value: category" type="text" id="inputCategory" placeholder="Category" style="width: 600px;">
+        	        </div>
+        	    </div>
+		    <div class="control-group">
+        	        <label class="control-label" for="inputDescription">Description</label>
+        	        <div class="controls">
+        	            <input data-bind="value: description" type="text" id="inputDescription" placeholder="Description" style="width: 400px;">
+        	        </div>
+        	    </div>
+		    <div class="control-group">
+        	        <label class="control-label" for="inputLength">Video Length</label>
+        	        <div class="controls">
+        	            <input data-bind="value: vlength" type="text" id="inputLength" placeholder="Video Length" style="width: 200px;">
+        	        </div>
+        	    </div>
+		    <div class="control-group">
+        	        <label class="control-label" for="inputTags">Additional Tags</label>
+        	        <div class="controls">
+        	            <input data-bind="value: tags" type="text" id="inputTags" placeholder="Additional Tags" style="width: 400px;">
+        	        </div>
+        	    </div>
+		    <div class="control-group">
+        	        <label class="control-label" for="inputNotes">Notes</label>
+        	        <div class="controls">
+        	            <input data-bind="value: notes" type="text" id="inputNotes" placeholder="Notes" style="width: 600px;">
+        	        </div>
+        	    </div>
+		    <div class="control-group">
+        	        <label class="control-label" for="inputReference">Reference</label>
+        	        <div class="controls">
+        	            <input data-bind="value: reference" type="text" id="inputReference" placeholder="Reference" style="width: 600px;">
+        	        </div>
+        	    </div>
+		    <div class="control-group">
+        	        <label class="control-label" for="inputSubtitle">Subtitle</label>
+        	        <div class="controls">
+        	            <input data-bind="value: subtitle" type="text" id="inputSubtitle" placeholder="Subtitle" style="width: 600px;">
+        	        </div>
+        	    </div>               
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button data-bind="click:editVideo" class="btn btn-primary">Update Video</button>
+            <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        // application code here!
+
+	function VideosViewModel() 
+	{
+	    /*  self.videos([
+		    {
+		        title: ko.observable('Intro'),
+		        category: ko.observable( [ { 'subject' : 'C++', 'unit' : 1, 'topic' : 'Introduction', 'sub_topic' : '' } ] ),
+			description: ko.observable('Introduction'),
+			vlength: ko.observable('02:58'),
+			tags : ko.observable('Codeblocks'),
+			notes: ko.observable('Example'),
+			reference: ko.observable(''),
+			subtitle: ko.observable('')
+		    },
+		    {
+		        title: ko.observable('Strings in C++'),
+		        category: ko.observable( [ { 'subject' : 'C++', 'unit' : 2, 'topic' : 'Basics', 'sub_topic' : 'String' } ] ),
+			description: ko.observable(''),
+			vlength: ko.observable('02:39'),
+			tags : ko.observable(''),
+			notes: ko.observable(''),
+			reference: ko.observable(''),
+			subtitle: ko.observable('')
+		    }
+		]);    */
+
+		var self = this;
+		self.videosURI = 'http://localhost:5000/eduvideo/videos';
+		self.videos = ko.observableArray();
+
+		self.ajax = function(uri, method, data) {
+		    var request = {
+		        url: uri,
+		        type: method,
+		        contentType: "application/json",
+		        accepts: "application/json",
+		        cache: false,
+		        dataType: 'json',
+		        data: JSON.stringify(data),
+		        error: function(jqXHR) {
+		            console.log("ajax error " + jqXHR.status);
+		        }
+		    };
+		    return $.ajax(request);
+		}
+
+		self.beginAdd = function() 
+		{
+		    $('#add').modal('show');
+		}
+
+		self.beginEdit = function( video ) 
+		{
+		     editVideoViewModel.setVideo( video );
+            	     $('#edit').modal('show');
+		}
+
+		self.remove = function( video ) 
+		{
+		    self.ajax( video.uri(), 'DELETE' ).done(
+			    function() 
+			    {
+		        	self.videos.remove(video);
+		    	    } );
+		}
+
+		self.updateVideo = function( video, newVideo ) 
+		{
+		    var i = self.videos.indexOf( video );
+		    self.videos()[i].uri( newVideo.uri );
+		    self.videos()[i].title( newVideo.title );
+		    self.videos()[i].category( newVideo.category );
+		    self.videos()[i].description( newVideo.description );
+		    self.videos()[i].vlength( newVideo.vlength );
+		    self.videos()[i].tags( newVideo.tags );
+		    self.videos()[i].notes( newVideo.notes );
+		    self.videos()[i].reference( newVideo.reference );
+		    self.videos()[i].subtitle( newVideo.subtitle );
+		}
+
+		self.edit = function( video, data ) 
+		{
+		    self.ajax( video.uri(), 'PUT', data ).done(
+			    function( res ) 
+			    {
+			        self.updateVideo( video, res.video );
+		            } );
+		}
+		
+		self.add = function( video )
+		{
+		    self.ajax( self.videosURI, 'POST', video ).done( 
+			    function( data ) 
+			    {
+				self.videos.push( {
+				    uri: ko.observable( data.video.uri ),
+				    title: ko.observable( data.video.title ),
+				    category: ko.observable( data.video.category ),
+				    description: ko.observable( data.video.description ),
+				    vlength: ko.observable( data.video.vlength ),
+				    tags: ko.observable( data.video.tags ),
+				    notes: ko.observable( data.video.notes ),
+				    reference: ko.observable( data.video.reference ),
+				    subtitle: ko.observable( data.video.subtitle )
+				} );
+			    } );
+		}
+
+		self.ajax( self.videosURI, 'GET' ).done(
+			function( data ) 
+			{
+				for (var i = 0; i < data.videos.length; i++) 
+				{
+					self.videos.push( {
+						uri: ko.observable( data.videos[i].uri ),
+						title: ko.observable( data.videos[i].title ),
+						category: ko.observable( data.videos[i].category ),
+						description: ko.observable( data.videos[i].description ),
+						vlength: ko.observable( data.videos[i].vlength ),
+						tags: ko.observable( data.videos[i].tags ),
+						notes: ko.observable( data.videos[i].notes ),
+						reference: ko.observable( data.videos[i].reference ),
+						subtitle: ko.observable( data.videos[i].subtitle )
+				        } );
+				}
+		    	} );
+
+	}
+
+	function AddVideoViewModel() 
+	{
+		var self = this;
+		self.title = ko.observable();
+		self.category = ko.observable();
+		self.description = ko.observable();
+		self.vlength = ko.observable();
+		self.tags = ko.observable();
+		self.notes = ko.observable();
+		self.reference = ko.observable();
+		self.subtitle = ko.observable();
+
+		self.addVideo = function() {
+		    $('#add').modal('hide');
+		    videosViewModel.add({
+		        title: self.title(),
+		        category: self.category(),
+			description: self.description(),
+			vlength: self.vlength(),
+			tags: self.tags(),
+		        notes: self.notes(),
+			reference: self.reference(),
+			subtitle: self.subtitle()
+		    });
+		    self.title("");
+		    self.category("");
+		    self.description("");
+		    self.vlength("");
+		    self.tags("");
+		    self.notes("");
+		    self.reference("");
+		    self.subtitle("");
+		}
+	}
+
+	function EditVideoViewModel() 
+	{
+		var self = this;
+		self.title = ko.observable();
+		self.category = ko.observable();
+		self.description = ko.observable();
+		self.vlength = ko.observable();
+		self.tags = ko.observable();
+		self.notes = ko.observable();
+		self.reference = ko.observable();
+		self.subtitle = ko.observable();
+
+		self.setVideo = function(video) {
+		    self.video = video;
+		    self.title( video.title() );
+		    self.category( video.category() );
+		    self.description( video.description() );
+		    self.vlength( video.vlength() );
+		    self.tags( video.tags() );
+		    self.notes( video.notes() );
+		    self.reference( video.reference() );
+		    self.subtitle( video.subtitle() );
+		    $('edit').modal('show');
+		}
+
+		self.editVideo = function() {
+		    $('#edit').modal('hide');
+		    videosViewModel.edit( self.video, {
+		        title: self.title(),
+		        category: self.category(),
+			description: self.description(),
+			vlength: self.vlength(),
+			tags: self.tags(),
+		        notes: self.notes(),
+			reference: self.reference(),
+			subtitle: self.subtitle()
+		    });
+		}
+	}
+
+	var videosViewModel = new VideosViewModel();
+        var addVideoViewModel = new AddVideoViewModel();
+	var editVideoViewModel = new EditVideoViewModel();
+        ko.applyBindings(videosViewModel, $('#main')[0]);
+        ko.applyBindings(addVideoViewModel, $('#add')[0]);
+	ko.applyBindings(editVideoViewModel, $('#edit')[0]);
+
+    </script>
+</body>
+</html>

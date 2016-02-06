@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>User Settings</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet">
+<script src="http://ajax.aspnetcdn.com/ajax/jquery/jquery-1.9.0.js"></script>
+<script src="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+<script src="http://ajax.aspnetcdn.com/ajax/knockout/knockout-2.2.1.js"></script>
+</head>
+<body>
+    <div class="navbar">
+        <div class="navbar-inner">
+            <a class="brand" href="#">User Settings</a>
+        </div>
+    </div>
+
+    <div id="main" class="container">
+        <!-- Main content here! -->
+        <table class="table table-striped">
+	    <tr><td style="width: 1px;"></td><td><b>User</b></td><td><b>Options</b></td></tr>
+	    <!-- ko foreach: users -->
+	    <tr>
+		<td>
+			<p><b data-bind="text: username"></b></p>
+			<p><b data-bind="text: password"></b></p>
+		</td>
+		<td>
+		    <button data-bind="click: $parent.beginEdit" class="btn">Edit</button>
+		    <button data-bind="click: $parent.remove" class="btn">Delete</button>
+		</td>
+	    </tr>
+	    <!-- /ko -->
+	</table>
+	<button data-bind="click: beginAdd" class="btn">Add User</button>
+
+    </div>
+
+    <div id="add" class="modal hide fade" tabindex="=1" role="dialog" aria-labelledby="addDialogLabel" aria-hidden="true">
+    	<div class="modal-header">
+        	<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        	<h3 id="addDialogLabel">Add User</h3>
+    	</div>
+   	 <div class="modal-body">
+        	<form class="form-horizontal">
+        	    <div class="control-group">
+        	        <label class="control-label" for="inputUser">User Name</label>
+        	        <div class="controls">
+        	            <input data-bind="value: username" type="text" id="inputUser" placeholder="User Name" style="width: 200px;">
+        	        </div>
+        	    </div>
+        	    <div class="control-group">
+        	        <label class="control-label" for="inputPassword">Password</label>
+        	        <div class="controls">
+        	            <input data-bind="value: password" type="text" id="inputPassword" placeholder="Password" style="width: 200px;">
+        	        </div>
+        	    </div>
+        	</form>
+    	</div>
+    	<div class="modal-footer">
+        	<button data-bind="click: addUser" class="btn btn-primary">Add User</button>
+        	<button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+    	</div>
+    </div>
+
+     <div id="edit" class="modal hide fade" tabindex="=1" role="dialog" aria-labelledby="editDialogLabel" aria-hidden="true">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+            <h3 id="editDialogLabel">Edit User</h3>
+        </div>
+        <div class="modal-body">
+            <form class="form-horizontal">
+               <div class="control-group">
+                   <label class="control-label" for="inputUser">User Name</label>
+        	   <div class="controls">
+        	       <input data-bind="value: username" type="text" id="inputUser" placeholder="User Name" style="width: 200px;">
+        	   </div>
+               </div>
+               <div class="control-group">
+        	   <label class="control-label" for="inputPassword">Password</label>
+        	   <div class="controls">
+        	        <input data-bind="value: password" type="text" id="inputPassword" placeholder="Password" style="width: 200px;">
+        	   </div>
+               </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button data-bind="click:editUser" class="btn btn-primary">Update User</button>
+            <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        // application code here!
+
+	function UsersViewModel() 
+	{
+	    /*  self.users([
+		    {
+		        username: ko.observable('Meg'),
+		        password: ko.observable('p1')
+		    },
+		    {
+		        username: ko.observable('Div'),
+		        password: ko.observable('p2')
+		    }
+		]);    */
+
+		var self = this;
+		self.usersURI = 'http://localhost:5000/eduvideo/users';
+		self.users = ko.observableArray();
+
+		self.ajax = function(uri, method, data) {
+		    var request = {
+		        url: uri,
+		        type: method,
+		        contentType: "application/json",
+		        accepts: "application/json",
+		        cache: false,
+		        dataType: 'json',
+		        data: JSON.stringify(data),
+		        error: function(jqXHR) {
+		            console.log("ajax error " + jqXHR.status);
+		        }
+		    };
+		    return $.ajax(request);
+		}
+
+		self.beginAdd = function() 
+		{
+		    $('#add').modal('show');
+		}
+
+		self.beginEdit = function( user ) 
+		{
+		     editUserViewModel.setUser( user );
+            	     $('#edit').modal('show');
+		}
+
+		self.remove = function( user ) 
+		{
+		    self.ajax( user.uri(), 'DELETE' ).done(
+			    function() 
+			    {
+		        	self.users.remove(user);
+		    	    } );
+		}
+
+		self.updateUser = function( user, newUser ) 
+		{
+		    var i = self.users.indexOf( user );
+		    self.users()[i].uri( newUser.uri );
+		    self.users()[i].username( newUser.username );
+		    self.users()[i].password( newUser.password );
+		}
+
+		self.edit = function( user, data ) 
+		{
+		    self.ajax( user.uri(), 'PUT', data ).done(
+			    function( res ) 
+			    {
+			        self.updateUser( user, res.user );
+		            } );
+		}
+		
+		self.add = function( user )
+		{
+		    self.ajax( self.usersURI, 'POST', user ).done( 
+			    function( data ) 
+			    {
+				self.users.push( {
+				    uri: ko.observable( data.user.uri ),
+				    username: ko.observable( data.user.username ),
+				    password: ko.observable( data.user.password )
+				} );
+			    } );
+		}
+
+		self.ajax( self.usersURI, 'GET' ).done(
+			function( data ) 
+			{
+				for (var i = 0; i < data.users.length; i++) 
+				{
+					self.users.push( {
+						uri: ko.observable( data.users[i].uri ),
+						username: ko.observable( data.users[i].username ),
+						password: ko.observable( data.users[i].password )
+				        } );
+				}
+		    	} );
+
+	}
+
+	function AddUserViewModel() 
+	{
+		var self = this;
+		self.username = ko.observable();
+		self.password = ko.observable();
+
+		self.addUser = function() {
+		    $('#add').modal('hide');
+		    usersViewModel.add({
+		        username: self.username(),
+		        password: self.password()
+		    });
+		    self.username("");
+		    self.password("");
+		}
+	}
+
+	function EditUserViewModel() 
+	{
+		var self = this;
+		self.username = ko.observable();
+		self.password = ko.observable();
+
+		self.setUser = function(user) {
+		    self.user = user;
+		    self.username( user.username() );
+		    self.password( user.password() );
+		    $('edit').modal('show');
+		}
+
+		self.editUser = function() {
+		    $('#edit').modal('hide');
+		    usersViewModel.edit( self.user, {
+		        username: self.username(),
+		        password: self.password()
+		    });
+		}
+	}
+
+	var usersViewModel = new UsersViewModel();
+        var addUserViewModel = new AddUserViewModel();
+	var editUserViewModel = new EditUserViewModel();
+        ko.applyBindings(usersViewModel, $('#main')[0]);
+        ko.applyBindings(addUserViewModel, $('#add')[0]);
+	ko.applyBindings(editUserViewModel, $('#edit')[0]);
+
+    </script>
+</body>
+</html>
