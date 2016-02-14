@@ -7,7 +7,7 @@ var Grid 		=   require('gridfs-stream');
 var fs 			= 	require('fs')
 Grid.mongo 		=	mongoose.mongo;
 var multer		= 	require('multer')
-var conn 		= 	mongoose.createConnection('mongodb://localhost:27017/eduvideo');
+var conn 		= 	mongoose.createConnection('mongodb://admin:root@ds059365.mongolab.com:59365/eduvideo');
 
 
 app.use(bodyParser.json());
@@ -58,6 +58,6 @@ app.post("/video", upload.single('video'), function(req,res) {
 
 app.use('/',router);
 
-app.listen(3000);
+app.listen(process.env.port || 3000);
 console.log("Listening to PORT 3000");
 
