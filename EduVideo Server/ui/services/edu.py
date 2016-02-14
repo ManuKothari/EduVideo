@@ -1,6 +1,11 @@
 from flask import Flask, jsonify, abort, make_response
 from flask.ext.restful import Api, Resource, reqparse, fields, marshal
-
+from pymongo import MongoClient
+client = MongoClient('localhost', 27017)
+db = client.eduvideo
+video_col = db.video
+user_col = db.user
+channel_col = db.channel
 app = Flask(__name__, static_url_path="")
 api = Api(app)
 
@@ -48,7 +53,7 @@ videos = [
 	'subtitle' : ""
     },
     {
-        'title' : 'Strings in C++',
+    'title' : 'Strings in C++',
 	'description' : '', 
 	'video_id' : 2,
 	'vlength' : "02:39",
@@ -95,12 +100,8 @@ class UserListAPI(Resource):
 
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
-        self.reqparse.add_argument('username', type=str, required=True,
-                                   help='No username provided',
-                                   location='json')
-	self.reqparse.add_argument('password', type=str, required=True,
-                                   help='No password provided',
-                                   location='json')
+        self.reqparse.add_argument('username', type=str, required=True, help='No username provided', location='json')
+        self.reqparse.add_argument('password', type=str, required=True, help='No password provided', location='json')
         super(UserListAPI, self).__init__()
 
     def get(self):
@@ -155,12 +156,8 @@ class ChannelListAPI(Resource):
 
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
-        self.reqparse.add_argument('subjects', type=str, required=True,
-                                   help='No subjects provided',
-                                   location='json')
-	self.reqparse.add_argument('no_of_videos', type=int, required=True,
-                                   help='Total number of videos not provided',
-                                   location='json')
+        self.reqparse.add_argument('subjects', type=str, required=True, help='No subjects provided', location='json')
+        self.reqparse.add_argument('no_of_videos', type=int, required=True, help='Total number of videos not provided', location='json')
         super(ChannelListAPI, self).__init__()
 
     def get(self):
@@ -215,25 +212,14 @@ class VideoListAPI(Resource):
 
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
-        self.reqparse.add_argument('title', type=str, required=True,
-                                   help='No video title provided',
-                                   location='json')
-	self.reqparse.add_argument('description', type=str, default="",
-                                   location='json')
-	self.reqparse.add_argument('vlength', type=str, required=True,
-                                   help='No video length provided',
-                                   location='json')
-	self.reqparse.add_argument('category', type=str, required=True,
-                                   help='No category provided',
-                                   location='json')
-	self.reqparse.add_argument('tags', type=str, default="",
-                                   location='json')
-        self.reqparse.add_argument('notes', type=str, default="",
-                                   location='json')
-	self.reqparse.add_argument('reference', type=str, default="",
-                                   location='json')
-	self.reqparse.add_argument('subtitle', type=str, default="",
-                                   location='json')
+        self.reqparse.add_argument('title', type=str, required=True, help='No video title provided',location='json')
+        self.reqparse.add_argument('description', type=str, default="", location='json')
+        self.reqparse.add_argument('vlength', type=str, required=True, help='No video length provided',location='json')
+        self.reqparse.add_argument('category', type=str, required=True, help='No category provided', location='json')
+        self.reqparse.add_argument('tags', type=str, default="", location='json')
+        self.reqparse.add_argument('notes', type=str, default="", location='json')
+        self.reqparse.add_argument('reference', type=str, default="", location='json')
+        self.reqparse.add_argument('subtitle', type=str, default="", location='json')
         super(VideoListAPI, self).__init__()
 
     def get(self):
@@ -246,11 +232,11 @@ class VideoListAPI(Resource):
             'title': args['title'],
             'description': args['description'],
             'vlength': args['vlength'],
-	    'category': args['category'],
-	    'tags': args['tags'],
+    	    'category': args['category'],
+    	    'tags': args['tags'],
             'notes': args['notes'],
             'reference': args['reference'],
-	    'subtitle': args['subtitle']
+    	    'subtitle': args['subtitle']
         }
         videos.append(video)
         return {'video': marshal(video, video_fields)}, 201
@@ -263,11 +249,11 @@ class VideoAPI(Resource):
         self.reqparse.add_argument('title', type=str, location='json')
         self.reqparse.add_argument('description', type=str, location='json')
         self.reqparse.add_argument('vlength', type=str, location='json')
-	self.reqparse.add_argument('category', type=str, location='json')
-	self.reqparse.add_argument('tags', type=str, location='json')
+        self.reqparse.add_argument('category', type=str, location='json')
+        self.reqparse.add_argument('tags', type=str, location='json')
         self.reqparse.add_argument('notes', type=str, location='json')
         self.reqparse.add_argument('reference', type=str, location='json')
-	self.reqparse.add_argument('subtitle', type=str, location='json')
+        self.reqparse.add_argument('subtitle', type=str, location='json')
         super(VideoAPI, self).__init__()
 
     def get(self, video_id):
