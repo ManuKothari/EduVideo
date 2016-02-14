@@ -1,39 +1,16 @@
 from flask import Flask, jsonify, abort, make_response
 from flask.ext.restful import Api, Resource, reqparse, fields, marshal
 from pymongo import MongoClient
-client = MongoClient('localhost', 27017)
+import collections
+
+client = MongoClient('mongodb://admin:root@ds059365.mongolab.com:59365/eduvideo')
+
 db = client.eduvideo
 video_col = db.video
 user_col = db.user
 channel_col = db.channel
 app = Flask(__name__, static_url_path="")
 api = Api(app)
-
-users = [
-    {
-	'user_id' : 1,
-	'username' : 'Meg',
-	'password' : 'p1'
-    },
-    {
-	'user_id' : 2,
-	'username' : 'Div',
-	'password' : 'p2'
-    }
-]
-
-channels = [
-    {
-	'channel_id' : 1,
-	'subjects' : "[ 'c', 'c#' ]",
-	'no_of_videos' : 5
-    },
-    {
-        'channel_id' : 2,
-	'subjects' : "[ 'c++', 'sql' ]",
-	'no_of_videos' : 6
-    }
-]
 
 videos = [
     {
@@ -105,16 +82,15 @@ class UserListAPI(Resource):
         super(UserListAPI, self).__init__()
 
     def get(self):
-        return {'users': [marshal(user, user_fields) for user in users]}
+        return {'users': [marshal(user, user_fields) for user in user_col.find()]}
 
     def post(self):
         args = self.reqparse.parse_args()
         user = {
-            'user_id': users[-1]['user_id'] + 1,
             'username': args['username'],
             'password': args['password']
         }
-        users.append(user)
+        user['_id'] = str(user_col.insert_one(user).inserted_id)
         return {'user': marshal(user, user_fields)}, 201
 
 
@@ -126,14 +102,15 @@ class UserAPI(Resource):
         self.reqparse.add_argument('password', type=str, location='json')
         super(UserAPI, self).__init__()
 
-    def get(self, user_id):
-        user = [user for user in users if user['user_id'] == user_id]
+    def get(self, _id):
+        user = [user for user in user_col.find() if user['_id'] == _id]
         if len(user) == 0:
             abort(404)
         return {'user': marshal(user[0], user_fields)}
 
-    def put(self, user_id):
-        user = [user for user in users if user['user_id'] == user_id]
+    def put(self, _id):
+        print(list(user_col.find()))
+        user = [user for user in user_col.find() if user['_id'] == _id]
         if len(user) == 0:
             abort(404)
         user = user[0]
@@ -141,13 +118,14 @@ class UserAPI(Resource):
         for k, v in args.items():
             if v is not None:
                 user[k] = v
+        user_col.find_one_and_update({'_id': _id }, user)
         return {'user': marshal(user, user_fields)}
 
-    def delete(self, user_id):
-        user = [user for user in users if user['user_id'] == user_id]
+    def delete(self, _id):
+        user = [user for user in user_col.find() if user['_id'] == _id]
         if len(user) == 0:
             abort(404)
-        users.remove(user[0])
+        users.find_one_and_delete({'_id': _id })
         return {'result': True}
 
 #----------------------------------------------------Channel----------------------------------------------------------------------------------
@@ -161,16 +139,15 @@ class ChannelListAPI(Resource):
         super(ChannelListAPI, self).__init__()
 
     def get(self):
-        return {'channels': [marshal(channel, channel_fields) for channel in channels]}
+        return {'channels': [marshal(channel, channel_fields) for channel in channel_col.find()]}
 
     def post(self):
         args = self.reqparse.parse_args()
         channel = {
-            'channel_id': channels[-1]['channel_id'] + 1,
             'subjects': args['subjects'],
             'no_of_videos': args['no_of_videos']
         }
-        channels.append(channel)
+        channel['_id'] = str(channel_col.insert_one(channel).inserted_id)
         return {'channel': marshal(channel, channel_fields)}, 201
 
 
@@ -182,14 +159,14 @@ class ChannelAPI(Resource):
         self.reqparse.add_argument('no_of_videos', type=int, location='json')
         super(ChannelAPI, self).__init__()
 
-    def get(self, channel_id):
-        channel = [channel for channel in channels if channel['channel_id'] == channel_id]
+    def get(self, _id):
+        channel = [channel for channel in channel_col.find() if channel['_id'] == _id]
         if len(channel) == 0:
             abort(404)
         return {'channel': marshal(channel[0], channel_fields)}
 
-    def put(self, channel_id):
-        channel = [channel for channel in channels if channel['channel_id'] == channel_id]
+    def put(self, _id):
+        channel = [channel for channel in channel_col.find() if channel['_id'] == _id]
         if len(channel) == 0:
             abort(404)
         channel = channel[0]
@@ -197,13 +174,14 @@ class ChannelAPI(Resource):
         for k, v in args.items():
             if v is not None:
                 channel[k] = v
+        channel_col.find_one_and_update({'_id': _id }, channel)
         return {'channel': marshal(channel, channel_fields)}
 
-    def delete(self, channel_id):
-        channel = [channel for channel in channels if channel['channel_id'] == channel_id]
+    def delete(self, _id):
+        channel = [channel for channel in channel_col.find() if channel['_id'] == _id]
         if len(channel) == 0:
             abort(404)
-        channels.remove(channel[0])
+        channel_col.find_one_and_delete({'_id': _id })
         return {'result': True}
 
 #----------------------------------------------------Video----------------------------------------------------------------------------------
@@ -281,13 +259,13 @@ class VideoAPI(Resource):
         return {'result': True}
 
 api.add_resource(UserListAPI, '/eduvideo/users', endpoint='users')
-api.add_resource(UserAPI, '/eduvideo/users/<int:user_id>', endpoint='user')
+api.add_resource(UserAPI, '/eduvideo/users/<_id>', endpoint='user')
 
 api.add_resource(ChannelListAPI, '/eduvideo/channels', endpoint='channels')
-api.add_resource(ChannelAPI, '/eduvideo/channels/<int:channel_id>', endpoint='channel')
+api.add_resource(ChannelAPI, '/eduvideo/channels/<_id>', endpoint='channel')
 
 api.add_resource(VideoListAPI, '/eduvideo/videos', endpoint='videos')
-api.add_resource(VideoAPI, '/eduvideo/videos/<int:video_id>', endpoint='video')
+api.add_resource(VideoAPI, '/eduvideo/videos/<video_id>', endpoint='video')
 
 
 if __name__ == '__main__':
