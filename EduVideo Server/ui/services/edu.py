@@ -124,7 +124,7 @@ class UserAPI(Resource):
         for k, v in args.items():
             if v is not None:
                 user[k] = v
-		user_col.find_one_and_update({'_id': _id }, { '$set':user })
+	user_col.find_one_and_update({'_id': _id }, { '$set':user })
         return {'user': marshal(user, user_fields)}
 
     def delete(self, _id):
@@ -132,6 +132,8 @@ class UserAPI(Resource):
         if len(user) == 0:
             abort(404)
         user_col.find_one_and_delete({'_id': _id })
+	print( user_col.find_one_and_delete({'_id': _id }) )
+	
         return {'result': True}
 
 #----------------------------------------------------Channel----------------------------------------------------------------------------------
