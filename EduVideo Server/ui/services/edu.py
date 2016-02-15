@@ -109,14 +109,14 @@ class UserAPI(Resource):
         super(UserAPI, self).__init__()
 
     def get(self, _id):
-        user = [user for user in user_col.find() if user['_id'] == _id]
+        user = [user for user in user_col.find() if str(user['_id']) == _id]
         if len(user) == 0:
             abort(404)
         return {'user': marshal(user[0], user_fields)}
 
     def put(self, _id):
         print(list(user_col.find()))
-        user = [user for user in user_col.find() if user['_id'] == _id]
+        user = [user for user in user_col.find() if str(user['_id']) == _id]
         if len(user) == 0:
             abort(404)
         user = user[0]
@@ -124,14 +124,16 @@ class UserAPI(Resource):
         for k, v in args.items():
             if v is not None:
                 user[k] = v
-        user_col.find_one_and_update({'_id': _id }, user)
+	user_col.find_one_and_update({'_id': _id }, { '$set':user })
         return {'user': marshal(user, user_fields)}
 
     def delete(self, _id):
-        user = [user for user in user_col.find() if user['_id'] == _id]
+        user = [user for user in user_col.find() if str(user['_id']) == _id]
         if len(user) == 0:
             abort(404)
-        users.find_one_and_delete({'_id': _id })
+        user_col.find_one_and_delete({'_id': _id })
+	print( user_col.find_one_and_delete({'_id': _id }) )
+	
         return {'result': True}
 
 #----------------------------------------------------Channel----------------------------------------------------------------------------------
@@ -166,13 +168,13 @@ class ChannelAPI(Resource):
         super(ChannelAPI, self).__init__()
 
     def get(self, _id):
-        channel = [channel for channel in channel_col.find() if channel['_id'] == _id]
+        channel = [channel for channel in channel_col.find() if str(channel['_id']) == _id]
         if len(channel) == 0:
             abort(404)
         return {'channel': marshal(channel[0], channel_fields)}
 
     def put(self, _id):
-        channel = [channel for channel in channel_col.find() if channel['_id'] == _id]
+        channel = [channel for channel in channel_col.find() if str(channel['_id']) == _id]
         if len(channel) == 0:
             abort(404)
         channel = channel[0]
@@ -180,11 +182,11 @@ class ChannelAPI(Resource):
         for k, v in args.items():
             if v is not None:
                 channel[k] = v
-        channel_col.find_one_and_update({'_id': _id }, channel)
+        channel_col.find_one_and_update({'_id': _id }, { '$set':channel })
         return {'channel': marshal(channel, channel_fields)}
 
     def delete(self, _id):
-        channel = [channel for channel in channel_col.find() if channel['_id'] == _id]
+        channel = [channel for channel in channel_col.find() if str(channel['_id']) == _id]
         if len(channel) == 0:
             abort(404)
         channel_col.find_one_and_delete({'_id': _id })
@@ -243,13 +245,13 @@ class VideoAPI(Resource):
         super(VideoAPI, self).__init__()
 
     def get(self, _id):
-        video = [video for video in video_col.find() if video['_id'] == _id]
+        video = [video for video in video_col.find() if str(video['_id']) == _id]
         if len(video) == 0:
             abort(404)
         return {'video': marshal(video[0], video_fields)}
 
     def put(self, _id):
-        video = [video for video in video_col.find() if video['_id'] == _id]
+        video = [video for video in video_col.find() if str(video['_id']) == _id]
         if len(video) == 0:
             abort(404)
         video = video[0]
@@ -257,11 +259,11 @@ class VideoAPI(Resource):
         for k, v in args.items():
             if v is not None:
                 video[k] = v
-        video_col.find_one_and_update({'_id': _id }, video)
+        video_col.find_one_and_update({'_id': _id }, { '$set':video })
         return {'video': marshal(video, video_fields)}
 
     def delete(self, _id):
-        video = [video for video in video_col.find() if video['_id'] == _id]
+        video = [video for video in video_col.find() if str(video['_id']) == _id]
         if len(video) == 0:
             abort(404)
         video_col.find_one_and_delete({'_id': _id })
