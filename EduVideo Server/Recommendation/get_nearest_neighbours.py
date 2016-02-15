@@ -16,6 +16,20 @@ list_of_videos - Dimension of each vector
 #mapping of user_id to user_vector
 user_vector = dict()
 
+k_dimen = len(list_of_videos)
+
+total_num_of_users_per_cluster = len(list_of_videos)/100
+
+d_dimen = 10
+
+for k in range(0,100):
+
+	if total_num_of_users_per_cluster  <= 2**k:
+
+		d_dimen = k-1
+
+		break
+
 def get_user_vectors():
 	
 	for user in user_rating:
