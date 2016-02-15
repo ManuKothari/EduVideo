@@ -1,5 +1,11 @@
 # EduVideo
 
+## Objective
+
+To provide short concise crowdsourced video lectures (<3 minutes) based on search (specific to the domain of CSE) and to personalize the results by recommending the most apt videos for the user.
+
+The current curriculum or syllabus also serves as an input to maintain a structure for the various videos and this site would suffice to assist in elimination or at least reduction of hand-written notes.
+
 ## Running the Node.js Server Locally
 
 1. Make sure you have an up-to-date version of Node.js installed on your system. If you don't have Node.js installed, you can install it from [here](http://nodejs.org/).
