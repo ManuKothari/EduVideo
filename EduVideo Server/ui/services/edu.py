@@ -3,20 +3,24 @@ from flask.ext.restful import Api, Resource, reqparse, fields, marshal
 from pymongo import MongoClient
 import collections
 
-client = MongoClient('mongodb://admin:root@ds059365.mongolab.com:59365/eduvideo')
+from flask.ext.cors import CORS
+
+client = MongoClient()
 
 db = client.eduvideo
 video_col = db.video
 user_col = db.user
 channel_col = db.channel
+
 app = Flask(__name__, static_url_path="")
 api = Api(app)
+CORS(app)
 
 videos = [
     {
 	'title' : 'Intro',
 	'description' : 'Introduction', 
-	'video_id' : 1,
+	'_id' : 1,
 	'vlength' : "02:58",
 	'category' :  [ { 'subject' : 'C++',
 			  'unit' : 1,
@@ -32,7 +36,7 @@ videos = [
     {
     'title' : 'Strings in C++',
 	'description' : '', 
-	'video_id' : 2,
+	'_id' : 2,
 	'vlength' : "02:39",
 	'category' :  [ { 'subject' : 'C++',
 			  'unit' : 2,
@@ -62,6 +66,8 @@ video_fields = {
     'notes': fields.String,
     'reference': fields.String,
     'subtitle': fields.String,
+    '_id': fields.String,
+    'video_id' : fields.String,
     'uri': fields.Url('video')
 }
 
@@ -198,15 +204,15 @@ class VideoListAPI(Resource):
         self.reqparse.add_argument('notes', type=str, default="", location='json')
         self.reqparse.add_argument('reference', type=str, default="", location='json')
         self.reqparse.add_argument('subtitle', type=str, default="", location='json')
+        self.reqparse.add_argument('video_id', type=str, required=True, help='No _id provided', location='json')
         super(VideoListAPI, self).__init__()
 
     def get(self):
-        return {'videos': [marshal(video, video_fields) for video in videos]}
+        return {'videos': [marshal(video, video_fields) for video in video_col.find()]}
 
     def post(self):
         args = self.reqparse.parse_args()
         video = {
-            'video_id': videos[-1]['video_id'] + 1,
             'title': args['title'],
             'description': args['description'],
             'vlength': args['vlength'],
@@ -214,9 +220,10 @@ class VideoListAPI(Resource):
     	    'tags': args['tags'],
             'notes': args['notes'],
             'reference': args['reference'],
-    	    'subtitle': args['subtitle']
+    	    'subtitle': args['subtitle'],
+            'video_id': args['video_id']
         }
-        videos.append(video)
+        video['_id'] = str(video_col.insert_one(video).inserted_id)
         return {'video': marshal(video, video_fields)}, 201
 
 
@@ -232,16 +239,17 @@ class VideoAPI(Resource):
         self.reqparse.add_argument('notes', type=str, location='json')
         self.reqparse.add_argument('reference', type=str, location='json')
         self.reqparse.add_argument('subtitle', type=str, location='json')
+        self.reqparse.add_argument('video_id', type=str, location='json')
         super(VideoAPI, self).__init__()
 
-    def get(self, video_id):
-        video = [video for video in videos if video['video_id'] == video_id]
+    def get(self, _id):
+        video = [video for video in video_col.find() if video['_id'] == _id]
         if len(video) == 0:
             abort(404)
         return {'video': marshal(video[0], video_fields)}
 
-    def put(self, video_id):
-        video = [video for video in videos if video['video_id'] == video_id]
+    def put(self, _id):
+        video = [video for video in video_col.find() if video['_id'] == _id]
         if len(video) == 0:
             abort(404)
         video = video[0]
@@ -249,13 +257,14 @@ class VideoAPI(Resource):
         for k, v in args.items():
             if v is not None:
                 video[k] = v
+        video_col.find_one_and_update({'_id': _id }, video)
         return {'video': marshal(video, video_fields)}
 
-    def delete(self, video_id):
-        video = [video for video in videos if video['video_id'] == video_id]
+    def delete(self, _id):
+        video = [video for video in video_col.find() if video['_id'] == _id]
         if len(video) == 0:
             abort(404)
-        videos.remove(video[0])
+        video_col.find_one_and_delete({'_id': _id })
         return {'result': True}
 
 api.add_resource(UserListAPI, '/eduvideo/users', endpoint='users')
@@ -265,7 +274,7 @@ api.add_resource(ChannelListAPI, '/eduvideo/channels', endpoint='channels')
 api.add_resource(ChannelAPI, '/eduvideo/channels/<_id>', endpoint='channel')
 
 api.add_resource(VideoListAPI, '/eduvideo/videos', endpoint='videos')
-api.add_resource(VideoAPI, '/eduvideo/videos/<video_id>', endpoint='video')
+api.add_resource(VideoAPI, '/eduvideo/videos/<_id>', endpoint='video')
 
 
 if __name__ == '__main__':
