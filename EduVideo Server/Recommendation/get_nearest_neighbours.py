@@ -4,6 +4,7 @@ import unittest
 from nearpy import Engine
 from nearpy.distances import CosineDistance
 from nearpy.hashes import RandomBinaryProjections, RandomBinaryProjectionTree, HashPermutations, HashPermutationMapper
+from get_data import *
 
 '''
 
