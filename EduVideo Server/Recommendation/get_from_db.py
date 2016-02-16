@@ -25,26 +25,56 @@ def connect_db():
 	user_info = db.user
 
 
+def write_in_file(user, list_of_weight):
+	
+	with open("User_info.txt", "w"):
+		
+			f.write("\n"+user+">")
+		
+			for i in list_of_weight:
+				
+				for j in i[0]:
+					
+					f.write(j[0]+":"+i[1]+"\t")
+					
+			f.write("\n")
 
 
 def get_data_from_db():
 	
 	cursor = db.restaurants.find()
 	
-	with open("User_info.txt","w") as f:
+	for doc in cursor:
+		
+		user = doc[user]
+
+				#a list of videos rated good 
+				
+		Good = doc[good]
+				
+				#a list of videos rated avg 
+				
+		Avg= doc[avg]
+				
+				#a list of videos rated poor 
+				
+		Poor = doc[poor]
+				
+				#a list of videos rated viewed 
+				
+		view = doc[view]
+		
+		write_in_file('user' [(Good,8), (avg,6), (view,4), (Poor,1)])
+				
+				
+				
+				
+		
+				
 	
-		for doc in cursor:
+		
 				
-				user = doc[user]
-				
-				#considering each has list of video and it's rating
-				
-				video_id = doc[video_id]
-				
-				rates = doc[video_id][rates]
-				
-				viewCount = doc[video_id][view_count]
 			
-				#yet to finish
+			
 			
 			
