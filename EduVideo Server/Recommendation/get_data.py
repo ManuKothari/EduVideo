@@ -25,7 +25,7 @@ user_id> vid_id1:rating	vid_id2:rading  and so on
 
 def read_from_file():
 	
-	with open("somefile.txt","r") as f:
+	with open("user_info.txt","r") as f:
 		
 		for line in f.readlines():
 			
