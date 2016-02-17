@@ -1,9 +1,10 @@
 from flask import Flask, jsonify, abort, make_response
 from flask.ext.restful import Api, Resource, reqparse, fields, marshal
+from flask.ext.cors import CORS
+from bson.objectid import ObjectId
 from pymongo import MongoClient
 import collections
 
-from flask.ext.cors import CORS
 
 client = MongoClient()
 
@@ -115,23 +116,22 @@ class UserAPI(Resource):
         return {'user': marshal(user[0], user_fields)}
 
     def put(self, _id):
-        user_bson_id_tuple_list = [(user,user['_id']) for user in user_col.find() if str(user['_id']) == _id]
-        if len( user_bson_id_tuple_list ) == 0:
+        user = [user for user in user_col.find() if str(user['_id']) == _id]
+        if len(user) == 0:
             abort(404)
-	user = user_bson_id_tuple_list[0][0]
-	bson_id = user_bson_id_tuple_list[0][1]
+	user = user[0]
         args = self.reqparse.parse_args()
         for k, v in args.items():
             if v is not None:
                 user[k] = v
-	user_col.find_one_and_update({'_id': bson_id }, { '$set':user })
+	user_col.find_one_and_update({'_id': ObjectId(_id) }, { '$set':user })
         return {'user': marshal(user, user_fields)}
 
     def delete(self, _id):
-        bson_id = [user['_id'] for user in user_col.find() if str(user['_id']) == _id]
-        if len( bson_id ) == 0:
+        user = [user for user in user_col.find() if str(user['_id']) == _id]
+        if len(user) == 0:
             abort(404)
-        user_col.find_one_and_delete({'_id': bson_id[0] })
+        user_col.find_one_and_delete({'_id': ObjectId(_id) })
         return {'result': True}
 
 #----------------------------------------------------Channel----------------------------------------------------------------------------------
@@ -172,23 +172,22 @@ class ChannelAPI(Resource):
         return {'channel': marshal(channel[0], channel_fields)}
 
     def put(self, _id):
-        channel_bson_id_tuple_list = [(channel,channel['_id']) for channel in channel_col.find() if str(channel['_id']) == _id]
-        if len( channel_bson_id_tuple_list ) == 0:
+        channel = [channel for channel in channel_col.find() if str(channel['_id']) == _id]
+        if len(channel) == 0:
             abort(404)
-        channel = channel_bson_id_tuple_list[0][0]
-	bson_id = channel_bson_id_tuple_list[0][1]
+        channel = channel[0]
         args = self.reqparse.parse_args()
         for k, v in args.items():
             if v is not None:
                 channel[k] = v
-        channel_col.find_one_and_update({'_id': bson_id }, { '$set':channel })
+        channel_col.find_one_and_update({'_id': ObjectId(_id) }, { '$set':channel })
         return {'channel': marshal(channel, channel_fields)}
 
     def delete(self, _id):
-        bson_id = [channel['_id'] for channel in channel_col.find() if str(channel['_id']) == _id]
-        if len( bson_id ) == 0:
+        channel = [channel for channel in channel_col.find() if str(channel['_id']) == _id]
+        if len(channel) == 0:
             abort(404)
-        channel_col.find_one_and_delete({'_id': bson_id[0] })
+        channel_col.find_one_and_delete({'_id': ObjectId(_id) })
         return {'result': True}
 
 #----------------------------------------------------Video----------------------------------------------------------------------------------
@@ -250,23 +249,22 @@ class VideoAPI(Resource):
         return {'video': marshal(video[0], video_fields)}
 
     def put(self, _id):
-        video_bson_id_tuple_list = [(video,video['_id']) for video in video_col.find() if str(video['_id']) == _id]
-        if len( video_bson_id_tuple_list ) == 0:
+        video = [video for video in video_col.find() if str(video['_id']) == _id]
+        if len(video) == 0:
             abort(404)
-        video = video_bson_id_tuple_list[0][0]
-	bson_id = video_bson_id_tuple_list[0][1]
+        video = video[0]
         args = self.reqparse.parse_args()
         for k, v in args.items():
             if v is not None:
                 video[k] = v
-        video_col.find_one_and_update({'_id': bson_id }, { '$set':video })
+        video_col.find_one_and_update({'_id': ObjectId(_id) }, { '$set':video })
         return {'video': marshal(video, video_fields)}
 
     def delete(self, _id):
-        bson_id = [video['_id'] for video in video_col.find() if str(video['_id']) == _id]
-        if len( bson_id ) == 0:
+        video = [video for video in video_col.find() if str(video['_id']) == _id]
+        if len(video) == 0:
             abort(404)
-        video_col.find_one_and_delete({'_id': bson_id[0] })
+        video_col.find_one_and_delete({'_id': ObjectId(_id) })
         return {'result': True}
 
 api.add_resource(UserListAPI, '/eduvideo/users', endpoint='users')
