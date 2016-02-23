@@ -12,6 +12,8 @@ db = client.eduvideo
 video_col = db.video
 user_col = db.user
 channel_col = db.channel
+chunks_col = db.fs.chunks
+files_col = db.fs.files
 
 app = Flask(__name__, static_url_path="")
 api = Api(app)
@@ -261,10 +263,13 @@ class VideoAPI(Resource):
         return {'video': marshal(video, video_fields)}
 
     def delete(self, _id):
-        video = [video for video in video_col.find() if str(video['_id']) == _id]
-        if len(video) == 0:
+        grid_id_list = [video['video_id'] for video in video_col.find() if str(video['_id']) == _id]
+        if len( grid_id_list ) == 0:
             abort(404)
+	grid_id = grid_id_list[0]
         video_col.find_one_and_delete({'_id': ObjectId(_id) })
+	files_col.remove({'_id': ObjectId( grid_id ) })
+	chunks_col.remove({'files_id': ObjectId( grid_id ) })
         return {'result': True}
 
 api.add_resource(UserListAPI, '/eduvideo/users', endpoint='users')
