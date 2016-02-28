@@ -4,9 +4,14 @@ from flask.ext.cors import CORS
 from bson.objectid import ObjectId
 from pymongo import MongoClient
 import collections
-
-
-client = MongoClient()
+import pymongo
+try:
+    client = MongoClient('mongodb://admin:root@ds055564.mlab.com:55564/eduvideo',serverSelectionTimeoutMS=5000)
+    client.server_info()
+    print("Connceted to MongoDB@online")
+except:
+    client = MongoClient()
+    print("Connected to MongoDB@localhost");
 
 db = client.eduvideo
 video_col = db.video
