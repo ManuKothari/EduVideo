@@ -138,7 +138,7 @@
 						<?php
 
 							try {
-								$conn = new Mongo('localhost');
+								$conn = new MongoClient('mongodb://admin:root@ds055564.mlab.com:55564/eduvideo');
 								$db = $conn->eduvideo;
 								$collection = $db->category;
 								$cursor = $collection->find();

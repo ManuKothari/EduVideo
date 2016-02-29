@@ -1,14 +1,12 @@
+from __future__ import print_function
 from flask import Flask, jsonify, abort, make_response
 from flask.ext.restful import Api, Resource, reqparse, fields, marshal
 from flask.ext.cors import CORS
 from bson.objectid import ObjectId
 from pymongo import MongoClient
-<<<<<<< HEAD
 import collections, fileinput
-=======
-import collections
->>>>>>> origin/master
 import pymongo
+
 try:
     client = MongoClient('mongodb://admin:root@ds055564.mlab.com:55564/eduvideo',serverSelectionTimeoutMS=5000)
     client.server_info()
@@ -239,9 +237,9 @@ class VideoListAPI(Resource):
 	    'view_count': 0
         }
         video['_id'] = str(video_col.insert_one(video).inserted_id)
-	extras = wrtfile( video )
-	with open('vidnm.txt', 'a') as f:
-		f.write( str(video['_id']) + " $@$ " + extras + "\n")
+        extras = wrtfile( video )
+        with open('vidnm.txt', 'a') as f:
+        	f.write( str(video['_id']) + " $@$ " + extras + "\n")
         return {'video': marshal(video, video_fields)}, 201
 
 
@@ -272,19 +270,19 @@ class VideoAPI(Resource):
             abort(404)
         video = video[0]
         args = self.reqparse.parse_args()
-	updfile = 0
+        updfile = 0
         for k, v in args.items():
             if v is not None:
                	video[k] = v
-	    if k in ['title', 'description', 'tags', 'category']:
-		updfile = 1
+            if k in ['title', 'description', 'tags', 'category']:
+                updfile = 1
         video_col.find_one_and_update({'_id': ObjectId(_id) }, { '$set':video })
-	if( updfile == 1 ):
-		extras = wrtfile( video )
-		for line in fileinput.input( "vidnm.txt", inplace=1 ):
-			if( line.split(" $@$ ")[0] == _id ):
-				line = line.replace( line.split(" $@$ ")[1] , extras + "\n" )
-			print line,
+        if( updfile == 1 ):
+            extras = wrtfile( video )
+            for line in fileinput.input( "vidnm.txt", inplace=1 ):
+                if( line.split(" $@$ ")[0] == _id ):
+                    line = line.replace( line.split(" $@$ ")[1] , extras + "\n" )
+                print( line, end="" )
         return {'video': marshal(video, video_fields)}
 
     def delete(self, _id):
@@ -295,9 +293,9 @@ class VideoAPI(Resource):
         video_col.find_one_and_delete({'_id': ObjectId(_id) })
         files_col.remove({'_id': ObjectId( grid_id ) })
         chunks_col.remove({'files_id': ObjectId( grid_id ) })
-	for line in fileinput.input( "vidnm.txt", inplace=1 ):
-		if( line.split(" $@$ ")[0] != _id ):
-			print line,
+        for line in fileinput.input( "vidnm.txt", inplace=1 ):
+            if( line.split(" $@$ ")[0] != _id ):
+                print( line, end="" )
         return {'result': True}
 
 api.add_resource(UserListAPI, '/eduvideo/users', endpoint='users')
