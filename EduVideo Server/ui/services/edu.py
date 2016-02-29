@@ -3,7 +3,11 @@ from flask.ext.restful import Api, Resource, reqparse, fields, marshal
 from flask.ext.cors import CORS
 from bson.objectid import ObjectId
 from pymongo import MongoClient
+<<<<<<< HEAD
+import collections, fileinput
+=======
 import collections
+>>>>>>> origin/master
 import pymongo
 try:
     client = MongoClient('mongodb://admin:root@ds055564.mlab.com:55564/eduvideo',serverSelectionTimeoutMS=5000)
@@ -24,40 +28,6 @@ app = Flask(__name__, static_url_path="")
 api = Api(app)
 CORS(app)
 
-videos = [
-    {
-	'title' : 'Intro',
-	'description' : 'Introduction', 
-	'_id' : 1,
-	'vlength' : "02:58",
-	'category' :  [ { 'subject' : 'C++',
-			  'unit' : 1,
-			  'topic' : 'Introduction',
-			  'sub_topic' : ''
-			} 
-		      ],
-	'tags' : "Codeblocks",
-	'notes' : "Example",
-	'reference' : "",
-	'subtitle' : ""
-    },
-    {
-    'title' : 'Strings in C++',
-	'description' : '', 
-	'_id' : 2,
-	'vlength' : "02:39",
-	'category' :  [ { 'subject' : 'C++',
-			  'unit' : 2,
-			  'topic' : 'Basics',
-			  'sub_topic' : 'String'
-			} 
-		      ],
-	'tags' : "",
-	'notes' : "",
-	'reference' : "", 
-	'subtitle' : ""
-    }
-]
 
 user_fields = {
     'username': fields.String,
@@ -65,12 +35,18 @@ user_fields = {
     'uri': fields.Url('user')
 }
 
+vid_category = {
+    'subject': fields.String,
+    'unitTopic': fields.String,
+    'subtopic': fields.String
+}
+
 video_fields = {
     'title': fields.String,
     'description': fields.String,
     'vlength': fields.String,
-    'category': fields.String,
-    'tags': fields.String,
+    'category': fields.List( fields.Nested( vid_category ) ),
+    'tags': fields.List( fields.String ),
     'notes': fields.String,
     'reference': fields.String,
     'subtitle': fields.String,
@@ -102,7 +78,13 @@ class UserListAPI(Resource):
         args = self.reqparse.parse_args()
         user = {
             'username': args['username'],
-            'password': args['password']
+            'password': args['password'],
+	    'rates': { 
+			'good': [],
+	    		'avg': [],
+    			'poor': [] 
+		     },
+	    'history': []
         }
         user['_id'] = str(user_col.insert_one(user).inserted_id)
         return {'user': marshal(user, user_fields)}, 201
@@ -126,12 +108,12 @@ class UserAPI(Resource):
         user = [user for user in user_col.find() if str(user['_id']) == _id]
         if len(user) == 0:
             abort(404)
-	user = user[0]
+        user = user[0]
         args = self.reqparse.parse_args()
         for k, v in args.items():
             if v is not None:
                 user[k] = v
-	user_col.find_one_and_update({'_id': ObjectId(_id) }, { '$set':user })
+        user_col.find_one_and_update({'_id': ObjectId(_id) }, { '$set':user })
         return {'user': marshal(user, user_fields)}
 
     def delete(self, _id):
@@ -199,6 +181,26 @@ class ChannelAPI(Resource):
 
 #----------------------------------------------------Video----------------------------------------------------------------------------------
 
+def setwrd( myset, wordstr ):
+	for word in wordstr.split(" "):
+		myset.add( word.lower() )
+
+def wrtfile( video ):
+	extras = set()
+	setwrd( extras, video['title'] )
+	setwrd( extras, video['description'] )
+	for vid in video['category']:
+		setwrd( extras, vid['subject'] )
+		setwrd( extras, vid['unitTopic'] )
+		if( vid['subtopic'] != "" ):
+			setwrd( extras, vid['subtopic'] )
+	for tag in video['tags']:
+		extras.add( tag )
+	extras = list( extras )
+	extras = " ".join( extras )
+	return extras
+
+
 class VideoListAPI(Resource):
 
     def __init__(self):
@@ -206,8 +208,8 @@ class VideoListAPI(Resource):
         self.reqparse.add_argument('title', type=str, required=True, help='No video title provided',location='json')
         self.reqparse.add_argument('description', type=str, default="", location='json')
         self.reqparse.add_argument('vlength', type=str, required=True, help='No video length provided',location='json')
-        self.reqparse.add_argument('category', type=str, required=True, help='No category provided', location='json')
-        self.reqparse.add_argument('tags', type=str, default="", location='json')
+        self.reqparse.add_argument('category', type=list, required=True, help='No category provided', location='json')
+        self.reqparse.add_argument('tags', type=list, default="", location='json')
         self.reqparse.add_argument('notes', type=str, default="", location='json')
         self.reqparse.add_argument('reference', type=str, default="", location='json')
         self.reqparse.add_argument('subtitle', type=str, default="", location='json')
@@ -228,9 +230,18 @@ class VideoListAPI(Resource):
             'notes': args['notes'],
             'reference': args['reference'],
     	    'subtitle': args['subtitle'],
-            'video_id': args['video_id']
+            'video_id': args['video_id'],
+	    'rates': { 
+			'good': 0,
+	    		'avg': 0,
+    			'poor': 0 
+		     },
+	    'view_count': 0
         }
         video['_id'] = str(video_col.insert_one(video).inserted_id)
+	extras = wrtfile( video )
+	with open('vidnm.txt', 'a') as f:
+		f.write( str(video['_id']) + " $@$ " + extras + "\n")
         return {'video': marshal(video, video_fields)}, 201
 
 
@@ -241,8 +252,8 @@ class VideoAPI(Resource):
         self.reqparse.add_argument('title', type=str, location='json')
         self.reqparse.add_argument('description', type=str, location='json')
         self.reqparse.add_argument('vlength', type=str, location='json')
-        self.reqparse.add_argument('category', type=str, location='json')
-        self.reqparse.add_argument('tags', type=str, location='json')
+        self.reqparse.add_argument('category', type=list, location='json')
+        self.reqparse.add_argument('tags', type=list, location='json')
         self.reqparse.add_argument('notes', type=str, location='json')
         self.reqparse.add_argument('reference', type=str, location='json')
         self.reqparse.add_argument('subtitle', type=str, location='json')
@@ -261,20 +272,32 @@ class VideoAPI(Resource):
             abort(404)
         video = video[0]
         args = self.reqparse.parse_args()
+	updfile = 0
         for k, v in args.items():
             if v is not None:
-                video[k] = v
+               	video[k] = v
+	    if k in ['title', 'description', 'tags', 'category']:
+		updfile = 1
         video_col.find_one_and_update({'_id': ObjectId(_id) }, { '$set':video })
+	if( updfile == 1 ):
+		extras = wrtfile( video )
+		for line in fileinput.input( "vidnm.txt", inplace=1 ):
+			if( line.split(" $@$ ")[0] == _id ):
+				line = line.replace( line.split(" $@$ ")[1] , extras + "\n" )
+			print line,
         return {'video': marshal(video, video_fields)}
 
     def delete(self, _id):
         grid_id_list = [video['video_id'] for video in video_col.find() if str(video['_id']) == _id]
         if len( grid_id_list ) == 0:
             abort(404)
-	grid_id = grid_id_list[0]
+        grid_id = grid_id_list[0]
         video_col.find_one_and_delete({'_id': ObjectId(_id) })
-	files_col.remove({'_id': ObjectId( grid_id ) })
-	chunks_col.remove({'files_id': ObjectId( grid_id ) })
+        files_col.remove({'_id': ObjectId( grid_id ) })
+        chunks_col.remove({'files_id': ObjectId( grid_id ) })
+	for line in fileinput.input( "vidnm.txt", inplace=1 ):
+		if( line.split(" $@$ ")[0] != _id ):
+			print line,
         return {'result': True}
 
 api.add_resource(UserListAPI, '/eduvideo/users', endpoint='users')
