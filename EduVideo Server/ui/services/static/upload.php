@@ -259,8 +259,6 @@
 	    $("#notes").val("");
 	    $("#reference").val("");
 	
-	    $("#new_video_form").show();
-
 	    $( "#subject" ).change( function() 
 		{
 			var sub = $("#subject").val();
