@@ -180,23 +180,7 @@
 									</div>
 								</div>
 							</div>
-							</br><!--
-							<div class="form-group">
-								<div class="row">
-									<div class="col-sm-3">
-										<label style="padding-top:5%;font-size:14px;">Enter tag</label>
-									</div>
-									<div class="col-sm-5">
-										<input type="text" class="form-control" id="vidtags" placeholder = "Tag" onkeyup="geTags();" list="tags" />
-										<datalist id="tags"> </datalist>
-									</div>
-								</div>
-								<div class="row">
-									<div class="col-sm-11 col-sm-offset-1">
-										<div id="tags_msg" style="color:red;padding-top:1%;"></div>
-									</div>
-								</div>
-							</div>-->
+							</br>
 							<hr>
 
 						<div class="form-group" ng-app="tagApp" ng-controller="tagController">
@@ -312,8 +296,6 @@
 	    $("#vlength").val("");
 	    $("#notes").val("");
 	    $("#reference").val("");
-
-		$("#new_video_form").show();            //REMOVE THIS LATER!!  DON'T FORGET LIKE LAST TIME
 
 	    $( "#subject" ).change( function() 
 		{
