@@ -1,0 +1,4 @@
+description
+best practice
+pointer
+Char arrays

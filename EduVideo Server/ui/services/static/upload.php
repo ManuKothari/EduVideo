@@ -20,6 +20,9 @@
 
 <script src="http://ajax.aspnetcdn.com/ajax/jquery/jquery-1.9.1.js"></script>
 <script src="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+
+<script type="text/javascript" src = "js/angular.js"></script>
+
 </head>
 
   <body>
@@ -38,13 +41,14 @@
         <div id="navbar" class="navbar-collapse collapse">
 			<div class="top-search">
 				<form class="navbar-form navbar-right">
-					<input type="text" class="form-control" placeholder="Search...">
-					<input type="submit" value=" ">
+					<input id="srch" type="text" class="form-control" placeholder="Search..." autocomplete="off" onkeyup="geTitles();" list="titles">
+					<datalist id="titles"> </datalist>
+					<input type="submit" value=" " onclick="searchvid(); return false;">
 				</form>
 			</div>  
 			<div class="header-top-right">
 				<div class="file">
-					<a href="upload.html">Upload</a>
+					<a href="#">Upload</a>
 				</div>	
 				<div class="signin">
 					<a href="#">Sign Up</a>
@@ -139,6 +143,7 @@
 
 							try {
 								$conn = new MongoClient('mongodb://admin:root@ds055564.mlab.com:55564/eduvideo');
+								//$conn = new Mongo('localhost');
 								$db = $conn->eduvideo;
 								$collection = $db->category;
 								$cursor = $collection->find();
@@ -175,11 +180,15 @@
 									</div>
 								</div>
 							</div>
-							</br>
+							</br><!--
 							<div class="form-group">
 								<div class="row">
-									<div class="col-sm-12">
-										<textarea class="form-control" rows="2" style="resize:none;" id="tags" placeholder = "Enter additional tags, if any, separated by comma..."></textarea>
+									<div class="col-sm-3">
+										<label style="padding-top:5%;font-size:14px;">Enter tag</label>
+									</div>
+									<div class="col-sm-5">
+										<input type="text" class="form-control" id="vidtags" placeholder = "Tag" onkeyup="geTags();" list="tags" />
+										<datalist id="tags"> </datalist>
 									</div>
 								</div>
 								<div class="row">
@@ -187,7 +196,35 @@
 										<div id="tags_msg" style="color:red;padding-top:1%;"></div>
 									</div>
 								</div>
+							</div>-->
+							<hr>
+
+						<div class="form-group" ng-app="tagApp" ng-controller="tagController">
+							<div class="row">
+								<div class="col-sm-3">
+									<label style="padding-top:5%;font-size:14px;">Enter number of tags, if any</label>
+								</div>
+								<div class="col-sm-4">
+									<input type="number" id="num_t_c" ng-model = "data.val"  min="0" class="form-control"  placeholder="Enter Number of Tags, if any">
+								</div>
+								<div class="col-sm-5">
+									<div id="num_t_c_msg" style="color:red;padding-top:2%;"></div>
+								</div>
 							</div>
+							<div ng-repeat = "x in [] | range:data.val">
+								<br>
+								<div class="row">
+									<div class="col-sm-2">
+										<center><label style="padding-top:4%;">Tag {{x}}:</label></center>
+									</div>
+									<div class="col-sm-5">
+										<input type="text" class="form-control" id="vidtags{{x}}" placeholder="Tag" onkeyup="geTags( this.id );" list="tags{{x}}" />
+										<datalist id="tags{{x}}"> </datalist>
+									</div>
+								</div>
+							</div>
+						</div>
+
 							<hr>
 							<div class="form-group">
 								<div class="row">
@@ -245,6 +282,24 @@
 
     <script type="text/javascript">
 
+	var app = angular.module("tagApp", []);
+	var _t_c = 0;
+
+	app.controller("tagController", function($scope) {
+		$scope.data = {};
+	});
+
+	app.filter("range", function() {
+		return function(arr, high) {
+			_t_c = parseInt(high);
+			for(var i = 1; i <= high; i++)
+			{
+				arr.push(i);
+			}
+			return arr;
+		}
+	});
+
         function displayinfo()
 	{
             myFile = document.getElementById("vidfile").files[0];
@@ -254,11 +309,12 @@
 	    $("#vidtitle").val( myFile.name.split(".")[0] );
 	    $("#descrip").val("");
 	    $("#subtopic").val("");
-	    $("#tags").val("");
 	    $("#vlength").val("");
 	    $("#notes").val("");
 	    $("#reference").val("");
-	
+
+		$("#new_video_form").show();            //REMOVE THIS LATER!!  DON'T FORGET LIKE LAST TIME
+
 	    $( "#subject" ).change( function() 
 		{
 			var sub = $("#subject").val();
@@ -330,6 +386,17 @@
 		    return $.ajax(request);
 		}
 
+		var taglist = [];
+		var tagsize = $("#num_t_c").val();
+		if( tagsize != "" || tagsize != 0 || tagsize != null )
+		{
+			for( i=1; i <= tagsize; i++ )
+			{
+				taglist[ i-1 ] = $( "#vidtags" + i.toString() ).val();
+			}
+			$.post( "newtags.php", { "ntags" : taglist } );
+		}
+
 		var newVid = {
 				title: $("#vidtitle").val(),
 				description: $("#descrip").val(),
@@ -338,7 +405,7 @@
     						'unitTopic': $("#uniTopic").val(),
     						'subtopic' : $("#subtopic").val()
 					  }],
-				tags: $("#tags").val().split(","),
+				tags: taglist,
 				vlength: $("#vlength").val(),
 				notes: $("#notes").val(),
 				reference: $("#reference").val(),
@@ -356,6 +423,116 @@
 				alert(output);				
 		    } );
 	}
+
+
+	function searchvid()
+	{
+		var self = this;
+		self.videosURI = 'http://localhost:5000/eduvideo/videos';
+
+		self.ajax = function(uri, method, data) {
+		    var request = {
+		        url: uri,
+		        type: method,
+		        contentType: "application/json",
+		        accepts: "application/json",
+		        cache: false,
+		        dataType: 'json',
+		        data: JSON.stringify(data),
+		        error: function(jqXHR) {
+		            console.log("ajax error " + jqXHR.status);
+		        }
+		    };
+		    return $.ajax(request);
+		}
+
+		var query =  $("#srch").val();
+		$.ajax({
+			    url: 'vsearch.php',
+			    data: "qry=" + encodeURIComponent(query),
+			    type: 'POST',
+			    cache: false,
+			    error: function( jqXHR )
+				   {
+				   	console.log("ajax error " + jqXHR.status);
+				   },
+			    success: function( data )
+				    {					
+					var vids = JSON.parse( data );
+					vids.pop();
+					var res = [];
+					for( var i = 0; i < vids.length; i++ )
+					{
+						self.ajax( self.videosURI + "/" + vids[i], 'GET' ).done(
+						    function( data ) 
+						    {
+							res[i] = data;
+					    	    } );
+						alert(res.length);
+						if( res.length == vids.length )
+						{
+							var restr = JSON.stringify( res );
+							restr = encodeURIComponent( restr );
+
+							var vform = $('<form action="vidlist.php" method="post" style="display:none;">' + 
+						'<input type="textarea" maxlength="5000" name="vidlist" value="' + restr + '" /' + '>' +
+						  	'</form>');
+							$('body').append( vform );
+							vform.submit();
+						}	
+					}
+					
+				    }
+			});
+	}
+
+	function geTitles()
+	{
+		var query =  $("#srch").val();
+		$("#titles").empty();
+		$.ajax({
+			    url: 'vtitles.php',
+			    data: "qry=" + encodeURIComponent(query),
+			    type: 'POST',
+			    cache: false,
+			    error: function( jqXHR )
+				   {
+				   	console.log("ajax error " + jqXHR.status);
+				   },
+			    success: function( data )
+				    {
+					var titles = JSON.parse( data );
+					titles.forEach( function( title ) {
+						$("#titles").append("<option value='" + title + "'></option>");	
+					});
+				    }
+			});
+	}
+
+	function geTags( x )
+	{
+		var sx = x.slice(-1);
+		var vtag =  $( "#vidtags" + sx ).val();
+		$( "#tags" + sx ).empty();
+		$.ajax({
+			    url: 'vtags.php',
+			    data: "tagpart=" + encodeURIComponent( vtag ),
+			    type: 'POST',
+			    cache: false,
+			    error: function( jqXHR )
+				   {
+				   	console.log("ajax error " + jqXHR.status);
+				   },
+			    success: function( data )
+				    {
+					var tags = JSON.parse( data );
+					tags.forEach( function( tag ) {
+						$( "#tags" + sx ).append("<option value='" + tag + "'></option>");	
+					});
+				    }
+			});
+	}
+
 
     </script>
 

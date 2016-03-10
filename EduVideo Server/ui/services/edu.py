@@ -27,9 +27,17 @@ api = Api(app)
 CORS(app)
 
 
+usr_rates = {
+    'good': fields.List,
+    'avg': fields.List,
+    'poor': fields.List
+}
+
 user_fields = {
     'username': fields.String,
     'password': fields.String,
+    'history': fields.List,
+    'rates': fields.Nested( usr_rates ),
     'uri': fields.Url('user')
 }
 
@@ -37,6 +45,12 @@ vid_category = {
     'subject': fields.String,
     'unitTopic': fields.String,
     'subtopic': fields.String
+}
+
+vid_rates = {
+    'good': fields.Integer,
+    'avg': fields.Integer,
+    'poor': fields.Integer
 }
 
 video_fields = {
@@ -47,7 +61,8 @@ video_fields = {
     'tags': fields.List( fields.String ),
     'notes': fields.String,
     'reference': fields.String,
-    'subtitle': fields.String,
+    'view_count': fields.Integer,
+    'rates': fields.Nested( vid_rates ),
     '_id': fields.String,
     'video_id' : fields.String,
     'uri': fields.Url('video')
@@ -210,7 +225,6 @@ class VideoListAPI(Resource):
         self.reqparse.add_argument('tags', type=list, default="", location='json')
         self.reqparse.add_argument('notes', type=str, default="", location='json')
         self.reqparse.add_argument('reference', type=str, default="", location='json')
-        self.reqparse.add_argument('subtitle', type=str, default="", location='json')
         self.reqparse.add_argument('video_id', type=str, required=True, help='No _id provided', location='json')
         super(VideoListAPI, self).__init__()
 
@@ -227,7 +241,6 @@ class VideoListAPI(Resource):
     	    'tags': args['tags'],
             'notes': args['notes'],
             'reference': args['reference'],
-    	    'subtitle': args['subtitle'],
             'video_id': args['video_id'],
 	    'rates': { 
 			'good': 0,
@@ -239,7 +252,7 @@ class VideoListAPI(Resource):
         video['_id'] = str(video_col.insert_one(video).inserted_id)
         extras = wrtfile( video )
         with open('vidnm.txt', 'a') as f:
-        	f.write( str(video['_id']) + " $@$ " + extras + "\n")
+        	f.write( str(video['_id']) + " $@$ " + video['title'] + " $@$ " + extras + "\n")
         return {'video': marshal(video, video_fields)}, 201
 
 
@@ -254,7 +267,6 @@ class VideoAPI(Resource):
         self.reqparse.add_argument('tags', type=list, location='json')
         self.reqparse.add_argument('notes', type=str, location='json')
         self.reqparse.add_argument('reference', type=str, location='json')
-        self.reqparse.add_argument('subtitle', type=str, location='json')
         self.reqparse.add_argument('video_id', type=str, location='json')
         super(VideoAPI, self).__init__()
 
@@ -274,14 +286,18 @@ class VideoAPI(Resource):
         for k, v in args.items():
             if v is not None:
                	video[k] = v
-            if k in ['title', 'description', 'tags', 'category']:
+            if k in ['description', 'tags', 'category']:
                 updfile = 1
+            elif k == 'title':
+                updfile = 2
         video_col.find_one_and_update({'_id': ObjectId(_id) }, { '$set':video })
-        if( updfile == 1 ):
+        if( updfile in [1, 2] ):
             extras = wrtfile( video )
             for line in fileinput.input( "vidnm.txt", inplace=1 ):
                 if( line.split(" $@$ ")[0] == _id ):
-                    line = line.replace( line.split(" $@$ ")[1] , extras + "\n" )
+                    line = line.replace( line.split(" $@$ ")[2] , extras + "\n" )
+                    if( updfile == 2 ):
+                        line = line.replace( line.split(" $@$ ")[1] , video['title'] )
                 print( line, end="" )
         return {'video': marshal(video, video_fields)}
 
