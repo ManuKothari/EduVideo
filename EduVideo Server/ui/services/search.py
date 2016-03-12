@@ -1,32 +1,34 @@
-import math, nltk, re
+from __future__ import print_function
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
-from nltk.corpus import stopwords
 from bson.objectid import ObjectId
 from pymongo import MongoClient
-import collections
+import collections, pymongo, math, nltk, sys
 
-client = MongoClient()
+try:
+    client = MongoClient('mongodb://admin:root@ds055564.mlab.com:55564/eduvideo',serverSelectionTimeoutMS=5000)
+    client.server_info()
+    #print("Connected to MongoDB@online")
+except:
+    client = MongoClient()
+    #print("Connected to MongoDB@localhost");
+
 db = client.eduvideo
 video_col = db.video
 user_col = db.user
 
-stop = stopwords.words('english')
-punct = ["-","(",")","_",","]
-for i in punct:
-	stop.append( i )
-#del stop[stop.index('out')]
+
 wordnet_lemmatizer = WordNetLemmatizer()
 
 def clean(di):
-	doc = [x for x in word_tokenize( str(di) ) if x not in stop]
+	doc = [x for x in word_tokenize( str(di) )]
 	newdoc = []
 	for word in doc:
 		try:
 			if( wordnet_lemmatizer.lemmatize(word) ):
 				newdoc.append(str(word))
 		except UnicodeDecodeError as u:
-			print("-----------------------------------------------------")	
+			print("", end="")	
 	return newdoc
 
 def tf(t,d):
@@ -82,21 +84,22 @@ def tfsearch( query ):
 		documents = f.read().split("\n")[:-1]
 		docs = []		
 		for vid in documents:
-			doc = vid.split(" $@$ ")[1]
+			doc = vid.split(" $@$ ")[2]
 			d = clean( doc )
+			
 			docs.append( d )
-			vidoc[ " ".join( d ) ] = vid			#For verification alone, will return only ids later
+			vidoc[ " ".join( d ) ] = vid.split(" $@$ ")[0]
 	for d in docs:
 		docscore = score( query, d, docs )
 		ranks.append( [ vidoc[ " ".join( d ) ] , docscore ] )
-	ranks = sorted( ranks, key = lambda x: x[1], reverse=True )
+	ranks = sorted( ranks, key = lambda x: x[1], reverse=True )	
 	return ranks[:10]
 
 
 def simple_search( query ):
 	res = tfsearch( query )
 	for i in range(0, len( res ) ):
-		vid = res[i][0].split(" $@$ ")[ 0 ]
+		vid = res[i][0]
 		res[i][1] *= 10
 		v = video_col.find_one( {'_id': ObjectId( vid ) } )
 		rank = v['rates']['good']*3 + v['view_count']*2 + v['rates']['avg'] - v['rates']['poor']
@@ -118,11 +121,14 @@ def personalized_search( query, user_id ):
 			for vid in documents:
 				v = vid.split(" $@$ ")[0]
 				if(v == h):
-					wrds( vid.split(" $@$ ")[1], newquery )
+					chk = vid.split(" $@$ ")[2]
+					for wrd in query.split(" "):
+						if( wrd in chk ):
+							wrds( vid.split(" $@$ ")[2], newquery )
 	newquery = " ".join( list( newquery ) )
 	res = tfsearch( newquery )
 	for i in range(0, len( res ) ):
-		vid = res[i][0].split(" $@$ ")[ 0 ]
+		vid = res[i][0]
 		res[i][1] *= 10
 		v = video_col.find_one( {'_id': ObjectId( vid ) } )
 		rank = v['rates']['good']*3 + v['view_count']*2 + v['rates']['avg'] - v['rates']['poor']
@@ -134,19 +140,24 @@ def personalized_search( query, user_id ):
 			rank -= 2
 		res[i][1] += rank
 	res = sorted( res, key = lambda x: x[1], reverse=True )
-	return res	
-	
+	return res
 
-def main():
-	
-	while True:
-		query = raw_input("\nEnter the query (To quit: Enter 'q'): ").lower()
-		if query == "q":
-			break	
-		res = personalized_search( query, "56cffd440a9ded124a720d96" )
-		print "Query Results: \n"
-		for doc, rank in res:
-			print "Document: {0}\nRank: {1}".format(doc, rank)
-		
-main()
+
+if __name__ == "__main__":
+	if( len(sys.argv) > 1 ):
+		query = sys.argv[1].lower()
+		res = simple_search( query )
+		vids = [ r[0] for r in res ]
+		if( len(sys.argv) == 3 ):
+			uid = sys.argv[2]
+			if( len(vids) > 4 ):
+				vids = vids[:4]
+			nres = personalized_search( query, uid )
+			nvid = [ r[0] for r in nres ]
+			for n in nvid:
+				if( n not in vids ):
+					vids.append( n ) 
+		for v in vids:
+			print( v )
+
 

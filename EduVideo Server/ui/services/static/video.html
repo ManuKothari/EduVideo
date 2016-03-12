@@ -28,8 +28,7 @@
 			<p data-bind="text: vlength"></p>
 			<p data-bind="text: tags"></p>
 			<p data-bind="text: notes"></p>
-			<p data-bind="text: reference"></p>
-			<p data-bind="text: subtitle"></p>			
+			<p data-bind="text: reference"></p>		
 		</td>
 		<td>
 		    <button data-bind="click: $parent.beginEdit" class="btn">Edit</button>
@@ -89,13 +88,7 @@
         	        <div class="controls">
         	            <input data-bind="value: reference" type="text" id="inputReference" placeholder="Reference" style="width: 600px;">
         	        </div>
-        	    </div>
-		    <div class="control-group">
-        	        <label class="control-label" for="inputSubtitle">Subtitle</label>
-        	        <div class="controls">
-        	            <input data-bind="value: subtitle" type="text" id="inputSubtitle" placeholder="Subtitle" style="width: 600px;">
-        	        </div>
-        	    </div>               
+        	    </div>           
             </form>
         </div>
         <div class="modal-footer">
@@ -155,7 +148,6 @@
 		    self.videos()[i].tags( newVideo.tags );
 		    self.videos()[i].notes( newVideo.notes );
 		    self.videos()[i].reference( newVideo.reference );
-		    self.videos()[i].subtitle( newVideo.subtitle );
 		}
 
 		self.edit = function( video, data ) 
@@ -180,8 +172,7 @@
 						vlength: ko.observable( data.videos[i].vlength ),
 						tags: ko.observable( data.videos[i].tags ),
 						notes: ko.observable( data.videos[i].notes ),
-						reference: ko.observable( data.videos[i].reference ),
-						subtitle: ko.observable( data.videos[i].subtitle )
+						reference: ko.observable( data.videos[i].reference )
 				        } );
 				}
 		    	} );
@@ -197,7 +188,6 @@
 		self.tags = ko.observable();
 		self.notes = ko.observable();
 		self.reference = ko.observable();
-		self.subtitle = ko.observable();
 
 		self.setVideo = function(video) {
 		    self.video = video;
@@ -208,13 +198,16 @@
 		    self.tags( video.tags() );
 		    self.notes( video.notes() );
 		    self.reference( video.reference() );
-		    self.subtitle( video.subtitle() );
 		    $('edit').modal('show');
 		}
 		
 		self.editVideo = function() {
 		    $('#edit').modal('hide');	
 		    var taglist = ( typeof( self.tags() ) == "string" ) ? self.tags().split(",") : self.tags() ;
+		    if( typeof( self.tags() ) == "string" )
+		    {
+		    	$.post( "http://localhost/ours/static/newtags.php", { "ntags" : taglist } );  //HARDCODED URL! CHANGE LATER
+		    }
 		    videosViewModel.edit( self.video, {
 		        title: self.title(),
 		        category: self.category(),
@@ -222,8 +215,7 @@
 			vlength: self.vlength(),
 			tags: taglist,
 		        notes: self.notes(),
-			reference: self.reference(),
-			subtitle: self.subtitle()
+			reference: self.reference()
 		    });
 		}
 	}

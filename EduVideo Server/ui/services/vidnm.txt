@@ -1,0 +1,29 @@
+56d33a080a9ded2248d38bed $@$ C++ Tutorial - 01 - Introduction to C++ $@$ a 01 description unit1-introduction introduction - brief c++ basics to intro tutorial
+56d33ac70a9ded2248d38bee $@$ C++ Tutorial - 08 - References $@$ best practice concept 08 - c++ describes references unit2-basics pointer tutorial
+56d70b2b0a9ded172385fc5e $@$ C++ Tutorial - 10 - String $@$ Char arrays tutorial - 10 elements c++ unit2-basics string
+56d70c030a9ded172385fc5f $@$ C++ Tutorial - 17 - Inheritance $@$ - inheritance 17 c++ unit3-concepts tutorial
+56d70c6d0a9ded172385fc60 $@$ C++ Tutorial - 24 - Custom Conversions $@$ - unit4-intermediate custom conversions c++ 24 tutorial
+56d70d180a9ded172385fc61 $@$ C++ Tutorial - 28 - Preprocessor II $@$ 28 - ii unit4-intermediate preprocessor c++ tutorial
+56d70f710a9ded172385fc62 $@$ C++ Tutorial - 07 - Pointers $@$ - unit1-introduction c++ 07 pointers tutorial
+56d70fdf0a9ded172385fc63 $@$ C++ Tutorial - 21 - Enum $@$ - enum 21 c++ unit3-concepts tutorial
+56d710660a9ded172385fc64 $@$ C++ Tutorial - 31 - Type Conversion II $@$ type conversion - ii unit5-advanced c++ 31 tutorial
+56d7114a0a9ded172385fc65 $@$ C++ Tutorial - 33 - Templates I $@$ unit5-advanced - c++ templates 33 i tutorial
+56d711f50a9ded172385fc66 $@$ Java Tutorial - 01 - Introduction to Java $@$ 01  - introduction unit1-introduction java to tutorial
+56d7126c0a9ded172385fc67 $@$ Java Tutorial - 03 - Compile and Run $@$ run - 03 and unit1-introduction compile java tutorial
+56d713400a9ded172385fc68 $@$ Java Tutorial - 07 - Arrays $@$ arrays  - unit2-basics java 07 tutorial
+56d713b10a9ded172385fc69 $@$ Java Tutorial - 08 - Conditionals $@$ - unit2-basics conditionals java tutorial 08
+56d714490a9ded172385fc6a $@$ Java Tutorial - 12 - Static $@$ 12 - unit3-intermediate java static tutorial
+56d714c40a9ded172385fc6b $@$ Java Tutorial - 13 - Inheritance $@$ - inheritance 13 unit3-intermediate java tutorial
+56d715470a9ded172385fc6c $@$ Java Tutorial - 17 - Constants $@$ - unit4-advanced 17 constants java tutorial
+56d715b80a9ded172385fc6d $@$ Java Tutorial - 19 - Abstract $@$ - unit4-advanced 19 abstract java tutorial
+56d716250a9ded172385fc6e $@$ Java Text Editor - 01 - Multipad $@$ multipad - editor text java unit5-javatexteditor 01
+56d716a30a9ded172385fc6f $@$ Java Text Editor - 04 - Save SaveAs.avi $@$ 04 - editor text java saveas unit5-javatexteditor save
+56d7171a0a9ded172385fc70 $@$ SQL Tutorial - 01 - Introduction to SQL $@$ 01  - introduction and sql algorithms unit1-sql to tutorial
+56d717b30a9ded172385fc71 $@$ SQL Tutorial - 02 - Using SQL $@$ - introduction and using sql 02 algorithms unit1-sql tutorial
+56d7182f0a9ded172385fc72 $@$ SQL Tutorial - 04 - Alter Drop $@$ 04 - drop alter and sql algorithms basics unit2-sql tutorial
+56d718c70a9ded172385fc73 $@$ SQL Tutorial - 05 - Insert Update Delete $@$ - delete 05 and sql insert algorithms basics unit2-sql tutorial update
+56d719640a9ded172385fc74 $@$ SQL Tutorial - 07 - Account Management - Create, Rename, Grant, Revoke, Drop $@$ - rename, drop unit3-sql grant, create, and advanced account management sql 07 algorithms tutorial revoke,
+56d719b20a9ded172385fc75 $@$ SQL Tutorial - 08 - Transaction - Begin Work, Commit, Rollback $@$ commit,  - unit3-sql and rollback advanced work, transaction begin sql algorithms tutorial 08
+56d71a610a9ded172385fc76 $@$ Kruskal Tutorial - 01 $@$  and 01 kruskal - unit4-algorithms basics algorithms sql tutorial
+56d71ad20a9ded172385fc77 $@$ Prim Graph Tutorial - 04 $@$ 04 - and unit4-algorithms sql algorithms prim basics tutorial graph
+56d71b7e0a9ded172385fc78 $@$ Math for Liberal Studies Using the Nearest-Neighbor Algorithm Tutorial - 06 $@$ the - studies nearest-neighbor intermediate and math using for 06 sql unit5-algorithms liberal algorithm algorithms tutorial
