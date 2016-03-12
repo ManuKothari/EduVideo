@@ -36,7 +36,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="#"><h1><img src="images/logo.png" alt="" width=50px height=50px /></h1></a>
+          <a class="navbar-brand" href="about.php"><h1><img src="images/weblogo.png" style= "width:150px" alt="" /></h1></a>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
 			<div class="top-search">

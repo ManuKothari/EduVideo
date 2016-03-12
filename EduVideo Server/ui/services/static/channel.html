@@ -22,6 +22,7 @@
 	    <!-- ko foreach: channels -->
 	    <tr>
 		<td>
+			<p><b data-bind="text: channel_name"></b></p>
 			<p><b data-bind="text: subjects"></b></p>
 			<p><b data-bind="text: no_of_videos"></b></p>
 		</td>
@@ -43,10 +44,16 @@
     	</div>
    	 <div class="modal-body">
         	<form class="form-horizontal">
+		     <div class="control-group">
+        	        <label class="control-label" for="channelName">Channel Name</label>
+        	        <div class="controls">
+        	            <input data-bind="value: channel_name" type="text" id="channelName" placeholder="Channel Name" style="width: 300px;">
+        	        </div>
+        	    </div>
         	    <div class="control-group">
         	        <label class="control-label" for="inputSubjects">Subjects</label>
         	        <div class="controls">
-        	            <input data-bind="value: subjects" type="text" id="inputSubjects" placeholder="Subjects" style="width: 300px;">
+        	            <input data-bind="value: subjects" type="text" id="inputSubjects" placeholder="Subjects separated by comma" style="width: 300px;">
         	        </div>
         	    </div>
         	    <div class="control-group">
@@ -70,6 +77,12 @@
         </div>
         <div class="modal-body">
             <form class="form-horizontal">
+		<div class="control-group">
+        	        <label class="control-label" for="channelName">Channel Name</label>
+        	        <div class="controls">
+        	            <input data-bind="value: channel_name" type="text" id="channelName" placeholder="Channel Name" style="width: 300px;">
+        	        </div>
+        	</div>
                 <div class="control-group">
         	    <label class="control-label" for="inputSubjects">Subjects</label>
         	        <div class="controls">
@@ -95,17 +108,6 @@
 
 	function ChannelsViewModel() 
 	{
-	    /*  self.channels([
-		    {
-		        subjects: ko.observable([ 'c', 'c#' ]),
-		        no_of_videos: ko.observable( 5 )
-		    },
-		    {
-		        subjects: ko.observable([ 'c++', 'sql' ]),
-		        no_of_videos: ko.observable( 7 )
-		    }
-		]);    */
-
 		var self = this;
 		self.channelsURI = 'http://localhost:5000/eduvideo/channels';
 		self.channels = ko.observableArray();
@@ -150,6 +152,7 @@
 		{
 		    var i = self.channels.indexOf( channel );
 		    self.channels()[i].uri( newChannel.uri );
+		    self.channels()[i].channel_name( newChannel.channel_name );
 		    self.channels()[i].subjects( newChannel.subjects );
 		    self.channels()[i].no_of_videos( newChannel.no_of_videos );
 		}
@@ -170,6 +173,7 @@
 			    {
 				self.channels.push( {
 				    uri: ko.observable( data.channel.uri ),
+				    channel_name: ko.observable( data.channel.channel_name ),
 				    subjects: ko.observable( data.channel.subjects ),
 				    no_of_videos: ko.observable( data.channel.no_of_videos )
 				} );
@@ -183,6 +187,7 @@
 				{
 					self.channels.push( {
 						uri: ko.observable( data.channels[i].uri ),
+						channel_name: ko.observable( data.channels[i].channel_name ),
 						subjects: ko.observable( data.channels[i].subjects ),
 						no_of_videos: ko.observable( data.channels[i].no_of_videos )
 				        } );
@@ -194,15 +199,18 @@
 	function AddChannelViewModel() 
 	{
 		var self = this;
+		self.channel_name = ko.observable();
 		self.subjects = ko.observable();
 		self.no_of_videos = ko.observable();
 
 		self.addChannel = function() {
 		    $('#add').modal('hide');
 		    channelsViewModel.add({
-		        subjects: self.subjects(),
+			channel_name: self.channel_name(),
+		        subjects: self.subjects().split(","),
 		        no_of_videos: self.no_of_videos()
 		    });
+		    self.channel_name("");
 		    self.subjects("");
 		    self.no_of_videos("");
 		}
@@ -211,11 +219,13 @@
 	function EditChannelViewModel() 
 	{
 		var self = this;
+		self.channel_name = ko.observable();
 		self.subjects = ko.observable();
 		self.no_of_videos = ko.observable();
 
 		self.setChannel = function(channel) {
 		    self.channel = channel;
+		    self.channel_name( channel.channel_name() );
 		    self.subjects( channel.subjects() );
 		    self.no_of_videos( channel.no_of_videos() );
 		    $('edit').modal('show');
@@ -223,8 +233,10 @@
 
 		self.editChannel = function() {
 		    $('#edit').modal('hide');
+		    var sublist = ( typeof( self.subjects() ) == "string" ) ? self.subjects().split(",") : self.subjects() ;
 		    channelsViewModel.edit( self.channel, {
-		        subjects: self.subjects(),
+			channel_name: self.channel_name(),
+		        subjects: sublist,
 		        no_of_videos: self.no_of_videos()
 		    });
 		}

@@ -1,17 +1,19 @@
 <!DOCTYPE html>
 <html>
 
+
 <head>
     <meta charset="utf-8">
-    <title>EduVideo</title>
+    <title>Eduvideo</title>
     <link rel="shortcut icon" href="favicon.ico">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <!-- Bootstrap css -->
 <link type="text/css" rel='stylesheet' href="css/bootstrap.min.css">
 <link href="css/dashboard.css" rel="stylesheet">
 <link href="css/style.css" rel='stylesheet' type='text/css' media="all" />
 <!-- End Bootstrap css -->
+
+
 <!-- Fancybox -->
 <link type="text/css" rel='stylesheet' href="js/fancybox/jquery.fancybox.css">
 <!-- End Fancybox -->
@@ -32,7 +34,6 @@
 <link href='//fonts.googleapis.com/css?family=Poiret+One' rel='stylesheet' type='text/css'>
 <!-- //fonts -->
 </head>
-
  <body>
 
     <nav class="navbar navbar-inverse navbar-fixed-top">
@@ -242,9 +243,7 @@
 				</div>
 				<div class="clearfix"> </div>
 			</div>
-
 			<div class="drop-navigation drop-navigation">
-
 				  <ul class="nav nav-sidebar"><br/>
 					<li class="active"><a href="index.html" class="home-icon"><span class="glyphicon glyphicon-home" aria-hidden="true"></span>CURRICULUM</a></li>
 					<li><a href="#" class="channel"><span class="glyphicon glyphicon-home glyphicon-blackboard" aria-hidden="true"></span>My Channels</a></li>
@@ -257,7 +256,9 @@
 						
 					<li><a href="#" class="watchlater"><span class="glyphicon glyphicon-home glyphicon-time" aria-hidden="true"></span>Watch Later</a></li>
 				  </ul>
-				  <hr>
+				
+				<hr>
+
 				  <ul class="nav nav-sidebar" id="ul_subscribe"><br/>
 					<li class="active"> <a href="#" class="subscribe"> <span class="glyphicon glyphicon-home glyphicon-tasks" aria-hidden="true"></span>Subscription</a> </li>
 				  </ul>
@@ -266,45 +267,11 @@
 					<li class="active"> <a href="#" class="browse">  <span class="glyphicon glyphicon-home glyphicon-plus-sign" aria-hidden="true"></span>Browse Channels</a> </li>
 					<li class="active"> <a href="#" class="managesubscription"> <span class="glyphicon glyphicon-home  glyphicon-cog" aria-hidden="true"></span>Manage Subscriptions</a> </li>
 				  </ul>
-						
-			</div>        
-	</div>
+				
+			</div>		
+     </div>
 
-	<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
-		<div class="main-grids">
-			<div class="top-grids">
-
-		<?php
-			extract( $_REQUEST );		
-			$vidlist = urldecode( $vidlist );
-			$vidlist = json_decode( $vidlist, true );
-			foreach( $vidlist as $vid )
-			{
-				echo '	<div class="col-md-4 resent-grid recommended-grid slider-top-grids">
-					<div class="resent-grid-img recommended-grid-img">
-						<video src="http://localhost:3000/video/'. $vid['video']['video_id'] .'" controls width="350px" height="200px"></video>
-						<div class="time">
-							<p style="color:black; font-size:15px;"> '. $vid['video']['vlength'] .' </p>
-						</div>
-						<div class="clck">
-							<span class="glyphicon glyphicon-time" aria-hidden="true"></span>
-						</div>
-					</div>
-					<div class="resent-grid-info recommended-grid-info">
-						<h3><a href="#" class="title title-info"> '. $vid['video']['title'] .' </a></h3>
-						<ul>
-							<li class="right-list"><p class="views views-info"> '. $vid['video']['view_count'] .'  views</p></li>
-						</ul>
-					</div>
-				</div>	';
-			}
-		?>
-
-			</div>
-		</div>
-	</div>
-
-    <script type="text/javascript">
+	<script type="text/javascript">
 	
 	function searchvid()
 	{
@@ -391,7 +358,6 @@
 	}
 
     </script>
-						
+   
 </body>
-</html>   
-						
+</html>		

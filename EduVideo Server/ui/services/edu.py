@@ -28,16 +28,19 @@ CORS(app)
 
 
 usr_rates = {
-    'good': fields.List,
-    'avg': fields.List,
-    'poor': fields.List
+    'good': fields.List( fields.String ),
+    'avg': fields.List( fields.String ),
+    'poor': fields.List( fields.String )
 }
 
 user_fields = {
     'username': fields.String,
     'password': fields.String,
-    'history': fields.List,
+    'history': fields.List( fields.String ),
     'rates': fields.Nested( usr_rates ),
+    'channel_ids': fields.List( fields.String ),
+    'subscribed_ids': fields.List( fields.String ),
+    'watch_later_ids': fields.List( fields.String ),
     'uri': fields.Url('user')
 }
 
@@ -65,12 +68,20 @@ video_fields = {
     'rates': fields.Nested( vid_rates ),
     '_id': fields.String,
     'video_id' : fields.String,
+    'author': fields.String,
+    'linked': fields.String,
+    'channel': fields.String,
+    'comments': fields.List( fields.String ),
     'uri': fields.Url('video')
 }
 
 channel_fields = {
-    'subjects': fields.String,
+    'subjects': fields.List( fields.String ),
     'no_of_videos': fields.Integer,
+    'channel_name': fields.String,
+    'author_id': fields.String,
+    'subscriber_ids': fields.List( fields.String ),
+    'video_ids': fields.List( fields.String ),
     'uri': fields.Url('channel')
 }
 
@@ -92,12 +103,15 @@ class UserListAPI(Resource):
         user = {
             'username': args['username'],
             'password': args['password'],
-	    'rates': { 
+            'history': [],
+            'rates': {
 			'good': [],
-	    		'avg': [],
-    			'poor': [] 
-		     },
-	    'history': []
+                        'avg': [],
+                        'poor': []
+                     },
+            'channel_ids': [],
+            'subscribed_ids': [],
+            'watch_later_ids': []
         }
         user['_id'] = str(user_col.insert_one(user).inserted_id)
         return {'user': marshal(user, user_fields)}, 201
@@ -142,8 +156,9 @@ class ChannelListAPI(Resource):
 
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
-        self.reqparse.add_argument('subjects', type=str, required=True, help='No subjects provided', location='json')
+        self.reqparse.add_argument('subjects', type=list, required=True, help='No subjects provided', location='json')
         self.reqparse.add_argument('no_of_videos', type=int, required=True, help='Total number of videos not provided', location='json')
+        self.reqparse.add_argument('channel_name', type=str, required=True, help='Channel name not provided', location='json')
         super(ChannelListAPI, self).__init__()
 
     def get(self):
@@ -153,7 +168,11 @@ class ChannelListAPI(Resource):
         args = self.reqparse.parse_args()
         channel = {
             'subjects': args['subjects'],
-            'no_of_videos': args['no_of_videos']
+            'no_of_videos': args['no_of_videos'],
+            'channel_name': args['channel_name'],
+            'author_id': "",
+            'subscriber_ids': [],
+            'video_ids': []
         }
         channel['_id'] = str(channel_col.insert_one(channel).inserted_id)
         return {'channel': marshal(channel, channel_fields)}, 201
@@ -163,8 +182,9 @@ class ChannelAPI(Resource):
 
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
-        self.reqparse.add_argument('subjects', type=str, location='json')
+        self.reqparse.add_argument('subjects', type=list, location='json')
         self.reqparse.add_argument('no_of_videos', type=int, location='json')
+        self.reqparse.add_argument('channel_name', type=str, location='json')
         super(ChannelAPI, self).__init__()
 
     def get(self, _id):
@@ -247,7 +267,11 @@ class VideoListAPI(Resource):
 	    		'avg': 0,
     			'poor': 0 
 		     },
-	    'view_count': 0
+	    'view_count': 0,
+            'author': "",
+            'linked': "",
+            'channel': "",
+            'comments': []
         }
         video['_id'] = str(video_col.insert_one(video).inserted_id)
         extras = wrtfile( video )
