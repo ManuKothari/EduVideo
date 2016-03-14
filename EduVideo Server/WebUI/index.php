@@ -1,3 +1,19 @@
+<?php
+	session_start();
+	if( isset($_SESSION["username"]) && isset($_SESSION["usertype"]) )
+	{
+		if( $_SESSION["usertype"]=="admin")
+		{
+			header("Location: admin.php");
+		}
+		elseif( $_SESSION["usertype"]=="guser")
+		{
+			header("Location: guser.php");
+		}
+	}
+	
+?>
+
 <!DOCTYPE html>
 <html>
 
@@ -45,13 +61,14 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="index.html"><h1><img src="images/weblogo.png" style= "width:200px" alt="" /></h1></a>
+          <a class="navbar-brand" href="about.php"><h1><img src="images/weblogo.png" style= "width:150px" alt="" /></h1></a>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
 			<div class="top-search">
 				<form class="navbar-form navbar-right">
-					<input type="text" class="form-control" placeholder="Search...">
-					<input type="submit" value=" ">
+					<input id="srch" type="text" class="form-control" placeholder="Search..." autocomplete="off" onkeyup="geTitles();" list="titles">
+					<datalist id="titles"> </datalist>
+					<input type="submit" value=" " onclick="searchvid(); return false;">
 				</form>
 			</div>
 			<div class="header-top-right">
@@ -242,21 +259,121 @@
 				</div>
 				<div class="clearfix"> </div>
 			</div>
-				<div class="drop-navigation drop-navigation">
+			<div class="drop-navigation drop-navigation">
 				  <ul class="nav nav-sidebar"><br/>
 					<li class="active"><a href="index.html" class="home-icon"><span class="glyphicon glyphicon-home" aria-hidden="true"></span>CURRICULUM</a></li>
-					<li><a href="#" class="cp-icon"><span class="glyphicon glyphicon-home glyphicon-blackboard" aria-hidden="true"></span>My channels<span class="glyphicon glyphicon-menu-down" aria-hidden="true"></span></a></li>
+					<li><a href="#" class="channel"><span class="glyphicon glyphicon-home glyphicon-blackboard" aria-hidden="true"></span>My Channels</a></li>
 					
-					<li><a href="#" class="java-icon"><span class="glyphicon glyphicon-fire" aria-hidden="true"></span>Trending<span class="glyphicon glyphicon-menu-down" aria-hidden="true"></span></a></li>
+					<li><a href="#" class="trending"><span class="glyphicon glyphicon-home glyphicon-fire" aria-hidden="true"></span>Trending</a></li>
 					
-					<li><a href="#" class="web1"><span class= "glyphicon glyphicon-check" aria-hidden="true"></span>Subscriptions<span class="glyphicon glyphicon-menu-down" aria-hidden="true"></span></a></li>
+					<li><a href="#" class="subscription"><span class= "glyphicon glyphicon-home glyphicon-check" aria-hidden="true"></span>Subscriptions</a></li>
 					
-					<li><a href="#" class="web2"><span class= "glyphicon glyphicon-home glyphicon-hourglass" aria-hidden="true"></span>History<span class="glyphicon glyphicon-menu-down" aria-hidden="true"></span></a></li>
+					<li><a href="#" class="history"><span class= "glyphicon glyphicon-home glyphicon-hourglass" aria-hidden="true"></span>History</a></li>
 						
-					<li><a href="#" class="chash-icon"><span class="glyphicon glyphicon-time" aria-hidden="true"></span>Watch Later<span class="glyphicon glyphicon-menu-down" aria-hidden="true"></span></a></li>
+					<li><a href="#" class="watchlater"><span class="glyphicon glyphicon-home glyphicon-time" aria-hidden="true"></span>Watch Later</a></li>
 				  </ul>
-				</div>
-          </div>
+				
+				<hr>
+
+				  <ul class="nav nav-sidebar" id="ul_subscribe"><br/>
+					<li class="active"> <a href="#" class="subscribe"> <span class="glyphicon glyphicon-home glyphicon-tasks" aria-hidden="true"></span>Subscription</a> </li>
+				  </ul>
+	
+				 <ul class="nav nav-sidebar" id="ul_subscribe"><br/>
+					<li class="active"> <a href="#" class="browse">  <span class="glyphicon glyphicon-home glyphicon-plus-sign" aria-hidden="true"></span>Browse Channels</a> </li>
+					<li class="active"> <a href="#" class="managesubscription"> <span class="glyphicon glyphicon-home  glyphicon-cog" aria-hidden="true"></span>Manage Subscriptions</a> </li>
+				  </ul>
+				
+			</div>		
+     </div>
+
+	<script type="text/javascript">
+	
+	function searchvid()
+	{
+		var self = this;
+		self.videosURI = 'http://localhost:5000/eduvideo/videos';
+
+		self.ajax = function(uri, method, data) {
+		    var request = {
+		        url: uri,
+		        type: method,
+		        contentType: "application/json",
+		        accepts: "application/json",
+		        cache: false,
+		        dataType: 'json',
+		        data: JSON.stringify(data),
+		        error: function(jqXHR) {
+		            console.log("ajax error " + jqXHR.status);
+		        }
+		    };
+		    return $.ajax(request);
+		}
+
+		var query =  $("#srch").val();
+		$.ajax({
+			    url: 'vsearch.php',
+			    data: "qry=" + encodeURIComponent(query),
+			    type: 'POST',
+			    cache: false,
+			    error: function( jqXHR )
+				   {
+				   	console.log("ajax error " + jqXHR.status);
+				   },
+			    success: function( data )
+				    {					
+					var vids = JSON.parse( data );
+					vids.pop();
+					var res = [];
+					for( var i = 0; i < vids.length; i++ )
+					{
+						self.ajax( self.videosURI + "/" + vids[i], 'GET' ).done(
+						    function( data ) 
+						    {
+							res[i] = data;
+					    	    } );
+						alert(res.length);
+						if( res.length == vids.length )
+						{
+							var restr = JSON.stringify( res );
+							restr = encodeURIComponent( restr );
+
+							var vform = $('<form action="vidlist.php" method="post" style="display:none;">' + 
+						'<input type="textarea" maxlength="5000" name="vidlist" value="' + restr + '" /' + '>' +
+						  	'</form>');
+							$('body').append( vform );
+							vform.submit();
+						}	
+					}
+					
+				    }
+			});
+	}
+
+	function geTitles()
+	{
+		var query =  $("#srch").val();
+		$("#titles").empty();
+		$.ajax({
+			    url: 'vtitles.php',
+			    data: "qry=" + encodeURIComponent(query),
+			    type: 'POST',
+			    cache: false,
+			    error: function( jqXHR )
+				   {
+				   	console.log("ajax error " + jqXHR.status);
+				   },
+			    success: function( data )
+				    {
+					var titles = JSON.parse( data );
+					titles.forEach( function( title ) {
+						$("#titles").append("<option value='" + title + "'></option>");	
+					});
+				    }
+			});
+	}
+
+    </script>
    
 </body>
 </html>		
