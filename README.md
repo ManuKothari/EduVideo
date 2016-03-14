@@ -46,3 +46,22 @@ REST APIs
 |/post/channel 	|	  POST |	Add new channel (owner - user)|
 |/put/channel/{id}	|  PUT |	Update channel details - add subscribers|
 
+9. Go to EduVideo -->  EduVideo Server--> ui --> services, and run edu.py. Make sure you have the following python packages:
+
+  - pip3 install Flask
+  - pip3 install flask-restful
+  - pip3 install flask-cors
+  - apt-get install python3-bson
+  - pip3 install pymongo
+  
+10. For the UI and database integration, you need to install php-mongo extension. You can use the command:
+
+  - sudo pecl install mongo
+
+11. To access database - interactive environment: (make sure you have latest version of mongo)
+    Refer : https://docs.mongodb.org/manual/tutorial/install-mongodb-on-ubuntu/
+
+  - mongo ds055564.mlab.com:55564/eduvideo -u admin -p root
+  
+
+
