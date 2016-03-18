@@ -49,8 +49,76 @@
 
 <link href='//fonts.googleapis.com/css?family=Poiret+One' rel='stylesheet' type='text/css'>
 <!-- //fonts -->
+<<<<<<< HEAD
+	<script type="text/javascript">
+	
+	function getvid()
+	{
+		var self = this;
+		self.videosURI = 'http://localhost:5000/eduvideo/videos';
+
+		self.ajax = function(uri, method, data) {
+		    var request = {
+		        url: uri,
+		        type: method,
+		        contentType: "application/json",
+		        accepts: "application/json",
+		        cache: false,
+		        dataType: 'json',
+		        data: JSON.stringify(data),
+		        error: function(jqXHR) {
+		            console.log("ajax error " + jqXHR.status);
+		        }
+		    };
+		    return $.ajax(request);
+		}
+
+		$.ajax({
+			    url: 'getsubscription.php',
+			    type: 'GET',
+			    cache: false,
+			    error: function( jqXHR )
+				   {
+				   	console.log("ajax error " + jqXHR.status);
+				   },
+			    success: function( data )
+				    {		
+					console.log(data)			
+					var vids = JSON.parse( data );
+					console.log(vids)
+					vids.pop();
+					var res = [];
+					for( var i = 0; i < vids.length; i++ )
+					{
+						self.ajax( self.videosURI + "/" + vids[i], 'GET' ).done(
+						    function( data ) 
+						    {
+							res[i] = data;
+					    	    } );
+						alert(res.length);
+						if( res.length == vids.length )
+						{
+							var restr = JSON.stringify( res );
+							restr = encodeURIComponent( restr );
+
+							var vform = $('<form action="subscription.php" method="post" style="display:none;">' + 
+						'<input type="textarea" maxlength="5000" name="vidlist" value="' + restr + '" /' + '>' +
+						  	'</form>');
+							$('body').append( vform );
+							vform.submit();
+						}	
+					}
+					
+				    }
+			});
+	}
+	</script>
+</head>
+ <body onload = "getvid()">
+=======
 </head>
  <body>
+>>>>>>> 70411a06e32f819267ab842defbf401c4c4ba235
 
     <nav class="navbar navbar-inverse navbar-fixed-top">
       <div class="container-fluid">
@@ -334,6 +402,7 @@
 				
 			<div class="clearfix"> </div>
 	</div>
+
 	<script type="text/javascript">
 	
 	function searchvid()
@@ -397,6 +466,7 @@
 			});
 	}
 	</script>
+
 	
 </body>
 </html>		
