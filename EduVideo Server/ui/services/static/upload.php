@@ -1,27 +1,44 @@
+<?php
+	session_start();
+	if( !isset($_SESSION["username"]) || !isset($_SESSION["usertype"]) )
+	{
+		header("Location: index.php");
+	}
+?>
+
 <!DOCTYPE HTML>
 <html>
+
 <head>
-<title>EduVideo</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<script type="application/x-javascript"> addEventListener("load", function() { setTimeout(hideURLbar, 0); }, false); function hideURLbar(){ window.scrollTo(0,1); } </script>
-<!-- bootstrap -->
-<link href="css/bootstrap.min.css" rel='stylesheet' type='text/css' media="all" />
-<!-- //bootstrap -->
-<link href="css/dashboard.css" rel="stylesheet">
-<!-- Custom Theme files -->
-<link href="css/style.css" rel='stylesheet' type='text/css' media="all" />
-<script src="js/jquery-1.11.1.min.js"></script>
-<!--start-smoth-scrolling-->
-<!-- fonts -->
-<link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
-<link href='http://fonts.googleapis.com/css?family=Poiret+One' rel='stylesheet' type='text/css'>
-<!-- //fonts -->
+    <meta charset="utf-8">
+    <title>EduVideo</title>
+    <link rel="shortcut icon" href="favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- Bootstrap css -->
+    <link type="text/css" rel='stylesheet' href="css/bootstrap.min.css">
+    <link href="css/dashboard.css" rel="stylesheet">
+    <link href="css/style.css" rel='stylesheet' type='text/css' media="all" />
+    <!-- End Bootstrap css -->
+    <!-- Fancybox -->
+    <link type="text/css" rel='stylesheet' href="js/fancybox/jquery.fancybox.css">
+    <!-- End Fancybox -->
 
-<script src="http://ajax.aspnetcdn.com/ajax/jquery/jquery-1.9.1.js"></script>
-<script src="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+    <link type="text/css" rel='stylesheet' href="fonts/fonts.css">
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800&amp;subset=latin,cyrillic-ext' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Merriweather:400,300,300italic,400italic,700,700italic,900,900italic' rel='stylesheet' type='text/css'>
 
-<script type="text/javascript" src = "js/angular.js"></script>
+    <link type="text/css" data-themecolor="default" rel='stylesheet' href="css/main-default.css">
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <script type="application/x-javascript"> addEventListener("load", function() { setTimeout(hideURLbar, 0); }, false); function hideURLbar(){ window.scrollTo(0,1); } </script>
+    <script src="js/jquery-1.11.1.min.js"></script>
+    <link href='//fonts.googleapis.com/css?family=Poiret+One' rel='stylesheet' type='text/css'>
+    <!-- //fonts -->
+
+    <link rel="stylesheet" type="text/css" href="css/mynav.css">
+    <script type="text/javascript" src = "js/jquery.min.js"></script>
+    <script type="text/javascript" src = "js/bootstrap.min.js"></script>
+    <script type="text/javascript" src = "js/angular.js"></script>
 
 </head>
 
@@ -47,19 +64,25 @@
 				</form>
 			</div>  
 			<div class="header-top-right">
-				<div class="file">
-					<a href="#">Upload</a>
-				</div>	
-				<div class="signin">
-					<a href="#">Sign Up</a>
-				</div>
-				<div class="signin">
-					<a href="#">Sign In</a>
-				</div>
+			<?php
+				echo '
+				<ul class="nav navbar-nav navbar-right">
+					<li> <div class="file" style="width:1%;font-size:5px;">
+						<a href="index.php"><i class="glyphicon glyphicon-home">&nbsp;Home</i></a>
+					</div> </li>
+					<li class="dropdown">
+						<button class="btn btn-default dropdown-toggle" type="button" id="username" data-toggle="dropdown"> <i class="glyphicon glyphicon-user"></i>'. $_SESSION["username"] . '&nbsp; <span class="caret"></span> </button>
+						<ul class="dropdown-menu">
+							<li><a href="chngPwd.php">Change Details</a></li>
+							<li><a href="logout.php">Log Out</a></li>
+						</ul>
+					</li>
+				</ul> ';
+			?>
 				<div class="clearfix"> </div>
 			</div>
         </div>
-		<div class="clearfix"> </div>
+	<div class="clearfix"> </div>
       </div>
     </nav>
 		<div></div>
@@ -443,27 +466,28 @@
 					var vids = JSON.parse( data );
 					vids.pop();
 					var res = [];
-					for( var i = 0; i < vids.length; i++ )
+					var j = 0;
+					self.ajax( self.videosURI, 'GET' ).done(
+					function( data ) 
 					{
-						self.ajax( self.videosURI + "/" + vids[i], 'GET' ).done(
-						    function( data ) 
-						    {
-							res[i] = data;
-					    	    } );
-						alert(res.length);
-						if( res.length == vids.length )
+						for( var i = 0; i < vids.length; i++ )
 						{
-							var restr = JSON.stringify( res );
-							restr = encodeURIComponent( restr );
-
-							var vform = $('<form action="vidlist.php" method="post" style="display:none;">' + 
-						'<input type="textarea" maxlength="5000" name="vidlist" value="' + restr + '" /' + '>' +
-						  	'</form>');
-							$('body').append( vform );
-							vform.submit();
-						}	
-					}
-					
+							data.videos.some( function( video ) {
+								if( video._id.trim() == vids[i].trim() )
+								{
+									res[ j ] = video;
+									j += 1;
+									return true;
+							    	}
+							} );
+						}
+						var restr = JSON.stringify( res );
+						restr = encodeURIComponent( restr );
+						var vform = $('<form action="vidlist.php" method="post" style="display:none;">' + 
+				'<input type="textarea" maxlength="5000" name="vidlist" value="' + restr + '" /' + '>' + '</form>');
+						$('body').append( vform );
+						vform.submit();
+					} );
 				    }
 			});
 	}

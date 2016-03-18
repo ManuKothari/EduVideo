@@ -36,6 +36,7 @@ usr_rates = {
 user_fields = {
     'username': fields.String,
     'password': fields.String,
+    'usertype': fields.String,
     'history': fields.List( fields.String ),
     'rates': fields.Nested( usr_rates ),
     'channel_ids': fields.List( fields.String ),
@@ -103,6 +104,7 @@ class UserListAPI(Resource):
         user = {
             'username': args['username'],
             'password': args['password'],
+            'usertype': "genuser",
             'history': [],
             'rates': {
 			'good': [],

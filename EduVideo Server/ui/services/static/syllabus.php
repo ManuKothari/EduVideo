@@ -196,8 +196,8 @@
 		{
 			echo '
 			<ul class="nav navbar-nav navbar-right">
-				<li> <div class="file">
-					<a href="upload.php">Upload</a>
+				<li> <div class="file" style="width:1%;font-size:5px;">
+					<a href="index.php"><i class="glyphicon glyphicon-home">&nbsp;Home</i></a>
 				</div> </li>
 				<li class="dropdown">
 					<button class="btn btn-default dropdown-toggle" type="button" id="username" data-toggle="dropdown"> <i class="glyphicon glyphicon-user"></i>'. $_SESSION["username"] . '&nbsp; <span class="caret"></span> </button>
@@ -258,6 +258,114 @@
 	?>
 		</ul>				
 	</div>	
+    </div>
+
+
+    <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+	<div class="show-top-grids">
+		<div class="col-sm-10 show-grid-left main-grids">
+	<?php
+		try 
+		{
+			$conn = new MongoClient('mongodb://admin:root@ds055564.mlab.com:55564/eduvideo');
+			$db = $conn->eduvideo;
+			$vid = $db->video;
+			$chn = $db->channel;
+			$curriculum = $db->category;
+			$cursor = $curriculum->find();
+			foreach( $cursor as $obj )
+			{				
+				$subject = $obj['sub'];
+				$totvids = $vid->count( array( "category.subject" => $subject ) );
+
+				echo $subject . "<br>";
+				echo $totvids . "<br>";
+
+				$chn_cursor = $chn->find( array( "subjects" => $subject ) );
+				foreach( $chn_cursor as $chn_obj )
+				{
+					echo $chn_obj['channel_name'] . "<br>";			
+				}			
+	
+				foreach( $obj['ut'] as $topic )
+				{
+					echo $topic . "<br>";		
+				}
+
+				if( isset($_SESSION["usertype"]) && $_SESSION["usertype"] == "admin" )
+				{
+					printf('<button onclick="delsub(\'%s\');" class="btn btn-primary">Delete Subject</button> <br>', $obj['sub']);	
+				}
+				echo "<hr>";
+			}
+			$conn->close();
+		} 
+		catch (MongoConnectionException $e) 
+		{
+			die('Error connecting to MongoDB server');
+		} 
+		catch (MongoException $e)
+		{
+		  	die('Error: ' . $e->getMessage());
+		}
+	?>
+		</div>
+		<div class="col-md-2 show-grid-right">
+			<button class="btn btn-md btn-primary btn-block" onclick="newsub();" type="button"> ADD NEW SUBJECT </button>			
+		</div>
+		<div class="clearfix"> </div>
+	</div>			
+    </div>
+
+
+    <div id="addsub" class="modal fade" tabindex="=1" role="dialog" aria-labelledby="addDialogLabel" aria-hidden="true">
+	<div class="modal-dialog">
+	    <div class="modal-content">
+		<div class="modal-header">
+       		    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+       		    <h3 class="modal-title" id="addDialogLabel">Add New Subject</h3>
+       		</div>
+       		<div class="modal-body">
+       		    <form class="form-horizontal">
+		       <div class="container-fluid">
+	       	           <div class="form-group">
+	       		       <label class="control-label" for="subnm" style="float:left">Subject Name:&nbsp;&nbsp;</label>
+	  		       <input type="text" class="form-control" id="subnm" placeholder="Subject Name" style="width: 300px;">
+			   </div> <hr>
+			   <div class="form-group">
+				<label class="control-label">Unit-wise Topic Names:</label>
+			   </div>
+			   <div class="form-group">
+				<label class="control-label" for="unit1" style="float:left">&nbsp;Unit 1:&nbsp;&nbsp;</label>
+				<input type="text" class="form-control" id="unit1" placeholder="Topic Name" style="width: 300px;">
+			   </div>
+			   <div class="form-group">
+				<label class="control-label" for="unit2" style="float:left">&nbsp;Unit 2:&nbsp;&nbsp;</label>
+				<input type="text" class="form-control" id="unit2" placeholder="Topic Name" style="width: 300px;">
+			   </div>
+			   <div class="form-group">
+				<label class="control-label" for="unit3" style="float:left">&nbsp;Unit 3:&nbsp;&nbsp;</label>
+				<input type="text" class="form-control" id="unit3" placeholder="Topic Name" style="width: 300px;">
+			   </div>
+			   <div class="form-group">
+				<label class="control-label" for="unit4" style="float:left">&nbsp;Unit 4:&nbsp;&nbsp;</label>
+				<input type="text" class="form-control" id="unit4" placeholder="Topic Name" style="width: 300px;">
+			   </div>
+			   <div class="form-group">
+				<label class="control-label" for="unit5" style="float:left">&nbsp;Unit 5:&nbsp;&nbsp;</label>
+				<input type="text" class="form-control" id="unit5" placeholder="Topic Name" style="width: 300px;">
+			   </div> <hr>
+		       </div>
+		    </form>
+		    <div id="submsg" style="color:green;"></div>
+		    <br><hr>
+		</div>
+		<div class="modal-footer">
+		    <button onclick="addsub();" class="btn btn-primary">Add Subject</button>
+		    <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+		</div>
+	    </div>
+	</div>
     </div>
 
 
@@ -414,6 +522,50 @@
 			{
 				createvidlist( data.user.watch_later_ids );
 			} );
+	}
+
+	function newsub()
+	{
+		$("#submsg").html("");
+		$('#addsub').modal('show');
+		
+	}
+
+	function addsub()
+	{
+		var topics = [];
+		for( var i = 0; i<5; i++ )
+		{
+			topics[ i ] = $( "#unit" + (i+1).toString() ).val();
+		}
+		var newSub = {
+				sub: $("#subnm").val(),
+				ut: topics
+			     };
+		$.ajax({
+		    url: 'newsub.php',
+		    type: 'POST',
+		    data: "obj="+ JSON.stringify( newSub ),
+		    success: function( data )
+			    {
+				if( data )
+					$("#submsg").html("Successfully stored but yet to be approved by admin!");
+			    }
+		});
+	}
+
+	function delsub( sub )
+	{
+		$.ajax({
+			    url: 'delsub.php',
+			    data: "sub=" + sub + "&no=" + 3,
+			    type: 'POST',
+			    cache: false,
+			    error: function( jqXHR )
+				   {
+				   	console.log("ajax error " + jqXHR.status);
+				   }
+			});
 	}
 
 

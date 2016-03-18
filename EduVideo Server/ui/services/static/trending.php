@@ -196,8 +196,8 @@
 		{
 			echo '
 			<ul class="nav navbar-nav navbar-right">
-				<li> <div class="file">
-					<a href="upload.php">Upload</a>
+				<li> <div class="file" style="width:1%;font-size:5px;">
+					<a href="index.php"><i class="glyphicon glyphicon-home">&nbsp;Home</i></a>
 				</div> </li>
 				<li class="dropdown">
 					<button class="btn btn-default dropdown-toggle" type="button" id="username" data-toggle="dropdown"> <i class="glyphicon glyphicon-user"></i>'. $_SESSION["username"] . '&nbsp; <span class="caret"></span> </button>
@@ -210,7 +210,7 @@
 		}
 	?>
 		</div>
-        </div>
+	</div>
 	<div class="clearfix"> </div>
 
       </div>
@@ -261,8 +261,80 @@
     </div>
 
 
-    <script type="text/javascript">
+    <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+	<div class="main-grids">
+		<div class="top-grids">
+	<?php
+		try 
+		{
+			$conn = new MongoClient('mongodb://admin:root@ds055564.mlab.com:55564/eduvideo');
+			$db = $conn->eduvideo;
+			$video = $db->video;
+			echo '<hr> <br> <div> Top 9 videos Most Viewed </div> <br> <hr>';
+			$views = $video->find()->sort( array( "view_count" => -1 ) )->limit( 9 );
+			foreach( $views as $vid )
+			{
+				echo '	
+				<div class="col-md-4 resent-grid recommended-grid slider-top-grids">
+					<div class="resent-grid-img recommended-grid-img">
+						<video src="http://localhost:3000/video/'. $vid['video_id'] .'" controls width="350px" height="200px"></video>
+						<div class="time">
+							<p style="color:black; font-size:15px;"> '. $vid['vlength'] .' </p>
+						</div>
+						<div class="clck">
+							<span class="glyphicon glyphicon-time" aria-hidden="true"></span>
+						</div>
+					</div>
+					<div class="resent-grid-info recommended-grid-info">
+						<h3><a href="#" class="title title-info"> '. $vid['title'] .' </a></h3>
+						<ul>
+							<li class="right-list"><p class="views views-info"> '. $vid['view_count'] .'  views</p></li>
+						</ul>
+					</div>
+				</div>	';
+			}
+			echo '<hr><br> <div> Top 9 videos with Maximum Likes </div> <br> <hr>';
+			$likes = $video->find()->sort( array( "rates.good" => -1 ) )->limit( 9 );
+			foreach( $likes as $vid )
+			{
+				echo '	
+				<div class="col-md-4 resent-grid recommended-grid slider-top-grids">
+					<div class="resent-grid-img recommended-grid-img">
+						<video src="http://localhost:3000/video/'. $vid['video_id'] .'" controls width="350px" height="200px"></video>
+						<div class="time">
+							<p style="color:black; font-size:15px;"> '. $vid['vlength'] .' </p>
+						</div>
+						<div class="clck">
+							<span class="glyphicon glyphicon-time" aria-hidden="true"></span>
+						</div>
+					</div>
+					<div class="resent-grid-info recommended-grid-info">
+						<h3><a href="#" class="title title-info"> '. $vid['title'] .' </a></h3>
+						<ul>
+							<li class="right-list"><p class="views views-info"> '. $vid['view_count'] .'  views</p></li>
+						</ul>
+					</div>
+				</div>	';
+			}
+			echo '<hr>';
+			$conn->close();
+		} 
+		catch (MongoConnectionException $e) 
+		{
+			die('Error connecting to MongoDB server');
+		} 
+		catch (MongoException $e)
+		{
+		  	die('Error: ' . $e->getMessage());
+		}
+	?>
+		</div>
+	</div>
+    </div>
 
+
+    <script type="text/javascript">
+	
 	videosURI = 'http://localhost:5000/eduvideo/videos';
 	usersURI = 'http://localhost:5000/eduvideo/users';
 	custom_ajax = function( uri, method, data ) 
@@ -418,6 +490,6 @@
 
 
     </script>
-   
- </body>
-</html>		
+						
+</body>
+</html>

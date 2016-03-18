@@ -27,3 +27,21 @@
 56d71a610a9ded172385fc76 $@$ Kruskal Tutorial - 01 $@$  and 01 kruskal - unit4-algorithms basics algorithms sql tutorial
 56d71ad20a9ded172385fc77 $@$ Prim Graph Tutorial - 04 $@$ 04 - and unit4-algorithms sql algorithms prim basics tutorial graph
 56d71b7e0a9ded172385fc78 $@$ Math for Liberal Studies Using the Nearest-Neighbor Algorithm Tutorial - 06 $@$ the - studies nearest-neighbor intermediate and math using for 06 sql unit5-algorithms liberal algorithm algorithms tutorial
+56e6cf650a9ded0d96dfc7ff $@$ HTML Tutorial - 01 - Introduction to HTML $@$ html tutorial 01  basics to - unit1-html web 1 introduction tech
+56e6d02a0a9ded0d96dfc800 $@$ HTML Tutorial - 02 - Tags and Elements $@$ html tutorial tags  basics - unit1-html 02 and elements web 1 tech
+56e6d0bc0a9ded0d96dfc801 $@$ HTML Tutorial - 12 - Lists $@$ html tutorial  unit2-html - lists advanced web 1 12 tech
+56e6d1460a9ded0d96dfc802 $@$ HTML Tutorial - 17 - XHTML $@$ html tutorial 17  unit2-html - xhtml advanced web 1 tech
+56e6d2070a9ded0d96dfc803 $@$ CSS Tutorial - 02 - Rule Structure $@$ tutorial  rule basics - structure css 02 web 1 unit3-css tech
+56e6d2700a9ded0d96dfc804 $@$ CSS Tutorial - 04 - Grouping $@$ tutorial  basics - grouping css web 1 04 unit3-css tech
+56e6d2ec0a9ded0d96dfc805 $@$ CSS Tutorial - 09 - Specificity $@$ tutorial  specificity - unit4-css css intermediate web 1 09 tech
+56e6d3500a9ded0d96dfc806 $@$ CSS Tutorial - 10 - Colors $@$ tutorial  10 - unit4-css css intermediate web 1 colors tech
+56e6d3dd0a9ded0d96dfc807 $@$ CSS Tutorial - 17 - Margin and Padding Properties $@$ tutorial  17 properties unit5-css margin - css advanced and web 1 padding tech
+56e6d6bd0a9ded0d96dfc808 $@$ CSS Tutorial - 18 - Dimension Properties $@$ tutorial  properties unit5-css 18 - css advanced web 1 tech dimension
+56e6d7310a9ded0d96dfc809 $@$ JavaScript Tutorial - 01 - Introduction to JavaScript $@$ tutorial javascript 01  unit1-javascript 2 to - web introduction tech
+56e6d7f40a9ded0d96dfc80a $@$ JavaScript Tutorial - 06 - Conditionals $@$ tutorial javascript  unit1-javascript 2 - conditionals web 06 tech
+56e6d8730a9ded0d96dfc80b $@$ PHP Tutorial - 01 - Introduction to PHP $@$ tutorial 01  2 basics unit2-php to - web php introduction tech
+56e6d8e60a9ded0d96dfc80c $@$ PHP Tutorial - 03 - Variables $@$ tutorial  2 basics unit2-php - web 03 variables php tech
+56e6d9660a9ded0d96dfc80d $@$ PHP Tutorial - 15 - Cookies $@$ tutorial  15 2 - cookies unit3-php advanced web php tech
+56e6d9d50a9ded0d96dfc80e $@$ PHP Tutorial - 16 - Sessions $@$ tutorial sessions  2 - unit3-php 16 advanced web php tech
+56e6dd210a9ded147b5706f2 $@$ XML Tutorial - 01 - Introduction to XML $@$  basics 01 tutorial tech unit4-xml introduction to 2 - xml web and asp.net
+56e6ddc40a9ded147b5706f3 $@$ ASP.NET Tutorial - 01 - Introduction to ASP.NET $@$  basics tutorial 01 tech unit4-xml introduction to 2 - web asp.net and
