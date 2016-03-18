@@ -49,7 +49,7 @@
 
 <link href='//fonts.googleapis.com/css?family=Poiret+One' rel='stylesheet' type='text/css'>
 <!-- //fonts -->
-<<<<<<< HEAD
+
 	<script type="text/javascript">
 	
 	function getvid()
@@ -115,10 +115,10 @@
 	</script>
 </head>
  <body onload = "getvid()">
-=======
+
 </head>
  <body>
->>>>>>> 70411a06e32f819267ab842defbf401c4c4ba235
+
 
     <nav class="navbar navbar-inverse navbar-fixed-top">
       <div class="container-fluid">
