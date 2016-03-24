@@ -1,5 +1,6 @@
 <?php
 	session_start();
+	extract( $_POST );
 	if( !isset($_SESSION["username"]) || !isset($_SESSION["usertype"]) )
 	{
 		header("Location: index.php");
@@ -10,29 +11,21 @@
 <html>
 
 <head>
-    <meta charset="utf-8">
     <title>EduVideo</title>
-    <link rel="shortcut icon" href="favicon.ico">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <!-- Bootstrap css -->
-    <link type="text/css" rel='stylesheet' href="css/bootstrap.min.css">
-    <link href="css/dashboard.css" rel="stylesheet">
-    <link href="css/style.css" rel='stylesheet' type='text/css' media="all" />
-    <!-- End Bootstrap css -->
-    <!-- Fancybox -->
-    <link type="text/css" rel='stylesheet' href="js/fancybox/jquery.fancybox.css">
-    <!-- End Fancybox -->
-
-    <link type="text/css" rel='stylesheet' href="fonts/fonts.css">
-    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800&amp;subset=latin,cyrillic-ext' rel='stylesheet' type='text/css'>
-    <link href='http://fonts.googleapis.com/css?family=Merriweather:400,300,300italic,400italic,700,700italic,900,900italic' rel='stylesheet' type='text/css'>
-
-    <link type="text/css" data-themecolor="default" rel='stylesheet' href="css/main-default.css">
-    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <script type="application/x-javascript"> addEventListener("load", function() { setTimeout(hideURLbar, 0); }, false); function hideURLbar(){ window.scrollTo(0,1); } </script>
+    <!-- bootstrap -->
+    <link href="css/bootstrap.min.css" rel='stylesheet' type='text/css' media="all" />
+    <!-- //bootstrap -->
+    <link href="css/dashboard.css" rel="stylesheet">
+    <!-- Custom Theme files -->
+    <link href="css/style.css" rel='stylesheet' type='text/css' media="all" />
     <script src="js/jquery-1.11.1.min.js"></script>
-    <link href='//fonts.googleapis.com/css?family=Poiret+One' rel='stylesheet' type='text/css'>
+    <!--start-smoth-scrolling-->
+    <!-- fonts -->
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Poiret+One' rel='stylesheet' type='text/css'>
     <!-- //fonts -->
 
     <link rel="stylesheet" type="text/css" href="css/mynav.css">
@@ -64,25 +57,25 @@
 				</form>
 			</div>  
 			<div class="header-top-right">
-			<?php
-				echo '
-				<ul class="nav navbar-nav navbar-right">
-					<li> <div class="file" style="width:1%;font-size:5px;">
-						<a href="index.php"><i class="glyphicon glyphicon-home">&nbsp;Home</i></a>
-					</div> </li>
-					<li class="dropdown">
-						<button class="btn btn-default dropdown-toggle" type="button" id="username" data-toggle="dropdown"> <i class="glyphicon glyphicon-user"></i>'. $_SESSION["username"] . '&nbsp; <span class="caret"></span> </button>
-						<ul class="dropdown-menu">
-							<li><a href="chngPwd.php">Change Details</a></li>
-							<li><a href="logout.php">Log Out</a></li>
-						</ul>
-					</li>
-				</ul> ';
-			?>
+		<?php
+			echo '
+			<ul class="nav navbar-nav navbar-right">
+				<li> <div class="file" style="width:1%;font-size:5px;">
+					<a href="index.php"><i class="glyphicon glyphicon-home">&nbsp;Home</i></a>
+				</div> </li>
+				<li class="dropdown">
+					<button class="btn btn-default dropdown-toggle" type="button" id="username" data-toggle="dropdown"> <i class="glyphicon glyphicon-user"></i>'. $_SESSION["username"] . '&nbsp; <span class="caret"></span> </button>
+					<ul class="dropdown-menu">
+						<li><a href="chngPwd.php">Change Details</a></li>
+						<li><a href="logout.php">Log Out</a></li>
+					</ul>
+				</li>
+			</ul> ';
+		?>
 				<div class="clearfix"> </div>
 			</div>
         </div>
-	<div class="clearfix"> </div>
+		<div class="clearfix"> </div>
       </div>
     </nav>
 		<div></div>
@@ -274,7 +267,7 @@
 							<div class="form-group">
 								<div class="row">
 									<div class="col-sm-2 col-sm-offset-5">
-										<input type="button" value="SUBMIT" class="btn btn-primary btn-block" onclick="post_vid();" />
+<?php	printf('<input type="button" value="SUBMIT" class="btn btn-primary btn-block" onclick="post_vid(\'%s\',\'%s\');" />', $cid, $_SESSION['uid']);	?>
 									</div>
 								</div>
 							</div>
@@ -285,7 +278,7 @@
 		</div>
 			
 		<div class="clearfix"> </div>
-    <script src="js/bootstrap.min.js"></script>
+
 
     <script type="text/javascript">
 
@@ -306,6 +299,53 @@
 			return arr;
 		}
 	});
+
+	videosURI = 'http://localhost:5000/eduvideo/videos';
+	custom_ajax = function( uri, method, data ) 
+	{
+	    var request = 
+		{
+	        	url: uri,
+		        type: method,
+		        contentType: "application/json",
+		        accepts: "application/json",
+		        cache: false,
+		        dataType: 'json',
+		        data: JSON.stringify( data ),
+		        error: function( jqXHR ) 
+			{
+		            console.log( "ajax error " + jqXHR.status );
+		        }
+		};
+	    return $.ajax( request );
+	}
+
+	function createvidlist( vids )
+	{
+		var res = [];
+		var j = 0;
+		custom_ajax( videosURI, 'GET' ).done(
+			function( data ) 
+			{
+				for( var i = 0; i < vids.length; i++ )
+				{
+					data.videos.some( function( video ) {
+						if( video._id.trim() == vids[i].trim() )
+						{
+							res[ j ] = video;
+							j += 1;
+							return true;
+					    	}
+					} );
+				}
+				var restr = JSON.stringify( res );
+				restr = encodeURIComponent( restr );
+				var vform = $('<form action="vidlist.php" method="post" style="display:none;">' + 
+			'<input type="textarea" maxlength="5000" name="vidlist" value="' + restr + '" /' + '>' + '</form>');
+				$('body').append( vform );
+				vform.submit();
+			} );
+	}
 
         function displayinfo()
 	{
@@ -370,27 +410,8 @@
 		});
         }
 
-	function post_vid()
+	function post_vid( cid , uid )
 	{
-		var self = this;
-		self.videosURI = 'http://localhost:5000/eduvideo/videos';
-
-		self.ajax = function(uri, method, data) {
-		    var request = {
-		        url: uri,
-		        type: method,
-		        contentType: "application/json",
-		        accepts: "application/json",
-		        cache: false,
-		        dataType: 'json',
-		        data: JSON.stringify(data),
-		        error: function(jqXHR) {
-		            console.log("ajax error " + jqXHR.status);
-		        }
-		    };
-		    return $.ajax(request);
-		}
-
 		var taglist = [];
 		var tagsize = $("#num_t_c").val();
 		if( tagsize != "" || tagsize != 0 || tagsize != null )
@@ -414,10 +435,12 @@
 				vlength: $("#vlength").val(),
 				notes: $("#notes").val(),
 				reference: $("#reference").val(),
+				channel: cid,
+				author: uid,
 				video_id : vidgrid_id
-		};
+			    };
 
- 		self.ajax( self.videosURI, 'POST', newVid ).done( 
+ 		custom_ajax( videosURI, 'POST', newVid ).done( 
 		    function( data ) 
 		    {			
 				var output = '';
@@ -432,25 +455,6 @@
 
 	function searchvid()
 	{
-		var self = this;
-		self.videosURI = 'http://localhost:5000/eduvideo/videos';
-
-		self.ajax = function(uri, method, data) {
-		    var request = {
-		        url: uri,
-		        type: method,
-		        contentType: "application/json",
-		        accepts: "application/json",
-		        cache: false,
-		        dataType: 'json',
-		        data: JSON.stringify(data),
-		        error: function(jqXHR) {
-		            console.log("ajax error " + jqXHR.status);
-		        }
-		    };
-		    return $.ajax(request);
-		}
-
 		var query =  $("#srch").val();
 		$.ajax({
 			    url: 'vsearch.php',
@@ -465,29 +469,7 @@
 				    {					
 					var vids = JSON.parse( data );
 					vids.pop();
-					var res = [];
-					var j = 0;
-					self.ajax( self.videosURI, 'GET' ).done(
-					function( data ) 
-					{
-						for( var i = 0; i < vids.length; i++ )
-						{
-							data.videos.some( function( video ) {
-								if( video._id.trim() == vids[i].trim() )
-								{
-									res[ j ] = video;
-									j += 1;
-									return true;
-							    	}
-							} );
-						}
-						var restr = JSON.stringify( res );
-						restr = encodeURIComponent( restr );
-						var vform = $('<form action="vidlist.php" method="post" style="display:none;">' + 
-				'<input type="textarea" maxlength="5000" name="vidlist" value="' + restr + '" /' + '>' + '</form>');
-						$('body').append( vform );
-						vform.submit();
-					} );
+					createvidlist( vids );
 				    }
 			});
 	}

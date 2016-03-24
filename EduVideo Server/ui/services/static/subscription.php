@@ -1,5 +1,9 @@
 <?php
 	session_start();
+	if( !isset($_SESSION["usertype"]) || !isset($_SESSION["username"]) )
+	{
+		header("Location: index.php");
+	}
 ?>
 
 <!DOCTYPE html>
@@ -60,155 +64,19 @@
 				<input type="submit" value=" " onclick="searchvid(); return false;">
 			</form>
 		</div>
-
 		<div class="header-top-right">
-	<?php
-		if( !isset($_SESSION["usertype"]) && !isset($_SESSION["username"]) )
-		{
-			echo '	
-			<div class="signin">
-				<a href="#small-dialog2" class="play-icon popup-with-zoom-anim">Sign Up</a>
-
-				<!-- pop-up-box -->
-				<script type="text/javascript" src="js/modernizr.custom.min.js"></script>    
-				<link href="css/popuo-box.css" rel="stylesheet" type="text/css" media="all" />
-				<script src="js/jquery.magnific-popup.js" type="text/javascript"></script>
-				<!--//pop-up-box -->
-
-				<div id="small-dialog2" class="mfp-hide">
-					<h3>Create Account</h3> 
-					<div class="social-sits">
-						<div class="facebook-button">
-							<a href="#">Connect with Facebook</a>
-						</div>
-						<div class="chrome-button">
-							<a href="#">Connect with Google</a>
-						</div>
-					</div>
-	
-					<div class="signup">
-						<form class="form-horizontal" onsubmit="return false;">
-							<div class="row">
-								<div class="col-xs-10">
-									<input type="text" id="newusername" class="form-control" placeholder="Enter Username" style="width:250px; padding-right:30px;"/>
-									<i class="glyphicon glyphicon-user" style="position:absolute; right:0; padding:8px 27px;"></i>
-								</div>
-							</div>
-							<div class="row">
-								<div class="col-xs-10">
-									<input type="password" id="newpassword" class="form-control" placeholder="Enter Password" style="width:250px; padding-right:30px;"/>
-									<i class="glyphicon glyphicon-lock" style="position:absolute; right:0; padding:8px 27px;"></i>
-								</div>
-							</div>
-							</br>
-							<div class="row">
-								<div class="col-xs-10">
-									<button class="btn btn-block btn-info" onclick="signUp();">SIGN UP</button>
-								</div>
-							</div>
-							</br>
-							<div class="row">
-								<div class="col-xs-10">
-									<center><div id="newusermsg"></div></center>
-								</div>
-							</div>
-						</form>	
-					</div>
-					<div class="clearfix"> </div>
-				</div>	
-				<script>
-					$(document).ready(function() {
-					$(".popup-with-zoom-anim").magnificPopup({
-						type: "inline",
-						fixedContentPos: false,
-						fixedBgPos: true,
-						overflowY: "auto",
-						closeBtnInside: true,
-						preloader: false,
-						midClick: true,
-						removalDelay: 300,
-						mainClass: "my-mfp-zoom-in"
-						});
-					});
-				</script>	
-			</div>
-
-			<div class="signin">
-				<a href="#small-dialog" class="play-icon popup-with-zoom-anim">Sign In</a>
-				<div id="small-dialog" class="mfp-hide">
-					<h3>Login</h3>
-					<div class="social-sits">
-						<div class="facebook-button">
-							<a href="#">Connect with Facebook</a>
-						</div>
-						<div class="chrome-button">
-							<a href="#">Connect with Google</a>
-						</div>
-					</div>
-
-					<div class="signup">
-						<form class="form-horizontal" onsubmit="return false;">
-							<div class="row">
-								<div class="col-xs-10">
-									<input type="text" id="oldusername" class="form-control" placeholder="Enter Username" style="width:250px; padding-right:30px;"/>
-									<i class="glyphicon glyphicon-user" style="position:absolute; right:0; padding:8px 27px;"></i>
-								</div>
-							</div>
-							<div class="row">
-								<div class="col-xs-10">
-									<input type="password" id="oldpassword" class="form-control" placeholder="Enter Password" style="width:250px; padding-right:30px;"/>
-									<i class="glyphicon glyphicon-lock" style="position:absolute; right:0; padding:8px 27px;"></i>
-								</div>
-							</div>
-							<div class="row">
-								<div class="col-xs-10">
-									<select class="form-control" id="oldusertype">
-										<option value="genuser">User</option>
-										<option value="admin">Admin</option>
-									</select>
-								</div>
-							</div>
-							</br>
-							<div class="row">
-								<div class="col-xs-10">
-									<button class="btn btn-block btn-info" onclick="login();">LOGIN</button>
-								</div>
-							</div>
-							</br>
-							<div class="row">
-								<div class="col-xs-10">
-									<center><div id="oldusermsg"></div></center>
-								</div>
-							</div>
-							</br>
-							<div class="forgot">
-								<a href="#">Forgot password ?</a>
-							</div>
-						</form>	
-					</div>
-					<div class="clearfix"> </div>
-
-				</div>
-			</div>
-			<div class="clearfix"> </div>	';
-		}
-		else if( isset($_SESSION["usertype"]) && isset($_SESSION["username"]) )
-		{
-			echo '
 			<ul class="nav navbar-nav navbar-right">
 				<li> <div class="file" style="width:1%;font-size:5px;">
 					<a href="index.php"><i class="glyphicon glyphicon-home">&nbsp;Home</i></a>
 				</div> </li>
 				<li class="dropdown">
-					<button class="btn btn-default dropdown-toggle" type="button" id="username" data-toggle="dropdown"> <i class="glyphicon glyphicon-user"></i>'. $_SESSION["username"] . '&nbsp; <span class="caret"></span> </button>
+					<button class="btn btn-default dropdown-toggle" type="button" id="username" data-toggle="dropdown"> <i class="glyphicon glyphicon-user"></i> <?php echo $_SESSION["username"]; ?> &nbsp; <span class="caret"></span> </button>
 					<ul class="dropdown-menu">
 						<li><a href="chngPwd.php">Change Details</a></li>
 						<li><a href="logout.php">Log Out</a></li>
 					</ul>
 				</li>
-			</ul>	';	
-		}
-	?>
+			</ul>
 		</div>
 	</div>
 	<div class="clearfix"> </div>
@@ -229,31 +97,19 @@
 		<ul class="nav nav-sidebar"><br/> <br>
 			<li class="active"><a href="syllabus.php" class="home-icon"><span class="glyphicon glyphicon-home" aria-hidden="true"></span>CURRICULUM</a></li>	
 			<li><a href="trending.php" class="trending"><span class="glyphicon glyphicon-home glyphicon-fire" aria-hidden="true"></span>Trending</a></li>
-
-	<?php
-		if( isset($_SESSION["usertype"]) && isset($_SESSION["username"]) )
-		{
-			echo '
 			<li><a href="mychns.php" class="channel"><span class="glyphicon glyphicon-home glyphicon-blackboard" aria-hidden="true"></span>My Channels</a></li>
 			<li><a href="subscription.php" class="subscription"><span class= "glyphicon glyphicon-home glyphicon-check" aria-hidden="true"></span>Subscriptions</a></li>					
 			<li><a href="#" onclick="usrhist(); return false;" class="history"><span class= "glyphicon glyphicon-home glyphicon-hourglass" aria-hidden="true"></span>History</a></li>			
-			<li><a href="#" onclick="usrwatchlater(); return false;" class="watchlater"><span class="glyphicon glyphicon-home glyphicon-time" aria-hidden="true"></span>Watch Later</a></li>	';
-		}
-	?>
+			<li><a href="#" onclick="usrwatchlater(); return false;" class="watchlater"><span class="glyphicon glyphicon-home glyphicon-time" aria-hidden="true"></span>Watch Later</a></li>
 		</ul>	<hr>
 
 		<ul class="nav nav-sidebar"> <br>
 			<li class="active"> <a href="browsech.php" class="browse">  <span class="glyphicon glyphicon-home glyphicon-plus-sign" aria-hidden="true"></span>Browse Channels</a> </li> <br>
-
+			<li class="active"> <a href="#" class="notify"> <span class="glyphicon glyphicon-home glyphicon-tasks" aria-hidden="true"></span>Notifications</a> </li> <br>
 	<?php
-		if( isset($_SESSION["usertype"]) && isset($_SESSION["username"]) )
+		if( $_SESSION["usertype"] == "admin" )
 		{
-			echo '	<li class="active"> <a href="#" class="notify"> <span class="glyphicon glyphicon-home glyphicon-tasks" aria-hidden="true"></span>Notifications</a> </li> <br>	';
-
-			if( $_SESSION["usertype"] == "admin" )
-			{
-				echo ' <li class="active"> <a href="adminsub.php" class="managesubjects"> <span class="glyphicon glyphicon-home glyphicon-cog" aria-hidden="true"></span>Manage Subjects</a> </li> <br>	';
-			}
+			echo ' <li class="active"> <a href="adminsub.php" class="managesubjects"> <span class="glyphicon glyphicon-home glyphicon-cog" aria-hidden="true"></span>Manage Subjects</a> </li> <br>	';
 		}
 	?>
 		</ul>				
@@ -262,35 +118,99 @@
 
 
     <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
-	<div class="main-grids">
-		<div class="top-grids">
+	<div class="main-grids"> <hr>
+	<h2 style="text-align: center;"> MY SUBSCRIBED CHANNELS </h2> <hr><hr>
 	<?php
-		extract( $_REQUEST );		
-		$vidlist = urldecode( $vidlist );
-		$vidlist = json_decode( $vidlist, true );
-		foreach( $vidlist as $vid )
+		try 
 		{
-			echo '	
-			<div class="col-md-4 resent-grid recommended-grid slider-top-grids">
-				<div class="resent-grid-img recommended-grid-img">
-					<video src="http://localhost:3000/video/'. $vid['video_id'] .'" controls width="350px" height="200px"></video>
-					<div class="time">
-						<p style="color:black; font-size:15px;"> '. $vid['vlength'] .' </p>
+			$conn = new MongoClient('mongodb://admin:root@ds055564.mlab.com:55564/eduvideo');
+			$db = $conn->eduvideo;
+			$channel = $db->channel;
+			$user = $db->user;
+			$video = $db->video;
+			$usrcur = $user->findOne( array('_id' => new MongoId( $_SESSION["uid"] ) ) );
+		if( count( $usrcur['subscribed_ids'] ) != 0 )
+		{
+			foreach( $usrcur['subscribed_ids'] as $chnid )
+			{
+				$chnobj = $channel->findOne( array('_id' => new MongoId( $chnid ) ) );
+				$nm = $user->findOne( array('_id' => new MongoId( $chnobj['author_id'] ) ) );
+				echo '
+		<div class="recommended">
+			<div class="recommended-grids english-grid">
+				<div class="recommended-info">
+					<div class="heading">';
+	printf('<h3> <a href="#" onclick="chnpg(\'%s\'); return false;" > %s </a> </h3>', $chnobj['_id'], $chnobj['channel_name']);
+						echo ' <h5> Featuring';
+						foreach( $chnobj['subjects'] as $sub )
+						{
+							echo ' ' . $sub . ' , ';
+						}
+				  		echo '</h5> </div>
+					<div class="heading-right">
+						<h4>' . $nm['username'] . '</h4>
 					</div>
-					<div class="clck">
-						<span class="glyphicon glyphicon-time" aria-hidden="true"></span>
+					<div class="heading-right">
+						<h4>' . count( $chnobj['subscriber_ids'] ) . ' Subscribers</h4>
 					</div>
-				</div>
-				<div class="resent-grid-info recommended-grid-info">
-					<h3><a href="#" class="title title-info"> '. $vid['title'] .' </a></h3>
-					<ul>
-						<li class="right-list"><p class="views views-info"> '. $vid['view_count'] .'  views</p></li>
-					</ul>
-				</div>
-			</div>	';
+					<div class="heading-right">
+						<h4>' . count( $chnobj['video_ids'] ) . ' Videos</h4>	
+					</div>
+					<div class="heading-right">
+						<a  href="#small-dialog8" class="play-icon popup-with-zoom-anim">Unsubscribe</a>
+					</div>
+					<div class="clearfix"> </div>
+				</div> <br>';
+
+				foreach( array_slice( $chnobj['video_ids'], 0, 5 ) as $vid )
+				{
+					$vobj = $video->findOne( array('_id' => new MongoId( $vid ) ) );
+					echo'
+				<div class="col-md-2 resent-grid recommended-grid sports-recommended-grid">
+					<div class="resent-grid-img recommended-grid-img">
+						<video src="http://localhost:3000/video/'. $vobj['video_id'] .'" controls width="250px" height="100px"></video>
+						<div class="time small-time sports-tome">
+							<p style="color:black; font-size:15px;">'. $vobj['vlength'] .'</p>
+						</div>
+						<div class="clck sports-clock">
+							<span class="glyphicon glyphicon-time" aria-hidden="true"></span>
+						</div>
+					</div>
+					<div class="resent-grid-info recommended-grid-info">
+						<h5><a href="#" class="title">'. $vobj['title'] .'</a></h5>
+						<p class="views">'. $vobj['view_count'] .'views</p>
+					</div>
+				</div>';
+				}
+
+				if( count( $chnobj['video_ids'] ) != 0 )
+				{
+					echo'	
+				<div class="heading-right"> So on ... </div> ';
+				}
+
+			echo'	<div class="clearfix"> </div>
+			</div>
+		</div>	<hr> ';
+
+			}
+		}
+		else
+		{
+			echo' <h1> None as yet! </h1> <br>
+			<h1> Subscribe to Channels to avail this feature! </h1> <br> ';
+		}
+			$conn->close();
+		} 
+		catch (MongoConnectionException $e) 
+		{
+			die('Error connecting to MongoDB server');
+		} 
+		catch (MongoException $e)
+		{
+		  	die('Error: ' . $e->getMessage());
 		}
 	?>
-		</div>
 	</div>
     </div>
 
@@ -299,6 +219,7 @@
 	
 	videosURI = 'http://localhost:5000/eduvideo/videos';
 	usersURI = 'http://localhost:5000/eduvideo/users';
+	channelsURI = 'http://localhost:5000/eduvideo/channels';
 	custom_ajax = function( uri, method, data ) 
 	{
 	    var request = 
@@ -391,47 +312,6 @@
 	}
 
 
-	function signUp()
-	{
-		var newUsr = {
-				username: $("#newusername").val(),
-				password: $("#newpassword").val()
-			     };
-
- 		custom_ajax( usersURI, 'POST', newUsr ).done( 
-		    function( data ) 
-		    {
-				var uid = data.user.uri.split("/")[3];
-				$("#newusermsg").css('color', 'green');
-				$("#newusermsg").html("Successfully created user account!");
-				$.post( "login.php", { "usrnm" : $("#newusername").val() , "usrtype" : "genuser" , "uid" : uid } ,
-                                        function() { location.href = "index.php"; } );
-		    } );
-	}
-
-	function login()
-	{
-		var usrnm = $("#oldusername").val();
-		var usrpwd = $("#oldpassword").val();
-		var usrtype = $("#oldusertype").val();
-
-		custom_ajax( usersURI, 'GET' ).done(
-			function( data ) 
-			{
-				data.users.forEach( function( user ) {
-					if( user.username == usrnm && user.password == usrpwd && user.usertype == usrtype )
-					{
-					    $.post( "login.php", { "usrnm" : usrnm , "usrtype" : usrtype, "uid" : user.uri.split("/")[3] } ,
-                                        	function() {
-							location.href = "index.php";
-						} );
-					}
-				});
-				$("#oldusermsg").css('color', 'red');
-				$("#oldusermsg").html("Incorrect Credentials! Try again");
-		    	} );
-	}
-
 	function usrhist()
 	{
 		custom_ajax( usersURI + "/" + <?php echo json_encode($_SESSION["uid"])?> , 'GET' ).done(
@@ -448,6 +328,14 @@
 			{
 				createvidlist( data.user.watch_later_ids );
 			} );
+	}
+
+	function chnpg( cid )
+	{
+		var vform = $('<form action="channel.php" method="post" style="display:none;">' + 
+		'<input type="text" name="cid" value="' + cid + '" /' + '>' + '</form>');
+		$('body').append( vform );
+		vform.submit();
 	}
 
 

@@ -37,6 +37,7 @@ user_fields = {
     'username': fields.String,
     'password': fields.String,
     'usertype': fields.String,
+    '_id': fields.String,
     'history': fields.List( fields.String ),
     'rates': fields.Nested( usr_rates ),
     'channel_ids': fields.List( fields.String ),
@@ -70,7 +71,8 @@ video_fields = {
     '_id': fields.String,
     'video_id' : fields.String,
     'author': fields.String,
-    'linked': fields.String,
+    'linkedto': fields.String,
+    'linkedby': fields.String,
     'channel': fields.String,
     'comments': fields.List( fields.String ),
     'uri': fields.Url('video')
@@ -78,9 +80,9 @@ video_fields = {
 
 channel_fields = {
     'subjects': fields.List( fields.String ),
-    'no_of_videos': fields.Integer,
     'channel_name': fields.String,
     'author_id': fields.String,
+    '_id': fields.String,
     'subscriber_ids': fields.List( fields.String ),
     'video_ids': fields.List( fields.String ),
     'uri': fields.Url('channel')
@@ -149,6 +151,12 @@ class UserAPI(Resource):
         user = [user for user in user_col.find() if str(user['_id']) == _id]
         if len(user) == 0:
             abort(404)
+        user = user[0]
+        delchn = getattr( ChannelAPI() , 'delete' )
+        for cid in user['channel_ids']:
+            delchn( cid )
+        for cid in user['subscribed_ids']:
+            channel_col.find_one_and_update( {'_id': ObjectId( cid ) } , { '$pull': { 'subscriber_ids' : _id } } )
         user_col.find_one_and_delete({'_id': ObjectId(_id) })
         return {'result': True}
 
@@ -159,8 +167,8 @@ class ChannelListAPI(Resource):
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument('subjects', type=list, required=True, help='No subjects provided', location='json')
-        self.reqparse.add_argument('no_of_videos', type=int, required=True, help='Total number of videos not provided', location='json')
         self.reqparse.add_argument('channel_name', type=str, required=True, help='Channel name not provided', location='json')
+        self.reqparse.add_argument('author_id', type=str, required=True, help='Author Id not provided', location='json')
         super(ChannelListAPI, self).__init__()
 
     def get(self):
@@ -170,13 +178,13 @@ class ChannelListAPI(Resource):
         args = self.reqparse.parse_args()
         channel = {
             'subjects': args['subjects'],
-            'no_of_videos': args['no_of_videos'],
             'channel_name': args['channel_name'],
-            'author_id': "",
+            'author_id': args['author_id'],
             'subscriber_ids': [],
             'video_ids': []
         }
         channel['_id'] = str(channel_col.insert_one(channel).inserted_id)
+        user_col.find_one_and_update( {'_id': ObjectId( channel['author_id'] ) } , { '$push': { 'channel_ids' : channel['_id'] } } )
         return {'channel': marshal(channel, channel_fields)}, 201
 
 
@@ -185,8 +193,8 @@ class ChannelAPI(Resource):
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument('subjects', type=list, location='json')
-        self.reqparse.add_argument('no_of_videos', type=int, location='json')
         self.reqparse.add_argument('channel_name', type=str, location='json')
+        self.reqparse.add_argument('author_id', type=str, location='json')
         super(ChannelAPI, self).__init__()
 
     def get(self, _id):
@@ -211,6 +219,13 @@ class ChannelAPI(Resource):
         channel = [channel for channel in channel_col.find() if str(channel['_id']) == _id]
         if len(channel) == 0:
             abort(404)
+        channel = channel[0]
+        delvid = getattr( VideoAPI() , 'delete' )
+        for vid in channel['video_ids']:
+            delvid( vid )
+        user_col.find_one_and_update( {'_id': ObjectId( channel['author_id'] ) } , { '$pull': { 'channel_ids' : _id } } )
+        for uid in channel['subscriber_ids']:
+            user_col.find_one_and_update( {'_id': ObjectId( uid ) } , { '$pull': { 'subscribed_ids' : _id } } )
         channel_col.find_one_and_delete({'_id': ObjectId(_id) })
         return {'result': True}
 
@@ -247,6 +262,8 @@ class VideoListAPI(Resource):
         self.reqparse.add_argument('tags', type=list, default="", location='json')
         self.reqparse.add_argument('notes', type=str, default="", location='json')
         self.reqparse.add_argument('reference', type=str, default="", location='json')
+        self.reqparse.add_argument('channel', type=str, required=True, help='No channel provided', location='json')
+        self.reqparse.add_argument('author', type=str, required=True, help='No author provided', location='json')
         self.reqparse.add_argument('video_id', type=str, required=True, help='No _id provided', location='json')
         super(VideoListAPI, self).__init__()
 
@@ -263,6 +280,8 @@ class VideoListAPI(Resource):
     	    'tags': args['tags'],
             'notes': args['notes'],
             'reference': args['reference'],
+            'channel': args['channel'],
+            'author': args['author'],
             'video_id': args['video_id'],
 	    'rates': { 
 			'good': 0,
@@ -270,12 +289,12 @@ class VideoListAPI(Resource):
     			'poor': 0 
 		     },
 	    'view_count': 0,
-            'author': "",
-            'linked': "",
-            'channel': "",
+            'linkedto': "",
+            'linkedby': "",
             'comments': []
         }
         video['_id'] = str(video_col.insert_one(video).inserted_id)
+        channel_col.find_one_and_update( {'_id': ObjectId( video['channel'] ) } , { '$push': { 'video_ids' : video['_id'] } } )
         extras = wrtfile( video )
         with open('vidnm.txt', 'a') as f:
         	f.write( str(video['_id']) + " $@$ " + video['title'] + " $@$ " + extras + "\n")
@@ -293,6 +312,8 @@ class VideoAPI(Resource):
         self.reqparse.add_argument('tags', type=list, location='json')
         self.reqparse.add_argument('notes', type=str, location='json')
         self.reqparse.add_argument('reference', type=str, location='json')
+        self.reqparse.add_argument('channel', type=str, location='json')
+        self.reqparse.add_argument('author', type=str, location='json')
         self.reqparse.add_argument('video_id', type=str, location='json')
         super(VideoAPI, self).__init__()
 
@@ -328,13 +349,24 @@ class VideoAPI(Resource):
         return {'video': marshal(video, video_fields)}
 
     def delete(self, _id):
-        grid_id_list = [video['video_id'] for video in video_col.find() if str(video['_id']) == _id]
-        if len( grid_id_list ) == 0:
+        video = [video for video in video_col.find() if str(video['_id']) == _id]
+        if len( video ) == 0:
             abort(404)
-        grid_id = grid_id_list[0]
+        video = video[0]
+        grid_id = video['video_id']
+        channel_col.find_one_and_update( {'_id': ObjectId( video['channel'] ) } , { '$pull': { 'video_ids' : _id } } )
+        if( video['linkedto'] != "" ):
+            video_col.find_one_and_update( {'_id': ObjectId( video['linkedto'] ) } , { '$set': { 'linkedby' : "" } } )
+        if( video['linkedby'] != "" ):
+            video_col.find_one_and_update( {'_id': ObjectId( video['linkedby'] ) } , { '$set': { 'linkedto' : "" } } )
         video_col.find_one_and_delete({'_id': ObjectId(_id) })
         files_col.remove({'_id': ObjectId( grid_id ) })
         chunks_col.remove({'files_id': ObjectId( grid_id ) })
+        user_col.update_many( { 'history' : _id } , { '$pull' : { 'history' : _id } } )
+        user_col.update_many( { 'watch_later_ids' : _id } , { '$pull' : { 'watch_later_ids' : _id } } )
+        user_col.update_many( { 'rates.good' : _id } , { '$pull' : { 'rates.good' : _id } } )
+        user_col.update_many( { 'rates.avg' : _id } , { '$pull' : { 'rates.avg' : _id } } )
+        user_col.update_many( { 'rates.poor' : _id } , { '$pull' : { 'rates.poor' : _id } } )
         for line in fileinput.input( "vidnm.txt", inplace=1 ):
             if( line.split(" $@$ ")[0] != _id ):
                 print( line, end="" )

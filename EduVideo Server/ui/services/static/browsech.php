@@ -262,35 +262,90 @@
 
 
     <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
-	<div class="main-grids">
-		<div class="top-grids">
+	<div class="main-grids"> <hr>
+	<h2 style="text-align: center;"> ALL CHANNELS </h2> <hr><hr>
 	<?php
-		extract( $_REQUEST );		
-		$vidlist = urldecode( $vidlist );
-		$vidlist = json_decode( $vidlist, true );
-		foreach( $vidlist as $vid )
+		try 
 		{
-			echo '	
-			<div class="col-md-4 resent-grid recommended-grid slider-top-grids">
-				<div class="resent-grid-img recommended-grid-img">
-					<video src="http://localhost:3000/video/'. $vid['video_id'] .'" controls width="350px" height="200px"></video>
-					<div class="time">
-						<p style="color:black; font-size:15px;"> '. $vid['vlength'] .' </p>
+			$conn = new MongoClient('mongodb://admin:root@ds055564.mlab.com:55564/eduvideo');
+			$db = $conn->eduvideo;
+			$channel = $db->channel;
+			$user = $db->user;
+			$video = $db->video;
+			$chncursor = $channel->find();
+			foreach( $chncursor as $chnobj )
+			{
+				$nm = $user->findOne( array('_id' => new MongoId( $chnobj['author_id'] ) ) );
+				echo '
+		<div class="recommended">
+			<div class="recommended-grids english-grid">
+				<div class="recommended-info">
+					<div class="heading">';
+	printf('<h3> <a href="#" onclick="chnpg(\'%s\'); return false;" > %s </a> </h3>', $chnobj['_id'], $chnobj['channel_name']);
+						echo ' <h5> Featuring';
+						foreach( $chnobj['subjects'] as $sub )
+						{
+							echo ' ' . $sub . ' , ';
+						}
+				  		echo '</h5> </div>
+					<div class="heading-right">
+						<h4>' . $nm['username'] . '</h4>
 					</div>
-					<div class="clck">
-						<span class="glyphicon glyphicon-time" aria-hidden="true"></span>
+					<div class="heading-right">
+						<h4>' . count( $chnobj['subscriber_ids'] ) . ' Subscribers</h4>
 					</div>
-				</div>
-				<div class="resent-grid-info recommended-grid-info">
-					<h3><a href="#" class="title title-info"> '. $vid['title'] .' </a></h3>
-					<ul>
-						<li class="right-list"><p class="views views-info"> '. $vid['view_count'] .'  views</p></li>
-					</ul>
-				</div>
-			</div>	';
+					<div class="heading-right">
+						<h4>' . count( $chnobj['video_ids'] ) . ' Videos</h4>	
+					</div>
+					<div class="heading-right">
+						<a  href="#small-dialog8" class="play-icon popup-with-zoom-anim">Subscribe</a>
+					</div>
+					<div class="clearfix"> </div>
+				</div> <br>';
+
+				foreach( array_slice( $chnobj['video_ids'], 0, 5 ) as $vid )
+				{
+					$vobj = $video->findOne( array('_id' => new MongoId( $vid ) ) );
+					echo'
+				<div class="col-md-2 resent-grid recommended-grid sports-recommended-grid">
+					<div class="resent-grid-img recommended-grid-img">
+						<video src="http://localhost:3000/video/'. $vobj['video_id'] .'" controls width="250px" height="100px"></video>
+						<div class="time small-time sports-tome">
+							<p style="color:black; font-size:15px;">'. $vobj['vlength'] .'</p>
+						</div>
+						<div class="clck sports-clock">
+							<span class="glyphicon glyphicon-time" aria-hidden="true"></span>
+						</div>
+					</div>
+					<div class="resent-grid-info recommended-grid-info">
+						<h5><a href="#" class="title">'. $vobj['title'] .'</a></h5>
+						<p class="views">'. $vobj['view_count'] .'views</p>
+					</div>
+				</div>';
+				}
+
+				if( count( $chnobj['video_ids'] ) != 0 )
+				{
+					echo'	
+				<div class="heading-right"> So on ... </div> ';
+				}
+
+			echo'	<div class="clearfix"> </div>
+			</div>
+		</div>	<hr> ';
+
+			}
+			$conn->close();
+		} 
+		catch (MongoConnectionException $e) 
+		{
+			die('Error connecting to MongoDB server');
+		} 
+		catch (MongoException $e)
+		{
+		  	die('Error: ' . $e->getMessage());
 		}
 	?>
-		</div>
 	</div>
     </div>
 
@@ -299,6 +354,7 @@
 	
 	videosURI = 'http://localhost:5000/eduvideo/videos';
 	usersURI = 'http://localhost:5000/eduvideo/users';
+	channelsURI = 'http://localhost:5000/eduvideo/channels';
 	custom_ajax = function( uri, method, data ) 
 	{
 	    var request = 
@@ -448,6 +504,14 @@
 			{
 				createvidlist( data.user.watch_later_ids );
 			} );
+	}
+
+	function chnpg( cid )
+	{
+		var vform = $('<form action="channel.php" method="post" style="display:none;">' + 
+		'<input type="text" name="cid" value="' + cid + '" /' + '>' + '</form>');
+		$('body').append( vform );
+		vform.submit();
 	}
 
 

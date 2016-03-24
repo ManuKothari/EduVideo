@@ -197,7 +197,7 @@
 			echo '
 			<ul class="nav navbar-nav navbar-right">
 				<li> <div class="file">
-					<a href="upload.php">Upload</a>
+					<a href="#" onclick="uploadvid(); return false;">Upload</a>
 				</div> </li>
 				<li class="dropdown">
 					<button class="btn btn-default dropdown-toggle" type="button" id="username" data-toggle="dropdown"> <i class="glyphicon glyphicon-user"></i>'. $_SESSION["username"] . '&nbsp; <span class="caret"></span> </button>
@@ -234,8 +234,8 @@
 		if( isset($_SESSION["usertype"]) && isset($_SESSION["username"]) )
 		{
 			echo '
-			<li><a href="#" class="channel"><span class="glyphicon glyphicon-home glyphicon-blackboard" aria-hidden="true"></span>My Channels</a></li>
-			<li><a href="#" class="subscription"><span class= "glyphicon glyphicon-home glyphicon-check" aria-hidden="true"></span>Subscriptions</a></li>					
+			<li><a href="mychns.php" class="channel"><span class="glyphicon glyphicon-home glyphicon-blackboard" aria-hidden="true"></span>My Channels</a></li>
+			<li><a href="subscription.php" class="subscription"><span class= "glyphicon glyphicon-home glyphicon-check" aria-hidden="true"></span>Subscriptions</a></li>					
 			<li><a href="#" onclick="usrhist(); return false;" class="history"><span class= "glyphicon glyphicon-home glyphicon-hourglass" aria-hidden="true"></span>History</a></li>			
 			<li><a href="#" onclick="usrwatchlater(); return false;" class="watchlater"><span class="glyphicon glyphicon-home glyphicon-time" aria-hidden="true"></span>Watch Later</a></li>	';
 		}
@@ -243,7 +243,7 @@
 		</ul>	<hr>
 
 		<ul class="nav nav-sidebar"> <br>
-			<li class="active"> <a href="#" class="browse">  <span class="glyphicon glyphicon-home glyphicon-plus-sign" aria-hidden="true"></span>Browse Channels</a> </li> <br>
+			<li class="active"> <a href="browsech.php" class="browse">  <span class="glyphicon glyphicon-home glyphicon-plus-sign" aria-hidden="true"></span>Browse Channels</a> </li> <br>
 
 	<?php
 		if( isset($_SESSION["usertype"]) && isset($_SESSION["username"]) )
@@ -261,10 +261,42 @@
     </div>
 
 
+    <div id="choosechn" class="modal fade" tabindex="=1" role="dialog" aria-labelledby="selchnDialogLabel" aria-hidden="true">
+	<div class="modal-dialog">
+	    <div class="modal-content">
+		<div class="modal-header">
+       		    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+       		    <h3 class="modal-title" id="selchnDialogLabel">Choose Channel</h3>
+       		</div>
+       		<div class="modal-body">
+		    <form id="selchnform" class="form-horizontal">
+			<div class="container-fluid">
+			   <div class="form-group">
+				<label class="control-label">Your Channels:</label>
+			   </div>
+			   <div class="form-group">
+				<label class="control-label" for="chnm" style="float:left">&nbsp;Channel Names:&nbsp;&nbsp;</label>
+				<select id="chnm" class="form-control" style="width: 400px;"></select>
+			   </div> <hr>
+		       </div>
+		    </form>
+		    <div id="selchnmsg" style="color:green;"></div>
+		    <br><hr>
+		</div>
+		<div class="modal-footer">
+		    <button id="chsel" onclick="selchn();" class="btn btn-primary">Select Channel</button>
+		    <button class="btn" data-dismiss="modal" id="cancel" aria-hidden="true">Cancel</button>
+		</div>
+	    </div>
+	</div>
+    </div>
+
+
     <script type="text/javascript">
 
 	videosURI = 'http://localhost:5000/eduvideo/videos';
 	usersURI = 'http://localhost:5000/eduvideo/users';
+	channelsURI = 'http://localhost:5000/eduvideo/channels';
 	custom_ajax = function( uri, method, data ) 
 	{
 	    var request = 
@@ -414,6 +446,59 @@
 			{
 				createvidlist( data.user.watch_later_ids );
 			} );
+	}
+
+	function uploadvid()
+	{
+		custom_ajax( usersURI + "/" + <?php echo json_encode($_SESSION["uid"])?> , 'GET' ).done(
+		    function( data ) 
+		    {
+			$("#choosechn").modal('show');
+			var cids = data.user.channel_ids;
+			if( cids.length == 0)
+			{
+				$("#chsel").hide();
+				$("#selchnform").hide();
+				$("#selchnmsg").html("First create your own Channel to avail this feature!");
+				$("#selchnmsg").show();
+			}
+			else
+			{
+				var chnm = document.getElementById("chnm");
+				var res = [];
+				var j = 0;
+				custom_ajax( channelsURI, 'GET' ).done(
+				    function( data ) 
+				    {
+					for( var i = 0; i < cids.length; i++ )
+					{
+						data.channels.some( function( channel ) {
+							if( channel._id.trim() == cids[i].trim() )
+							{
+								res[ j ] = channel;
+								j += 1;
+								return true;
+						    	}
+						} );
+					}
+					for( i=0; i < res.length; i++ )
+					{
+						chnm.options[chnm.options.length] = new Option(res[i].channel_name, res[i]._id);
+					}
+					$("#selchnform").show();
+				    });
+			}
+		    });
+	}
+
+	function selchn()
+	{
+		$("#selchnmsg").html("Redirecting to upload...............");
+		var chid = $("#chnm").val();
+		var vform = $('<form action="upload.php" method="post" style="display:none;">' + 
+			'<input type="text" name="cid" value="' + chid + '" /' + '>' + '</form>');
+		$('body').append( vform );
+		vform.submit();
 	}
 
 

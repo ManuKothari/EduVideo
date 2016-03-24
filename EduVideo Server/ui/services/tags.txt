@@ -2,3 +2,5 @@ description
 best practice
 pointer
 Char arrays
+is-a relation
+reuse

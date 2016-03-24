@@ -107,6 +107,29 @@
 		<script type="text/javascript" src = "js/bootstrap.min.js"></script>
 		<script type="text/javascript">
 
+			usersURI = 'http://localhost:5000/eduvideo/users';
+			videosURI = 'http://localhost:5000/eduvideo/videos';
+			channelsURI = 'http://localhost:5000/eduvideo/channels';
+			custom_ajax = function( uri, method, data ) 
+			{
+			    var request = 
+				{
+					url: uri,
+					type: method,
+					contentType: "application/json",
+					accepts: "application/json",
+					cache: false,
+					dataType: 'json',
+					data: JSON.stringify( data ),
+					error: function( jqXHR ) 
+					{
+					    console.log( "ajax error " + jqXHR.status );
+					}
+				};
+			    return $.ajax( request );
+			}
+
+
 			window.onload = function ()
 			{
 			    var username = document.getElementById("username");
@@ -117,25 +140,6 @@
 
 			function editusr()
 			{	
-				var self = this;
-				self.usersURI = 'http://localhost:5000/eduvideo/users';
-
-				self.ajax = function(uri, method, data) {
-				    var request = {
-					url: uri,
-					type: method,
-					contentType: "application/json",
-					accepts: "application/json",
-					cache: false,
-					dataType: 'json',
-					data: JSON.stringify(data),
-					error: function(jqXHR) {
-					    console.log("ajax error " + jqXHR.status);
-					}
-				    };
-				    return $.ajax(request);
-				}	
-
 				var usrnm = $("#usernm").val();
 				var oldpwd = $("#oldpassword").val();
 				var newpwd = $("#newpassword").val();
@@ -152,8 +156,8 @@
 				}
 				else
 				{
-					var uri = self.usersURI + "/" + <?php echo json_encode($_SESSION["uid"]) ?> ;
-					self.ajax( uri , 'GET' ).done(
+					var uri = usersURI + "/" + <?php echo json_encode($_SESSION["uid"]) ?> ;
+					custom_ajax( uri , 'GET' ).done(
 						function( res ) 
 						{
 							if( res.user.password != oldpwd )
@@ -164,7 +168,7 @@
 							else
 							{
 								var data = { username : usrnm, password: newpwd };
-								self.ajax( uri , 'PUT', data ).done(
+								custom_ajax( uri , 'PUT', data ).done(
 									function( res ) 
 									{
 										$("#errormsg").css('color', 'green');
@@ -179,31 +183,12 @@
 
 			function delusr()
 			{
-				var self = this;
-				self.usersURI = 'http://localhost:5000/eduvideo/users';
-				var uri = self.usersURI + "/" + <?php echo json_encode($_SESSION["uid"]) ?> ;
-
-				self.ajax = function(uri, method, data) {
-				    var request = {
-					url: uri,
-					type: method,
-					contentType: "application/json",
-					accepts: "application/json",
-					cache: false,
-					dataType: 'json',
-					data: JSON.stringify(data),
-					error: function(jqXHR) {
-					    console.log("ajax error " + jqXHR.status);
-					}
-				    };
-				    return $.ajax(request);
-				}	
-				
-				self.ajax( uri , 'DELETE' ).done(
-					function() 
-					{
-						location.href = "logout.php";
-					} );
+			    var uri = usersURI + "/" + <?php echo json_encode($_SESSION["uid"]) ?> ;
+			    custom_ajax( uri , 'DELETE' ).done(
+				function() 
+				{
+					location.href = "logout.php";
+				});	
 			}
 
 			function cancel()

@@ -24,7 +24,6 @@
 		<td>
 			<p><b data-bind="text: channel_name"></b></p>
 			<p><b data-bind="text: subjects"></b></p>
-			<p><b data-bind="text: no_of_videos"></b></p>
 		</td>
 		<td>
 		    <button data-bind="click: $parent.beginEdit" class="btn">Edit</button>
@@ -33,42 +32,8 @@
 	    </tr>
 	    <!-- /ko -->
 	</table>
-	<button data-bind="click: beginAdd" class="btn">Add Channel</button>
-
     </div>
 
-    <div id="add" class="modal hide fade" tabindex="=1" role="dialog" aria-labelledby="addDialogLabel" aria-hidden="true">
-    	<div class="modal-header">
-        	<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-        	<h3 id="addDialogLabel">Add Channel</h3>
-    	</div>
-   	 <div class="modal-body">
-        	<form class="form-horizontal">
-		     <div class="control-group">
-        	        <label class="control-label" for="channelName">Channel Name</label>
-        	        <div class="controls">
-        	            <input data-bind="value: channel_name" type="text" id="channelName" placeholder="Channel Name" style="width: 300px;">
-        	        </div>
-        	    </div>
-        	    <div class="control-group">
-        	        <label class="control-label" for="inputSubjects">Subjects</label>
-        	        <div class="controls">
-        	            <input data-bind="value: subjects" type="text" id="inputSubjects" placeholder="Subjects separated by comma" style="width: 300px;">
-        	        </div>
-        	    </div>
-        	    <div class="control-group">
-        	        <label class="control-label" for="inputNoOfVideos">Total Number of Videos</label>
-        	        <div class="controls">
-        	            <input data-bind="value: no_of_videos" type="number" id="inputNoOfVideos" placeholder="Total Number of Videos" style="width: 200px;">
-        	        </div>
-        	    </div>
-        	</form>
-    	</div>
-    	<div class="modal-footer">
-        	<button data-bind="click: addChannel" class="btn btn-primary">Add Channel</button>
-        	<button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
-    	</div>
-    </div>
 
      <div id="edit" class="modal hide fade" tabindex="=1" role="dialog" aria-labelledby="editDialogLabel" aria-hidden="true">
         <div class="modal-header">
@@ -87,12 +52,6 @@
         	    <label class="control-label" for="inputSubjects">Subjects</label>
         	        <div class="controls">
         	            <input data-bind="value: subjects" type="text" id="inputSubjects" placeholder="Subjects" style="width: 300px;">
-        	        </div>
-        	</div>
-        	<div class="control-group">
-        	    <label class="control-label" for="inputNoOfVideos">Total Number of Videos</label>
-        	        <div class="controls">
-        	            <input data-bind="value: no_of_videos" type="number" id="inputNoOfVideos" placeholder="Total Number of Videos" style="width: 200px;">
         	        </div>
         	</div>
             </form>
@@ -128,11 +87,6 @@
 		    return $.ajax(request);
 		}
 
-		self.beginAdd = function() 
-		{
-		    $('#add').modal('show');
-		}
-
 		self.beginEdit = function( channel ) 
 		{
 		     editChannelViewModel.setChannel( channel );
@@ -154,7 +108,6 @@
 		    self.channels()[i].uri( newChannel.uri );
 		    self.channels()[i].channel_name( newChannel.channel_name );
 		    self.channels()[i].subjects( newChannel.subjects );
-		    self.channels()[i].no_of_videos( newChannel.no_of_videos );
 		}
 
 		self.edit = function( channel, data ) 
@@ -165,20 +118,6 @@
 			        self.updateChannel( channel, res.channel );
 		            } );
 		}
-		
-		self.add = function( channel )
-		{
-		    self.ajax( self.channelsURI, 'POST', channel ).done( 
-			    function( data ) 
-			    {
-				self.channels.push( {
-				    uri: ko.observable( data.channel.uri ),
-				    channel_name: ko.observable( data.channel.channel_name ),
-				    subjects: ko.observable( data.channel.subjects ),
-				    no_of_videos: ko.observable( data.channel.no_of_videos )
-				} );
-			    } );
-		}
 
 		self.ajax( self.channelsURI, 'GET' ).done(
 			function( data ) 
@@ -188,32 +127,11 @@
 					self.channels.push( {
 						uri: ko.observable( data.channels[i].uri ),
 						channel_name: ko.observable( data.channels[i].channel_name ),
-						subjects: ko.observable( data.channels[i].subjects ),
-						no_of_videos: ko.observable( data.channels[i].no_of_videos )
+						subjects: ko.observable( data.channels[i].subjects )
 				        } );
 				}
 		    	} );
 
-	}
-
-	function AddChannelViewModel() 
-	{
-		var self = this;
-		self.channel_name = ko.observable();
-		self.subjects = ko.observable();
-		self.no_of_videos = ko.observable();
-
-		self.addChannel = function() {
-		    $('#add').modal('hide');
-		    channelsViewModel.add({
-			channel_name: self.channel_name(),
-		        subjects: self.subjects().split(","),
-		        no_of_videos: self.no_of_videos()
-		    });
-		    self.channel_name("");
-		    self.subjects("");
-		    self.no_of_videos("");
-		}
 	}
 
 	function EditChannelViewModel() 
@@ -221,13 +139,11 @@
 		var self = this;
 		self.channel_name = ko.observable();
 		self.subjects = ko.observable();
-		self.no_of_videos = ko.observable();
 
 		self.setChannel = function(channel) {
 		    self.channel = channel;
 		    self.channel_name( channel.channel_name() );
 		    self.subjects( channel.subjects() );
-		    self.no_of_videos( channel.no_of_videos() );
 		    $('edit').modal('show');
 		}
 
@@ -236,17 +152,14 @@
 		    var sublist = ( typeof( self.subjects() ) == "string" ) ? self.subjects().split(",") : self.subjects() ;
 		    channelsViewModel.edit( self.channel, {
 			channel_name: self.channel_name(),
-		        subjects: sublist,
-		        no_of_videos: self.no_of_videos()
+		        subjects: sublist
 		    });
 		}
 	}
 
 	var channelsViewModel = new ChannelsViewModel();
-        var addChannelViewModel = new AddChannelViewModel();
 	var editChannelViewModel = new EditChannelViewModel();
         ko.applyBindings(channelsViewModel, $('#main')[0]);
-        ko.applyBindings(addChannelViewModel, $('#add')[0]);
 	ko.applyBindings(editChannelViewModel, $('#edit')[0]);
 
     </script>

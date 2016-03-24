@@ -1,5 +1,6 @@
 <?php
 	session_start();
+	extract( $_POST );
 ?>
 
 <!DOCTYPE html>
@@ -264,32 +265,49 @@
     <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
 	<div class="main-grids">
 		<div class="top-grids">
-	<?php
-		extract( $_REQUEST );		
-		$vidlist = urldecode( $vidlist );
-		$vidlist = json_decode( $vidlist, true );
-		foreach( $vidlist as $vid )
+    <?php
+	try 
+	{
+		$conn = new MongoClient('mongodb://admin:root@ds055564.mlab.com:55564/eduvideo');
+		$db = $conn->eduvideo;
+		$channel = $db->channel;
+		$user = $db->user;
+		$video = $db->video;
+		$chnobj = $channel->findOne( array('_id' => new MongoId( $cid ) ) );
+		echo ' <h2 style="text-align: center;">'. $chnobj['channel_name'] .'</h2> <hr><hr> ';
+		foreach( $chnobj['video_ids'] as $vid )
 		{
+			$vobj = $video->findOne( array('_id' => new MongoId( $vid ) ) );
 			echo '	
 			<div class="col-md-4 resent-grid recommended-grid slider-top-grids">
 				<div class="resent-grid-img recommended-grid-img">
-					<video src="http://localhost:3000/video/'. $vid['video_id'] .'" controls width="350px" height="200px"></video>
+					<video src="http://localhost:3000/video/'. $vobj['video_id'] .'" controls width="350px" height="200px"></video>
 					<div class="time">
-						<p style="color:black; font-size:15px;"> '. $vid['vlength'] .' </p>
+						<p style="color:black; font-size:15px;"> '. $vobj['vlength'] .' </p>
 					</div>
 					<div class="clck">
 						<span class="glyphicon glyphicon-time" aria-hidden="true"></span>
 					</div>
 				</div>
 				<div class="resent-grid-info recommended-grid-info">
-					<h3><a href="#" class="title title-info"> '. $vid['title'] .' </a></h3>
+					<h3><a href="#" class="title title-info"> '. $vobj['title'] .' </a></h3>
 					<ul>
-						<li class="right-list"><p class="views views-info"> '. $vid['view_count'] .'  views</p></li>
+						<li class="right-list"><p class="views views-info"> '. $vobj['view_count'] .'  views</p></li>
 					</ul>
 				</div>
 			</div>	';
 		}
-	?>
+		$conn->close();
+	} 
+	catch (MongoConnectionException $e) 
+	{
+		die('Error connecting to MongoDB server');
+	} 
+	catch (MongoException $e)
+	{
+	  	die('Error: ' . $e->getMessage());
+	}
+    ?>
 		</div>
 	</div>
     </div>
