@@ -62,7 +62,7 @@ vid_rates = {
 
 vid_comments = {
     'uid': fields.String,
-    'mail': fields.String
+    'msg': fields.String
 }
 
 video_fields = {
