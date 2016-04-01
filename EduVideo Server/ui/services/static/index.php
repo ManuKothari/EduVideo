@@ -248,7 +248,7 @@
 	<?php
 		if( isset($_SESSION["usertype"]) && isset($_SESSION["username"]) )
 		{
-			echo '	<li class="active"> <a href="#" class="notify"> <span class="glyphicon glyphicon-home glyphicon-tasks" aria-hidden="true"></span>Notifications</a> </li> <br>	';
+			echo '	<li class="active"> <a href="notifications.php" class="notify"> <span class="glyphicon glyphicon-home glyphicon-tasks" aria-hidden="true"></span>Notifications</a> </li> <br>	';
 
 			if( $_SESSION["usertype"] == "admin" )
 			{

@@ -1,6 +1,6 @@
 <?php
 	session_start();
-	if( !isset($_SESSION["usertype"]) || $_SESSION["usertype"] != "admin" )
+	if( !isset($_SESSION["usertype"]) || !isset($_SESSION["username"]) )
 	{
 		header("Location: index.php");
 	}
@@ -38,7 +38,7 @@
     <link rel="stylesheet" type="text/css" href="css/mynav.css">
     <script type="text/javascript" src = "js/jquery.min.js"></script>
     <script type="text/javascript" src = "js/bootstrap.min.js"></script>
-   
+
 </head>
 
  <body>
@@ -64,7 +64,6 @@
 				<input type="submit" value=" " onclick="searchvid(); return false;">
 			</form>
 		</div>
-
 		<div class="header-top-right">
 			<ul class="nav navbar-nav navbar-right">
 				<li> <div class="file" style="width:1%;font-size:5px;">
@@ -79,7 +78,7 @@
 				</li>
 			</ul>
 		</div>
-        </div>
+	</div>
 	<div class="clearfix"> </div>
 
       </div>
@@ -107,31 +106,57 @@
 		<ul class="nav nav-sidebar"> <br>
 			<li class="active"> <a href="browsech.php" class="browse">  <span class="glyphicon glyphicon-home glyphicon-plus-sign" aria-hidden="true"></span>Browse Channels</a> </li> <br>
 			<li class="active"> <a href="notifications.php" class="notify"> <span class="glyphicon glyphicon-home glyphicon-tasks" aria-hidden="true"></span>Notifications</a> </li> <br>
-			<li class="active"> <a href="adminsub.php" class="managesubjects"> <span class="glyphicon glyphicon-home glyphicon-cog" aria-hidden="true"></span>Manage Subjects</a> </li> <br>
+	<?php
+		if( $_SESSION["usertype"] == "admin" )
+		{
+			echo ' <li class="active"> <a href="adminsub.php" class="managesubjects"> <span class="glyphicon glyphicon-home glyphicon-cog" aria-hidden="true"></span>Manage Subjects</a> </li> <br>	';
+		}
+	?>
 		</ul>				
 	</div>	
     </div>
 
 
     <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
-	<div class="main-grids">
-		<div class="top-grids">
+	<div class="show-top-grids">		
+	    <div class="col-sm-10 show-grid-left main-grids"> <hr>
+		<h2 style="text-align: center;"> MY NOTIFICATIONS </h2> <hr><hr>
 	<?php
 		try 
 		{
 			$conn = new MongoClient('mongodb://admin:root@ds055564.mlab.com:55564/eduvideo');
 			$db = $conn->eduvideo;
-			$collection = $db->newsub;
-			$cursor = $collection->find();
-			foreach( $cursor as $obj )
+			$channel = $db->channel;
+			$user = $db->user;
+			$video = $db->video;
+			$usrcur = $user->findOne( array('_id' => new MongoId( $_SESSION["uid"] ) ) );
+			if( count( $usrcur['notify'] ) != 0 )
 			{
-				echo $obj['sub'] . '<br>';
-				foreach( $obj['ut'] as $topic )
+				foreach( array_reverse( $usrcur['notify'] ) as $notify )
 				{
-					echo $topic . "<br>";		
+					$cvids = explode( "$@$", $notify );
+					$chnm = $cvids[0];
+					if( count($cvids) == 2 )
+					{
+						$vidnm = $cvids[1];
+						$msg = 'A new video "' . $vidnm . '" has been added to the channel "' . $chnm . '"!';
+					}
+					else
+					{
+						$msg = 'The channel "' . $chnm . '" has been deleted!';
+					}
+					echo $msg . "<br><hr>";
 				}
-				printf('<button onclick="addnewsub(\'%s\');" class="btn btn-primary">Add</button> <br>', $obj['sub']);
-				printf('<button onclick="skipnewsub(\'%s\');" class="btn btn-primary">Skip</button> <br><hr>', $obj['sub']);
+			}
+			else if( count( $usrcur['subscribed_ids'] ) != 0 )
+			{
+				echo' <h1> None as yet! </h1> <br>
+				<h1> Subscribe to more Channels meanwhile! </h1> <br> ';
+			}
+			else
+			{
+				echo' <h1> None as yet! </h1> <br>
+				<h1> Subscribe to Channels to avail this feature! </h1> <br> ';
 			}
 			$conn->close();
 		} 
@@ -144,15 +169,19 @@
 		  	die('Error: ' . $e->getMessage());
 		}
 	?>
-		</div>
-	</div>			
+     	    </div> <br>
+	    <div class="col-md-2 show-grid-right">
+	    	<button onclick="clearmsg();" class="btn btn-md btn-primary btn-block" type="button"> CLEAR ALL MSGS</button>	
+    	    </div>
+	</div>
     </div>
 
 
     <script type="text/javascript">
-
+	
 	videosURI = 'http://localhost:5000/eduvideo/videos';
 	usersURI = 'http://localhost:5000/eduvideo/users';
+	channelsURI = 'http://localhost:5000/eduvideo/channels';
 	custom_ajax = function( uri, method, data ) 
 	{
 	    var request = 
@@ -244,6 +273,7 @@
 			});
 	}
 
+
 	function usrhist()
 	{
 		custom_ajax( usersURI + "/" + <?php echo json_encode($_SESSION["uid"])?> , 'GET' ).done(
@@ -262,36 +292,30 @@
 			} );
 	}
 
-	function addnewsub( sub )
+	function clearmsg()
 	{
+		var uid = <?php echo json_encode($_SESSION["uid"])?> ;
 		$.ajax({
-			    url: 'delsub.php',
-			    data: "sub=" + sub + "&no=" + 1,
+			    url: 'usrmail.php',
+			    data: "uid=" + uid + "&no=" + 3 ,
 			    type: 'POST',
 			    cache: false,
 			    error: function( jqXHR )
 				   {
 				   	console.log("ajax error " + jqXHR.status);
-				   }
-			});
-	}
-	
-	function skipnewsub( sub )
-	{
-		$.ajax({
-			    url: 'delsub.php',
-			    data: "sub=" + sub + "&no=" + 2,
-			    type: 'POST',
-			    cache: false,
-			    error: function( jqXHR )
-				   {
-				   	console.log("ajax error " + jqXHR.status);
-				   }
+				   },
+			    success: function( data )
+				    {
+					if( data )
+					{
+						alert("Cleared all notifications!");
+					}
+				    }
 			});
 	}
 
 
     </script>
-   
- </body>
-</html>		
+						
+</body>
+</html>

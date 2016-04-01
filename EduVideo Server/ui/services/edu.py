@@ -4,8 +4,8 @@ from flask.ext.restful import Api, Resource, reqparse, fields, marshal
 from flask.ext.cors import CORS
 from bson.objectid import ObjectId
 from pymongo import MongoClient
-import collections, fileinput
-import pymongo
+from subprocess import Popen
+import collections, fileinput, pymongo
 
 try:
     client = MongoClient('mongodb://admin:root@ds055564.mlab.com:55564/eduvideo',serverSelectionTimeoutMS=5000)
@@ -38,11 +38,13 @@ user_fields = {
     'password': fields.String,
     'usertype': fields.String,
     '_id': fields.String,
+    'email': fields.String,
     'history': fields.List( fields.String ),
     'rates': fields.Nested( usr_rates ),
     'channel_ids': fields.List( fields.String ),
     'subscribed_ids': fields.List( fields.String ),
     'watch_later_ids': fields.List( fields.String ),
+    'notify': fields.List( fields.String ),
     'uri': fields.Url('user')
 }
 
@@ -56,6 +58,11 @@ vid_rates = {
     'good': fields.Integer,
     'avg': fields.Integer,
     'poor': fields.Integer
+}
+
+vid_comments = {
+    'uid': fields.String,
+    'mail': fields.String
 }
 
 video_fields = {
@@ -74,8 +81,13 @@ video_fields = {
     'linkedto': fields.String,
     'linkedby': fields.String,
     'channel': fields.String,
-    'comments': fields.List( fields.String ),
+    'comments': fields.List( fields.Nested( vid_comments ) ),
     'uri': fields.Url('video')
+}
+
+chn_subscribe = {
+    'uid': fields.String,
+    'mail': fields.Integer
 }
 
 channel_fields = {
@@ -83,7 +95,7 @@ channel_fields = {
     'channel_name': fields.String,
     'author_id': fields.String,
     '_id': fields.String,
-    'subscriber_ids': fields.List( fields.String ),
+    'subscriber_ids': fields.List( fields.Nested( chn_subscribe ) ),
     'video_ids': fields.List( fields.String ),
     'uri': fields.Url('channel')
 }
@@ -107,6 +119,7 @@ class UserListAPI(Resource):
             'username': args['username'],
             'password': args['password'],
             'usertype': "genuser",
+            'email': "",
             'history': [],
             'rates': {
 			'good': [],
@@ -115,7 +128,8 @@ class UserListAPI(Resource):
                      },
             'channel_ids': [],
             'subscribed_ids': [],
-            'watch_later_ids': []
+            'watch_later_ids': [],
+            'notify': []
         }
         user['_id'] = str(user_col.insert_one(user).inserted_id)
         return {'user': marshal(user, user_fields)}, 201
@@ -156,7 +170,8 @@ class UserAPI(Resource):
         for cid in user['channel_ids']:
             delchn( cid )
         for cid in user['subscribed_ids']:
-            channel_col.find_one_and_update( {'_id': ObjectId( cid ) } , { '$pull': { 'subscriber_ids' : _id } } )
+            channel_col.find_one_and_update( {'_id': ObjectId( cid ) } , { '$pull': { 'subscriber_ids' : { 'uid' : _id } } } )
+        video_col.update_many( { 'comments.uid' : _id } , { '$pull' : { 'comments' : { 'uid' : _id } } } )
         user_col.find_one_and_delete({'_id': ObjectId(_id) })
         return {'result': True}
 
@@ -224,8 +239,15 @@ class ChannelAPI(Resource):
         for vid in channel['video_ids']:
             delvid( vid )
         user_col.find_one_and_update( {'_id': ObjectId( channel['author_id'] ) } , { '$pull': { 'channel_ids' : _id } } )
-        for uid in channel['subscriber_ids']:
-            user_col.find_one_and_update( {'_id': ObjectId( uid ) } , { '$pull': { 'subscribed_ids' : _id } } )
+        for chn in channel['subscriber_ids']:
+            user_col.find_one_and_update( {'_id': ObjectId( chn['uid'] ) } , { '$pull': { 'subscribed_ids' : _id } } )
+            user_col.find_one_and_update( {'_id': ObjectId( chn['uid'] ) } , { '$push': { 'notify' : channel['channel_name'] } } )
+            if( chn['mail'] == 1 ):
+                user = [user for user in user_col.find() if str(user['_id']) == chn['uid']]
+                user = user[0]
+                mail = user['email']
+                msg = '"The channel ' + channel['channel_name'] + ' has been deleted!"'
+                Process1 = Popen('./notify.sh %s %s ' %(mail, msg), shell=True)
         channel_col.find_one_and_delete({'_id': ObjectId(_id) })
         return {'result': True}
 
@@ -295,6 +317,17 @@ class VideoListAPI(Resource):
         }
         video['_id'] = str(video_col.insert_one(video).inserted_id)
         channel_col.find_one_and_update( {'_id': ObjectId( video['channel'] ) } , { '$push': { 'video_ids' : video['_id'] } } )
+        channel = [channel for channel in channel_col.find() if str(channel['_id']) == video['channel']]
+        channel = channel[0]
+        msg = channel['channel_name'] + "$@$" + video['title']
+        for chn in channel['subscriber_ids']:
+            user_col.find_one_and_update( {'_id': ObjectId( chn['uid'] ) } , { '$push': { 'notify' : msg } } )
+            if( chn['mail'] == 1 ):
+                user = [user for user in user_col.find() if str(user['_id']) == chn['uid']]
+                user = user[0]
+                mail = user['email']
+                msg = '"A new video ' + video['title'] + ' has been added to the channel ' + channel['channel_name'] + '!"'
+                Process2 = Popen('./notify.sh %s %s ' %(mail, msg), shell=True)
         extras = wrtfile( video )
         with open('vidnm.txt', 'a') as f:
         	f.write( str(video['_id']) + " $@$ " + video['title'] + " $@$ " + extras + "\n")

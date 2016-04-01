@@ -262,87 +262,142 @@
 
 
     <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
-	<div class="main-grids">
-		<div class="top-grids">
-	<?php
-		try 
-		{
-			$conn = new MongoClient('mongodb://admin:root@ds055564.mlab.com:55564/eduvideo');
-			$db = $conn->eduvideo;
-			$video = $db->video;
-			echo '<hr> <br> <div> Top 9 videos Most Viewed </div> <br> <hr>';
-			$views = $video->find()->sort( array( "view_count" => -1 ) )->limit( 9 );
-			$vwlist = array();
-			foreach( $views as $vid )
-			{
-				$vwlist[] = $vid['_id'];
-			}
-			foreach( $views as $vid )
-			{
-				echo '	
-				<div class="col-md-4 resent-grid recommended-grid slider-top-grids">
-					<div class="resent-grid-img recommended-grid-img"> ';
-
-	printf('<video src="http://localhost:3000/video/%s" controls width="350px" height="200px" onclick="singlevid(\'%s\',\'%s\');"></video>', $vid['video_id'], $vid['_id'], implode(";", $vwlist) );
-							
-				echo '	<div class="time">
-							<p style="color:black; font-size:15px;"> '. $vid['vlength'] .' </p>
-						</div>
-						<div class="clck">
-							<span class="glyphicon glyphicon-time" aria-hidden="true"></span>
-						</div>
-					</div>
-					<div class="resent-grid-info recommended-grid-info"> ';
-	printf('<h3><a href="#" onclick="singlevid(\'%s\',\'%s\'); return false;" class="title title-info"> %s </a></h3>', $vid['_id'], implode(";", $vwlist), $vid['title'] );
-					echo '	<ul>
-							<li class="right-list"><p class="views views-info"> '. $vid['view_count'] .'  views</p></li>
-						</ul>
-					</div>
-				</div>	';
-			}
-			echo '<hr><br> <div> Top 9 videos with Maximum Likes </div> <br> <hr>';
-			$likes = $video->find()->sort( array( "rates.good" => -1 ) )->limit( 9 );
-			$lklist = array();
-			foreach( $likes as $vid )
-			{
-				$lklist[] = $vid['_id'];
-			}
-			foreach( $likes as $vid )
-			{
-				echo '	
-				<div class="col-md-4 resent-grid recommended-grid slider-top-grids">
-					<div class="resent-grid-img recommended-grid-img"> ';
-
-	printf('<video src="http://localhost:3000/video/%s" controls width="350px" height="200px" onclick="singlevid(\'%s\',\'%s\');"></video>', $vid['video_id'], $vid['_id'], implode(";", $lklist) );
-							
-				echo '	<div class="time">
-							<p style="color:black; font-size:15px;"> '. $vid['vlength'] .' </p>
-						</div>
-						<div class="clck">
-							<span class="glyphicon glyphicon-time" aria-hidden="true"></span>
-						</div>
-					</div>
-					<div class="resent-grid-info recommended-grid-info"> ';
-	printf('<h3><a href="#" onclick="singlevid(\'%s\',\'%s\'); return false;" class="title title-info"> %s </a></h3>', $vid['_id'], implode(";", $lklist), $vid['title'] );
-					echo '	<ul>
-							<li class="right-list"><p class="views views-info"> '. $vid['view_count'] .'  views</p></li>
-						</ul>
-					</div>
-				</div>	';
-			}
-			echo '<hr>';
-			$conn->close();
-		} 
-		catch (MongoConnectionException $e) 
-		{
-			die('Error connecting to MongoDB server');
-		} 
-		catch (MongoException $e)
-		{
-		  	die('Error: ' . $e->getMessage());
-		}
-	?>
+	<div class="show-top-grids"> <hr>
+    <?php
+		extract( $_POST );
+		$vid = explode( ';' , $vidlist )[0];
+		$vlist = explode( ';' , $vidlist )[1];
+		$vlist = explode( ',' , $vlist );
+	try 
+	{
+		$conn = new MongoClient('mongodb://admin:root@ds055564.mlab.com:55564/eduvideo');
+		$db = $conn->eduvideo;
+		$channel = $db->channel;
+		$user = $db->user;
+		$video = $db->video;
+		$usrvid = $video->findOne( array('_id' => new MongoId( $vid ) ) );
+		
+      echo' <div class="col-sm-8 single-left">
+		<div class="song">
+		    <div class="song-info">
+			<h3>'. $usrvid['title'] .'</h3>	
+		    </div>
+		    <div class="video-grid">
+    			<video src="http://localhost:3000/video/'. $usrvid['video_id'] .'" controls width="550px" height="450px" autoplay onended="nextvid();"></video>
+          	    </div>
 		</div>
+		<div class="song-grid-right">
+		    <div class="share">
+			<ul><br><br><br>
+				<li><a href="#" class="icon like">Good</a></li><br>
+				<li><a href="#" class="icon dribbble-icon">Avg</a></li><br>
+				<li><a href="#" class="icon pinterest-icon">Poor</a></li><br>
+				<li class="view">'. $usrvid['view_count'] .' Views</li><br> ';
+		if( isset($_SESSION["usertype"]) && isset($_SESSION["username"]) )
+		{
+			echo '	<li><a href="#" class="icon comment-icon">Watch Later</a></li> ';
+		}
+		echo '	</ul>
+		    </div>
+		</div>
+		<div class="clearfix"> </div>
+		
+		<div class="all-comments"> ';
+			$authusr = $user->findOne( array('_id' => new MongoId( $usrvid['author'] ) ) );
+		echo '	<h5 style="float:left; display:inline; width:25%; color:blue;">'. $authusr['username']  .'</h5>';
+			$authchn = $channel->findOne( array('_id' => new MongoId( $usrvid['channel'] ) ) );
+		echo '	<h5 style="float:left; display:inline; width:30%; color:blue;">'. $authchn['channel_name']  .'</h5>
+			<h5 style="float:left; display:inline; width:15%; color:green;">'. $usrvid['rates']['good']  .' goods </h5>
+			<h5 style="float:left; display:inline; width:15%; color:purple;">'. $usrvid['rates']['avg']  .' avgs </h5>
+			<h5 style="float:left; display:inline; width:15%; color:red;">'. $usrvid['rates']['poor']  .' poors </h5>
+			<div class="clearfix"> </div> <hr> ';
+
+	foreach( $usrvid['category'] as $cat )
+	{
+		echo' <h5 style="float:left; display:inline; width:40%; color:#006400;"> '. $cat['subject'] .' - '. $cat['unitTopic'] .' - '. $cat['subtopic'].' , </h5> ';
+	}
+		echo' <div class="clearfix"> </div> <hr> ';
+
+	if( count( $usrvid['tags'] ) > 0 )
+	{
+		echo' <h5 style="color:#191970;"> Tags:  '. implode(" , ", $usrvid['tags']) .' </h5> <hr> ';
+	}
+	if( strcmp( $usrvid['description'], "" ) != 0 )
+	{
+		echo' <h5 style="color:#800000;"> Description:  '. $usrvid['description'] .' </h5> <hr>';
+	}
+
+	    echo '  <div class="all-comments-info"> ';
+	    if( isset($_SESSION["usertype"]) && isset($_SESSION["username"]) )
+	    {	
+		echo '	<div class="box">  
+			    <form id="cmtform">
+				<textarea placeholder="Comment" required=" "></textarea>
+				<input type="submit" value="Add your comment">
+				<div class="clearfix"> </div>
+			    </form>
+			</div> <br><hr> ';
+	    }
+		echo '	<h5 style="text-align:center; color:brown;"> All Comments ( '. count( $usrvid['comments'] ) .' ) </h5>
+		    </div><hr> ';
+
+	if( count( $usrvid['comments'] ) > 0 )
+	{
+	    foreach( array_reverse( $usrvid['comments'] ) as $cmt )
+	    {
+		$cmtusr = $user->findOne( array('_id' => new MongoId( $cmt['uid'] ) ) );
+	      echo' <div class="media-grids">
+			<div class="media">
+			    <h5 style="float:left; display:inline; width:20%;">'. $cmtusr['username'] .': </h5>
+			    <div class="media-body" style="float:left; display:inline; width:50%;">
+				<p>'. $cmt['msg'] .'</p>
+			    </div>
+			</div> <hr>
+		    </div> ';
+	    }
+	}		    
+	echo '	</div>
+	    </div>
+		
+	    <div class="col-md-4 single-right">
+		<h3>Up Next</h3>
+		<div class="single-grid-right">
+		    <div class="single-right-grids">
+			<div class="col-md-4 single-right-grid-left">
+			    <a href="single.html"><img src="images/r1.jpg" alt="" /></a>
+			</div>
+			<div class="col-md-8 single-right-grid-right">
+			    <a href="single.html" class="title"> Nullam interdum metus</a>
+			    <p class="author"><a href="#" class="author">John Maniya</a></p>
+			    <p class="views">2,114,200 views</p>
+			</div>
+			<div class="clearfix"> </div>
+		    </div>
+		    <div class="single-right-grids">
+			<div class="col-md-4 single-right-grid-left">
+			    <a href="single.html"><img src="images/r2.jpg" alt="" /></a>
+			</div>
+			<div class="col-md-8 single-right-grid-right">
+			    <a href="single.html" class="title"> Nullam interdum metus</a>
+			    <p class="author"><a href="#" class="author">John Maniya</a></p>
+			    <p class="views">2,114,200 views </p>
+			</div>
+			<div class="clearfix"> </div>
+		    </div>
+		</div>
+	    </div> ';
+		$conn->close();
+	} 
+	catch (MongoConnectionException $e) 
+	{
+		die('Error connecting to MongoDB server');
+	} 
+	catch (MongoException $e)
+	{
+	  	die('Error: ' . $e->getMessage());
+	}
+    ?>
+	    <div class="clearfix"> </div>
 	</div>
     </div>
 
@@ -369,6 +424,7 @@
 		};
 	    return $.ajax( request );
 	}
+	var cancel_autoplay = 0;
 
 
 	function createvidlist( vids )
@@ -502,16 +558,33 @@
 			} );
 	}
 
-	function singlevid( vid, vidlist )
+	function nextvid()
 	{
-		vidlist = vidlist.split( ";" );
-		vidlist.splice( vidlist.indexOf( vid ) , 1 );
-		vidlist = vidlist.join();
-		vidlist = vid + ";" + vidlist;
-		var vform = $('<form action="singlevid.php" method="post" style="display:none;">' + 
-		'<input type="text" name="vidlist" value="' + vidlist + '" /' + '>' + '</form>');
-		$('body').append( vform );
-		vform.submit();
+		var orivid = <?php echo json_encode( $vid ) ?>;
+		var vidlist = <?php echo json_encode( $vlist ) ?>;
+		if( cancel_autoplay == 0 )
+		{
+		    custom_ajax( videosURI + "/" + orivid , 'GET' ).done(
+			function( data ) 
+			{
+				if( data.video.linkedto != "" )
+				{
+					var vid = data.video.linkedto;					
+					vidlist.splice( vidlist.indexOf( vid ) , 1 );
+					vidlist = vidlist.join();
+					vidlist = vid + ";" + vidlist;
+					var nform = $('<form action="singlevid.php" method="post" style="display:none;">' + 
+					'<input type="text" name="vidlist" value="' + vidlist + '" /' + '>' + '</form>');
+					$('body').append( nform );
+					nform.submit();
+				}
+			});
+		}
+	}
+
+	function cancelnext()
+	{
+		cancel_autoplay = 1;
 	}
 
 

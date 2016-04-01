@@ -105,7 +105,7 @@
 
 		<ul class="nav nav-sidebar"> <br>
 			<li class="active"> <a href="browsech.php" class="browse">  <span class="glyphicon glyphicon-home glyphicon-plus-sign" aria-hidden="true"></span>Browse Channels</a> </li> <br>
-			<li class="active"> <a href="#" class="notify"> <span class="glyphicon glyphicon-home glyphicon-tasks" aria-hidden="true"></span>Notifications</a> </li> <br>
+			<li class="active"> <a href="notifications.php" class="notify"> <span class="glyphicon glyphicon-home glyphicon-tasks" aria-hidden="true"></span>Notifications</a> </li> <br>
 	<?php
 		if( $_SESSION["usertype"] == "admin" )
 		{
@@ -161,24 +161,26 @@
 				echo'	</div>
 					<div class="clearfix"> </div>
 				</div> <br>';
-
+				$chnvid9 = array_slice( $chnobj['video_ids'], 0, 9 );
 				foreach( array_slice( $chnobj['video_ids'], 0, 3 ) as $vid )
 				{
 					$vobj = $video->findOne( array('_id' => new MongoId( $vid ) ) );
 					echo'
 				<div class="col-md-2 resent-grid recommended-grid sports-recommended-grid">
-					<div class="resent-grid-img recommended-grid-img">
-						<video src="http://localhost:3000/video/'. $vobj['video_id'] .'" controls width="250px" height="100px"></video>
-						<div class="time small-time sports-tome">
+					<div class="resent-grid-img recommended-grid-img"> ';
+
+	printf('<video src="http://localhost:3000/video/%s" controls width="250px" height="100px" onclick="singlevid(\'%s\',\'%s\');"></video>', $vobj['video_id'], $vobj['_id'], implode(";", $chnvid9) );
+						
+					echo '	<div class="time small-time sports-tome">
 							<p style="color:black; font-size:15px;">'. $vobj['vlength'] .'</p>
 						</div>
 						<div class="clck sports-clock">
 							<span class="glyphicon glyphicon-time" aria-hidden="true"></span>
 						</div>
 					</div>
-					<div class="resent-grid-info recommended-grid-info">
-						<h5><a href="#" class="title">'. $vobj['title'] .'</a></h5>
-						<p class="views">'. $vobj['view_count'] .'views</p>
+					<div class="resent-grid-info recommended-grid-info"> ';
+	printf('<h5><a href="#" onclick="singlevid(\'%s\',\'%s\'); return false;" class="title"> %s </a></h5>', $vobj['_id'], implode(";", $chnvid9), $vobj['title'] );
+					echo '	<p class="views">'. $vobj['view_count'] .'views</p>
 					</div>
 				</div>';
 				}
@@ -498,6 +500,18 @@
 	{
 		var vform = $('<form action="channel.php" method="post" style="display:none;">' + 
 		'<input type="text" name="cid" value="' + cid + '" /' + '>' + '</form>');
+		$('body').append( vform );
+		vform.submit();
+	}
+
+	function singlevid( vid, vidlist )
+	{
+		vidlist = vidlist.split( ";" );
+		vidlist.splice( vidlist.indexOf( vid ) , 1 );
+		vidlist = vidlist.join();
+		vidlist = vid + ";" + vidlist;
+		var vform = $('<form action="singlevid.php" method="post" style="display:none;">' + 
+		'<input type="text" name="vidlist" value="' + vidlist + '" /' + '>' + '</form>');
 		$('body').append( vform );
 		vform.submit();
 	}

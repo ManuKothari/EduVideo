@@ -248,7 +248,7 @@
 	<?php
 		if( isset($_SESSION["usertype"]) && isset($_SESSION["username"]) )
 		{
-			echo '	<li class="active"> <a href="#" class="notify"> <span class="glyphicon glyphicon-home glyphicon-tasks" aria-hidden="true"></span>Notifications</a> </li> <br>	';
+			echo '	<li class="active"> <a href="notifications.php" class="notify"> <span class="glyphicon glyphicon-home glyphicon-tasks" aria-hidden="true"></span>Notifications</a> </li> <br>	';
 
 			if( $_SESSION["usertype"] == "admin" )
 			{
@@ -296,30 +296,44 @@
 					</div>
 					<div class="heading-right">
 						<h4>' . count( $chnobj['video_ids'] ) . ' Videos</h4>	
-					</div>
-					<div class="heading-right">
-						<a  href="#small-dialog8" class="play-icon popup-with-zoom-anim">Subscribe</a>
-					</div>
-					<div class="clearfix"> </div>
-				</div> <br>';
+					</div> ';
 
+				if( isset($_SESSION["usertype"]) && isset($_SESSION["uid"]) )
+				{
+				  echo' <div class="heading-right"> ';
+					$usr = $user->findOne( array('_id' => new MongoId( $_SESSION["uid"] ) ) );
+					if( in_array( $chnobj['_id'], $usr['subscribed_ids'] ) )
+					{
+	printf('<button onclick="unsubscribe(\'%s\');" class="btn btn-md btn-primary btn-block" type="button"> UNSUBSCRIBE </button>' ,  $chnobj['_id'] );
+					}
+					else
+					{
+  	printf('<button onclick="subscribeusr(\'%s\',\'%s\');" class="btn btn-md btn-primary btn-block" type="button"> SUBSCRIBE </button>' , $chnobj['_id'], $usr['email'] );
+					}
+				  echo'	</div> ';
+				}
+				echo '	<div class="clearfix"> </div>
+				</div> <br>';
+				$chnvid9 = array_slice( $chnobj['video_ids'], 0, 9 );
 				foreach( array_slice( $chnobj['video_ids'], 0, 5 ) as $vid )
 				{
 					$vobj = $video->findOne( array('_id' => new MongoId( $vid ) ) );
 					echo'
 				<div class="col-md-2 resent-grid recommended-grid sports-recommended-grid">
-					<div class="resent-grid-img recommended-grid-img">
-						<video src="http://localhost:3000/video/'. $vobj['video_id'] .'" controls width="250px" height="100px"></video>
-						<div class="time small-time sports-tome">
+					<div class="resent-grid-img recommended-grid-img"> ';
+
+	printf('<video src="http://localhost:3000/video/%s" controls width="250px" height="100px" onclick="singlevid(\'%s\',\'%s\');"></video>', $vobj['video_id'], $vobj['_id'], implode(";", $chnvid9) );
+	
+					echo '	<div class="time small-time sports-tome">
 							<p style="color:black; font-size:15px;">'. $vobj['vlength'] .'</p>
 						</div>
 						<div class="clck sports-clock">
 							<span class="glyphicon glyphicon-time" aria-hidden="true"></span>
 						</div>
 					</div>
-					<div class="resent-grid-info recommended-grid-info">
-						<h5><a href="#" class="title">'. $vobj['title'] .'</a></h5>
-						<p class="views">'. $vobj['view_count'] .'views</p>
+					<div class="resent-grid-info recommended-grid-info"> ';
+	printf('<h5><a href="#" onclick="singlevid(\'%s\',\'%s\'); return false;" class="title"> %s </a></h5>', $vobj['_id'], implode(";", $chnvid9), $vobj['title'] );
+					echo '	<p class="views">'. $vobj['view_count'] .'views</p>
 					</div>
 				</div>';
 				}
@@ -346,6 +360,38 @@
 		  	die('Error: ' . $e->getMessage());
 		}
 	?>
+	</div>
+    </div>
+
+
+    <div id="subscribemail" class="modal fade" tabindex="=1" role="dialog" aria-labelledby="mailDialogLabel" aria-hidden="true">
+	<div class="modal-dialog">
+	    <div class="modal-content">
+		<div class="modal-header">
+       		    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+		    <h3 class="modal-title" id="mailDialogLabel">Do you want Mails also to be sent to you?</h3>
+       		</div>
+       		<div class="modal-body">
+		    <button class="btn btn-block btn-info" onclick="showmail();">YES</button> <hr>
+		    <button id="nomail" class="btn btn-block btn-info" onclick="subscribe(0);">NO</button> <br><hr>
+		    <form id="mailform" class="form-horizontal">
+			<div class="container-fluid">
+	       	           <div class="form-group">
+	       		       <label class="control-label" for="mailid" style="float:left">Email Id:&nbsp;&nbsp;</label>
+	  		       <input type="text" class="form-control email" id="mailid" placeholder="Email" style="width: 400px;"  required="required" pattern="([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?" title="Enter a valid email" />
+			   </div> <hr>
+			   <div class="form-group">
+				<button class="btn btn-md btn-primary btn-block" onclick="subscribe(1);" type="button"> SUBSCRIBE</button>
+			   </div>
+			</div>
+		    </form>
+		    <div id="mailmsg" style="color:green;"></div>
+		    <br><hr>
+		</div>
+		<div class="modal-footer">
+		    <button class="btn" data-dismiss="modal" id="mcancel" aria-hidden="true">Cancel</button>
+		</div>
+	    </div>
 	</div>
     </div>
 
@@ -510,6 +556,89 @@
 	{
 		var vform = $('<form action="channel.php" method="post" style="display:none;">' + 
 		'<input type="text" name="cid" value="' + cid + '" /' + '>' + '</form>');
+		$('body').append( vform );
+		vform.submit();
+	}
+
+	function subscribeusr( cid, email )
+	{
+		$("#nomail").show();
+		$("#mailform").hide();
+		$("#mailmsg").hide();
+		$("#mailmsg").html( cid );		
+		if( email != "" )
+		{
+			$("#mailid").val( email );
+		}
+		$('#subscribemail').modal('show');
+	}
+
+	function showmail()
+	{
+		$("#nomail").hide();
+		$("#mailform").show();
+	}
+
+	function subscribe( mailno )
+	{
+		var cid = $("#mailmsg").html();
+		var uid = <?php echo json_encode($_SESSION["uid"])?> ;
+		var mail = "";
+		if( mailno == 1 )
+		{
+			mail = $("#mailid").val();
+		}
+		$.ajax({
+			    url: 'usrmail.php',
+			    data: "cid=" + cid + "&uid=" + uid + "&mailno=" + mailno + "&email=" + mail + "&no=" + 1 ,
+			    type: 'POST',
+			    cache: false,
+			    error: function( jqXHR )
+				   {
+				   	console.log("ajax error " + jqXHR.status);
+				   },
+			    success: function( data )
+				    {
+					if( data )
+					{
+						$("#mailmsg").html( "Successfully subscribed to the channel");
+						$("#mailmsg").show();
+						$("#mcancel").html('Close');
+					}
+				    }
+			});		
+	}
+
+	function unsubscribe( cid )
+	{
+		var uid = <?php echo json_encode($_SESSION["uid"])?> ;
+		$.ajax({
+			    url: 'usrmail.php',
+			    data: "cid=" + cid + "&uid=" + uid + "&no=" + 2 ,
+			    type: 'POST',
+			    cache: false,
+			    error: function( jqXHR )
+				   {
+				   	console.log("ajax error " + jqXHR.status);
+				   },
+			    success: function( data )
+				    {
+					if( data )
+					{
+						alert("Unsubscribed!");
+					}
+				    }
+			});		
+	}
+
+	function singlevid( vid, vidlist )
+	{
+		vidlist = vidlist.split( ";" );
+		vidlist.splice( vidlist.indexOf( vid ) , 1 );
+		vidlist = vidlist.join();
+		vidlist = vid + ";" + vidlist;
+		var vform = $('<form action="singlevid.php" method="post" style="display:none;">' + 
+		'<input type="text" name="vidlist" value="' + vidlist + '" /' + '>' + '</form>');
 		$('body').append( vform );
 		vform.submit();
 	}

@@ -248,7 +248,7 @@
 	<?php
 		if( isset($_SESSION["usertype"]) && isset($_SESSION["username"]) )
 		{
-			echo '	<li class="active"> <a href="#" class="notify"> <span class="glyphicon glyphicon-home glyphicon-tasks" aria-hidden="true"></span>Notifications</a> </li> <br>	';
+			echo '	<li class="active"> <a href="notifications.php" class="notify"> <span class="glyphicon glyphicon-home glyphicon-tasks" aria-hidden="true"></span>Notifications</a> </li> <br>	';
 
 			if( $_SESSION["usertype"] == "admin" )
 			{
@@ -268,22 +268,29 @@
 		extract( $_REQUEST );		
 		$vidlist = urldecode( $vidlist );
 		$vidlist = json_decode( $vidlist, true );
+		$vlist = array();
+		foreach( $vidlist as $vid )
+		{
+			$vlist[] = $vid['_id'];
+		}
 		foreach( $vidlist as $vid )
 		{
 			echo '	
 			<div class="col-md-4 resent-grid recommended-grid slider-top-grids">
-				<div class="resent-grid-img recommended-grid-img">
-					<video src="http://localhost:3000/video/'. $vid['video_id'] .'" controls width="350px" height="200px"></video>
-					<div class="time">
+				<div class="resent-grid-img recommended-grid-img"> ';
+
+	printf('<video src="http://localhost:3000/video/%s" controls width="350px" height="200px" onclick="singlevid(\'%s\',\'%s\');"></video>', $vid['video_id'], $vid['_id'], implode(";", $vlist) );
+							
+				echo '	<div class="time">
 						<p style="color:black; font-size:15px;"> '. $vid['vlength'] .' </p>
 					</div>
 					<div class="clck">
 						<span class="glyphicon glyphicon-time" aria-hidden="true"></span>
 					</div>
 				</div>
-				<div class="resent-grid-info recommended-grid-info">
-					<h3><a href="#" class="title title-info"> '. $vid['title'] .' </a></h3>
-					<ul>
+				<div class="resent-grid-info recommended-grid-info"> ';
+	printf('<h3><a href="#" onclick="singlevid(\'%s\',\'%s\'); return false;" class="title title-info"> %s </a></h3>', $vid['_id'], implode(";", $vlist), $vid['title'] );
+					echo '	<ul>
 						<li class="right-list"><p class="views views-info"> '. $vid['view_count'] .'  views</p></li>
 					</ul>
 				</div>
@@ -448,6 +455,18 @@
 			{
 				createvidlist( data.user.watch_later_ids );
 			} );
+	}
+
+	function singlevid( vid, vidlist )
+	{
+		vidlist = vidlist.split( ";" );
+		vidlist.splice( vidlist.indexOf( vid ) , 1 );
+		vidlist = vidlist.join();
+		vidlist = vid + ";" + vidlist;
+		var vform = $('<form action="singlevid.php" method="post" style="display:none;">' + 
+		'<input type="text" name="vidlist" value="' + vidlist + '" /' + '>' + '</form>');
+		$('body').append( vform );
+		vform.submit();
 	}
 
 

@@ -267,7 +267,7 @@
 							<div class="form-group">
 								<div class="row">
 									<div class="col-sm-2 col-sm-offset-5">
-<?php	printf('<input type="button" value="SUBMIT" class="btn btn-primary btn-block" onclick="post_vid(\'%s\',\'%s\');" />', $cid, $_SESSION['uid']);	?>
+	<?php	printf('<input type="button" value="SUBMIT" class="btn btn-primary btn-block" onclick="post_vid(\'%s\');" />', $cid );	?>
 									</div>
 								</div>
 							</div>
@@ -410,8 +410,9 @@
 		});
         }
 
-	function post_vid( cid , uid )
+	function post_vid( cid )
 	{
+		var uid = <?php echo json_encode($_SESSION["uid"])?> ;
 		var taglist = [];
 		var tagsize = $("#num_t_c").val();
 		if( tagsize != "" || tagsize != 0 || tagsize != null )
