@@ -444,14 +444,14 @@
 		custom_ajax( usersURI + "/" + <?php echo json_encode($_SESSION["uid"])?> , 'GET' ).done(
 			function( data ) 
 			{
-				createvidlist( data.user.history );
+				createvidlist( data.user.history.reverse() );
 			} );
 	}
 
 	function usrwatchlater()
 	{
 		custom_ajax( usersURI + "/" + <?php echo json_encode($_SESSION["uid"])?> , 'GET' ).done(
-			function( data ) 
+			function( data )
 			{
 				createvidlist( data.user.watch_later_ids );
 			} );

@@ -1,5 +1,6 @@
 <?php
 	session_start();
+	$uid = "";
 ?>
 
 <!DOCTYPE html>
@@ -194,6 +195,7 @@
 		}
 		else if( isset($_SESSION["usertype"]) && isset($_SESSION["username"]) )
 		{
+			$GLOBALS['uid'] = $_SESSION["uid"];
 			echo '
 			<ul class="nav navbar-nav navbar-right">
 				<li> <div class="file" style="width:1%;font-size:5px;">
@@ -268,13 +270,32 @@
 		$vid = explode( ';' , $vidlist )[0];
 		$vlist = explode( ';' , $vidlist )[1];
 		$vlist = explode( ',' , $vlist );
-	try 
-	{
+      try 
+      {
 		$conn = new MongoClient('mongodb://admin:root@ds055564.mlab.com:55564/eduvideo');
 		$db = $conn->eduvideo;
 		$channel = $db->channel;
 		$user = $db->user;
 		$video = $db->video;
+		if( isset($_SESSION["usertype"]) && isset($_SESSION["username"]) )
+		{
+		    $usr = $user->findOne( array('_id' => new MongoId( $_SESSION["uid"] ) ) );
+		    if( in_array( $vid, $usr['history'] ) )
+		    {
+			$user->update( array('_id' => new MongoId( $_SESSION["uid"] ) ), array('$pull' => array('history' => $vid ) ) );
+			$user->update( array('_id' => new MongoId( $_SESSION["uid"] ) ), array('$push' => array('history' => $vid ) ) );
+		    }
+		    else if( count( $usr['history'] ) == 10 )
+		    {
+			$user->update( array('_id' => new MongoId( $_SESSION["uid"] ) ), array('$pop' => array('history' => -1 ) ) );
+			$user->update( array('_id' => new MongoId( $_SESSION["uid"] ) ), array('$push' => array('history' => $vid ) ) );
+		    }
+		    else
+		    {
+			$user->update( array('_id' => new MongoId( $_SESSION["uid"] ) ), array('$push' => array('history' => $vid ) ) );
+		    }
+		}
+		$video->update( array('_id' => new MongoId( $vid ) ), array('$inc' => array('view_count' => new MongoInt32( 1 ) ) ) );
 		$usrvid = $video->findOne( array('_id' => new MongoId( $vid ) ) );
 		
       echo' <div class="col-sm-8 single-left">
@@ -288,14 +309,56 @@
 		</div>
 		<div class="song-grid-right">
 		    <div class="share">
-			<ul><br><br><br>
-				<li><a href="#" class="icon like">Good</a></li><br>
-				<li><a href="#" class="icon dribbble-icon">Avg</a></li><br>
-				<li><a href="#" class="icon pinterest-icon">Poor</a></li><br>
-				<li class="view">'. $usrvid['view_count'] .' Views</li><br> ';
+			<ul><br><br><br> ';
 		if( isset($_SESSION["usertype"]) && isset($_SESSION["username"]) )
 		{
-			echo '	<li><a href="#" class="icon comment-icon">Watch Later</a></li> ';
+			$usrt = $user->findOne( array('_id' => new MongoId( $_SESSION["uid"] ) ) );
+			if( in_array( $vid, $usrt['rates']['good'] ) )
+			{
+			    echo' <li><a href="#" onclick="videtail(6); return false;" class="icon like">Un-Good</a></li><br> ';
+			}
+			else
+			{
+			    echo' <li><a href="#" onclick="videtail(1); return false;" class="icon like">Good</a></li><br> ';
+			}
+
+			if( in_array( $vid, $usrt['rates']['avg'] ) )
+			{
+			    echo' <li><a href="#" onclick="videtail(7); return false;" class="icon dribbble-icon">Un-Avg</a></li><br> ';
+			}
+			else
+			{
+			    echo' <li><a href="#" onclick="videtail(2); return false;" class="icon dribbble-icon">Avg</a></li><br> ';
+			}
+
+			if( in_array( $vid, $usrt['rates']['poor'] ) )
+			{
+			    echo' <li><a href="#" onclick="videtail(8); return false;" class="icon pinterest-icon">Un-Poor</a></li><br> ';
+			}
+			else
+			{
+			    echo' <li><a href="#" onclick="videtail(3); return false;" class="icon pinterest-icon">Poor</a></li><br> ';
+			}
+		}
+		else
+		{
+			echo '	<li><a href="#" onclick="videtail(1); return false;" class="icon like">Good</a></li><br>
+				<li><a href="#" onclick="videtail(2); return false;" class="icon dribbble-icon">Avg</a></li><br>
+				<li><a href="#" onclick="videtail(3); return false;" class="icon pinterest-icon">Poor</a></li><br> ';
+		}
+			echo '	<li class="view">'. $usrvid['view_count'] .' Views</li><br> ';
+
+		if( isset($_SESSION["usertype"]) && isset($_SESSION["username"]) )
+		{
+			$usrwl = $user->findOne( array('_id' => new MongoId( $_SESSION["uid"] ) ) );
+			if( in_array( $vid, $usrwl['watch_later_ids'] ) )
+			{
+			    echo' <li><a href="#" onclick="videtail(5); return false;" class="icon comment-icon">Un-Watch</a></li> ';
+			}
+			else
+			{
+			    echo' <li><a href="#" onclick="videtail(4); return false;" class="icon comment-icon">Watch Later</a></li> ';
+			}
 		}
 		echo '	</ul>
 		    </div>
@@ -307,9 +370,9 @@
 		echo '	<h5 style="float:left; display:inline; width:25%; color:blue;">'. $authusr['username']  .'</h5>';
 			$authchn = $channel->findOne( array('_id' => new MongoId( $usrvid['channel'] ) ) );
 		echo '	<h5 style="float:left; display:inline; width:30%; color:blue;">'. $authchn['channel_name']  .'</h5>
-			<h5 style="float:left; display:inline; width:15%; color:green;">'. $usrvid['rates']['good']  .' goods </h5>
-			<h5 style="float:left; display:inline; width:15%; color:purple;">'. $usrvid['rates']['avg']  .' avgs </h5>
-			<h5 style="float:left; display:inline; width:15%; color:red;">'. $usrvid['rates']['poor']  .' poors </h5>
+			<h5 style="float:left; display:inline; width:15%; color:green;">'. $usrvid['rates']['good']  .' good </h5>
+			<h5 style="float:left; display:inline; width:15%; color:purple;">'. $usrvid['rates']['avg']  .' avg </h5>
+			<h5 style="float:left; display:inline; width:15%; color:red;">'. $usrvid['rates']['poor']  .' poor </h5>
 			<div class="clearfix"> </div> <hr> ';
 
 	foreach( $usrvid['category'] as $cat )
@@ -330,21 +393,41 @@
 	    echo '  <div class="all-comments-info"> ';
 	    if( isset($_SESSION["usertype"]) && isset($_SESSION["username"]) )
 	    {	
+		$comment = "";
+		foreach( $usrvid['comments'] as $cmt )
+	    	{
+			if( strcmp( $cmt['uid'] , $_SESSION["uid"] ) == 0 )
+	    		{
+				$comment = $cmt['msg'];
+			}
+		}
 		echo '	<div class="box">  
 			    <form id="cmtform">
-				<textarea placeholder="Comment" required=" "></textarea>
-				<input type="submit" value="Add your comment">
-				<div class="clearfix"> </div>
+				<textarea placeholder="Comment" id="usrcmt" required=" ">'.$comment.'</textarea> ';
+			if( strcmp( $comment , "" ) == 0 )
+			{
+			  echo' <input type="submit" value="Add your comment" onclick="cmtadd(9); return false;"> ';
+			}
+			else
+			{
+    echo' <input type="submit" value="Edit your comment" onclick="cmtadd(10); return false;" style="float:left; display:inline; width:30%;" > 
+	  <input type="submit" value="Delete" onclick="cmtadd(11); return false;" style="float:right; display:inline; width:30%;" > ';
+			}
+			echo '	<div class="clearfix"> </div>
 			    </form>
 			</div> <br><hr> ';
 	    }
-		echo '	<h5 style="text-align:center; color:brown;"> All Comments ( '. count( $usrvid['comments'] ) .' ) </h5>
+		echo '	<h5 style="text-align:center; color:brown;"> '. count( $usrvid['comments'] ) .' Comments </h5>
 		    </div><hr> ';
 
 	if( count( $usrvid['comments'] ) > 0 )
 	{
 	    foreach( array_reverse( $usrvid['comments'] ) as $cmt )
 	    {
+		if( isset($_SESSION["usertype"]) && ( strcmp( $cmt['uid'] , $_SESSION["uid"] ) == 0 ) )
+	    	{
+			continue;
+		}
 		$cmtusr = $user->findOne( array('_id' => new MongoId( $cmt['uid'] ) ) );
 	      echo' <div class="media-grids">
 			<div class="media">
@@ -360,42 +443,55 @@
 	    </div>
 		
 	    <div class="col-md-4 single-right">
-		<h3>Up Next</h3>
-		<div class="single-grid-right">
+		<div class="single-grid-right"> ';
+
+	if( strcmp( $usrvid['linkedto'] , "" ) != 0 )
+	{
+	    echo '  <h3 style="text-align: center;"> <a href="#" id="ca" onclick="cancelnext(); return false;"> Cancel Autoplay? </a> </h3>
+		    <hr>
 		    <div class="single-right-grids">
-			<div class="col-md-4 single-right-grid-left">
-			    <a href="single.html"><img src="images/r1.jpg" alt="" /></a>
-			</div>
-			<div class="col-md-8 single-right-grid-right">
-			    <a href="single.html" class="title"> Nullam interdum metus</a>
-			    <p class="author"><a href="#" class="author">John Maniya</a></p>
-			    <p class="views">2,114,200 views</p>
+			<div class="col-md-4 single-right-grid-left"> ';
+			    $linkedvid = $video->findOne( array('_id' => new MongoId( $usrvid['linkedto'] ) ) );
+			    printf('<video src="http://localhost:3000/video/%s" controls width="110px" height="110px" onclick="singlevid(\'%s\');"></video>', $linkedvid['video_id'], $usrvid['linkedto'] );
+		echo'	</div>
+			<div class="col-md-8 single-right-grid-right"> ';
+			    printf('<a href="#" onclick="singlevid(\'%s\'); return false;" class="title"> %s </a>', $usrvid['linkedto'], $linkedvid['title'] );
+			    $authvid = $user->findOne( array('_id' => new MongoId( $linkedvid['author'] ) ) );
+		echo '	    <p class="author" style="color:blue;"> '. $authvid['username'] .' </p>
+			    <p class="views" style="color:#228B22;"> '. $linkedvid['view_count'] .' views </p>
 			</div>
 			<div class="clearfix"> </div>
-		    </div>
-		    <div class="single-right-grids">
-			<div class="col-md-4 single-right-grid-left">
-			    <a href="single.html"><img src="images/r2.jpg" alt="" /></a>
-			</div>
-			<div class="col-md-8 single-right-grid-right">
-			    <a href="single.html" class="title"> Nullam interdum metus</a>
-			    <p class="author"><a href="#" class="author">John Maniya</a></p>
-			    <p class="views">2,114,200 views </p>
-			</div>
-			<div class="clearfix"> </div>
-		    </div>
-		</div>
-	    </div> ';
-		$conn->close();
-	} 
-	catch (MongoConnectionException $e) 
-	{
-		die('Error connecting to MongoDB server');
-	} 
-	catch (MongoException $e)
-	{
-	  	die('Error: ' . $e->getMessage());
+		    </div> <hr> <hr> ';
 	}
+	foreach( $vlist as $othvid )
+	{
+	    $vobj = $video->findOne( array('_id' => new MongoId( $othvid ) ) );
+	    echo '  <div class="single-right-grids">
+			<div class="col-md-4 single-right-grid-left"> ';
+			    printf('<video src="http://localhost:3000/video/%s" controls width="110px" height="110px" onclick="singlevid(\'%s\');"></video>', $vobj['video_id'], $vobj['_id'] );
+		echo '	</div>
+			<div class="col-md-8 single-right-grid-right"> ';
+			    printf('<a href="#" onclick="singlevid(\'%s\'); return false;" class="title"> %s </a>', $vobj['_id'], $vobj['title'] );
+			    $authvid = $user->findOne( array('_id' => new MongoId( $vobj['author'] ) ) );
+		echo '	    <p class="author" style="color:blue;"> '. $authvid['username'] .' </p>
+			    <p class="views" style="color:#228B22;"> '. $vobj['view_count'] .' views </p>
+			</div>
+			<div class="clearfix"> </div>
+		    </div> ';
+	}
+	echo'   </div>
+	    </div> ';
+
+		$conn->close();
+      } 
+      catch (MongoConnectionException $e) 
+      {
+		die('Error connecting to MongoDB server');
+      } 
+      catch (MongoException $e)
+      {
+	  	die('Error: ' . $e->getMessage());
+      }
     ?>
 	    <div class="clearfix"> </div>
 	</div>
@@ -545,7 +641,7 @@
 		custom_ajax( usersURI + "/" + <?php echo json_encode($_SESSION["uid"])?> , 'GET' ).done(
 			function( data ) 
 			{
-				createvidlist( data.user.history );
+				createvidlist( data.user.history.reverse() );
 			} );
 	}
 
@@ -585,8 +681,68 @@
 	function cancelnext()
 	{
 		cancel_autoplay = 1;
+		$("#ca").text("Cancelled Autoplay!");
 	}
 
+	function singlevid( vid )
+	{
+		var vidlist = <?php echo json_encode( $vlist ) ?>;
+		vidlist.splice( vidlist.indexOf( vid ) , 1 );
+		vidlist = vidlist.join();
+		vidlist = vid + ";" + vidlist;
+		var nform = $('<form action="singlevid.php" method="post" style="display:none;">' + 
+		'<input type="text" name="vidlist" value="' + vidlist + '" /' + '>' + '</form>');
+		$('body').append( nform );
+		nform.submit();
+	}
+
+	function videtail( no )
+	{
+		var vid = <?php echo json_encode( $vid ) ?>;
+		var uid = <?php echo json_encode( $uid ) ?>;
+		$.ajax({
+			    url: 'videtail.php',
+			    data: "vid=" + vid + "&uid=" + uid + "&no=" + no,
+			    type: 'POST',
+			    cache: false,
+			    error: function( jqXHR )
+				   {
+				   	console.log("ajax error " + jqXHR.status);
+				   },
+			    success: function( data )
+				    {
+					if( data )
+					{
+						alert("Done!");
+					}
+				    }
+			});
+	}
+
+	function cmtadd( no )
+	{
+		var uid = <?php echo json_encode( $uid ) ?>;
+		var vid = <?php echo json_encode( $vid ) ?>;
+		var msg = $("#usrcmt").val();
+		$.ajax({
+			    url: 'videtail.php',
+			    data: "vid=" + vid + "&uid=" + uid + "&msg=" + msg + "&no=" + no,
+			    type: 'POST',
+			    cache: false,
+			    error: function( jqXHR )
+				   {
+				   	console.log("ajax error " + jqXHR.status);
+				   },
+			    success: function( data )
+				    {
+					if( data )
+					{
+						alert("Done!");
+					}
+				    }
+			});
+	}
+	
 
     </script>
 						
