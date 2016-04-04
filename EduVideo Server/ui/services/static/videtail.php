@@ -42,14 +42,17 @@
 	    else if( $no == 6 && ( strcmp( $uid , "" ) != 0 ) )
 	    {
 		echo $user->update( array('_id' => new MongoId( $uid ) ), array('$pull' => array('rates.good' => $vid ) ) );
+		echo $video->update( array('_id' => new MongoId( $vid ) ), array('$inc' => array('rates.good' => -1 ) ) );
 	    }
 	    else if( $no == 7 && ( strcmp( $uid , "" ) != 0 ) )
 	    {
 		echo $user->update( array('_id' => new MongoId( $uid ) ), array('$pull' => array('rates.avg' => $vid ) ) );
+		echo $video->update( array('_id' => new MongoId( $vid ) ), array('$inc' => array('rates.avg' => -1 ) ) );
 	    }
 	    else if( $no == 8 && ( strcmp( $uid , "" ) != 0 ) )
 	    {
 		echo $user->update( array('_id' => new MongoId( $uid ) ), array('$pull' => array('rates.poor' => $vid ) ) );
+		echo $video->update( array('_id' => new MongoId( $vid ) ), array('$inc' => array('rates.poor' => -1 ) ) );
 	    }
 	    else if( $no == 9 && ( strcmp( $uid , "" ) != 0 ) )
 	    {
