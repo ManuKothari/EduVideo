@@ -4,25 +4,17 @@
 	{
 		$conn = new MongoClient('mongodb://admin:root@ds055564.mlab.com:55564/eduvideo');
 		$db = $conn->eduvideo;
-		if( $no == 3 )
+		$newsub = $db->newsub;
+		if( $no == 1 )
 		{
 			$category = $db->category;
-			echo $category->remove( array( "sub" => $sub ) );
-		}
-		else
-		{
-			$newsub = $db->newsub;
-			if( $no == 1 )
+			$cursor = $newsub->find( array( "sub" => $sub ) );
+			foreach( $cursor as $obj )
 			{
-				$category = $db->category;
-				$cursor = $newsub->find( array( "sub" => $sub ) );
-				foreach( $cursor as $obj )
-				{
-					echo $category->insert( $obj );
-				}
+				echo $category->insert( $obj );
 			}
-			echo $newsub->remove( array( "sub" => $sub ) );
 		}
+		echo $newsub->remove( array( "sub" => $sub ) );
 		$conn->close();
 	} 
 	catch (MongoConnectionException $e) 

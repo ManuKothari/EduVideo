@@ -1,5 +1,6 @@
 <?php
 	session_start();
+	extract( $_POST );
 ?>
 
 <!DOCTYPE html>
@@ -210,7 +211,7 @@
 		}
 	?>
 		</div>
-        </div>
+	</div>
 	<div class="clearfix"> </div>
 
       </div>
@@ -262,110 +263,72 @@
 
 
     <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
-	<div class="show-top-grids">
-		<div class="col-sm-10 show-grid-left main-grids">
-	<?php
-		try 
-		{
-			$conn = new MongoClient('mongodb://admin:root@ds055564.mlab.com:55564/eduvideo');
-			$db = $conn->eduvideo;
-			$vid = $db->video;
-			$chn = $db->channel;
-			$curriculum = $db->category;
-			$cursor = $curriculum->find();
-			foreach( $cursor as $obj )
-			{				
-				$subject = $obj['sub'];
-				$totvids = $vid->count( array( "category.subject" => $subject ) );
+	<div class="main-grids">
+		<div class="top-grids">
+    <?php
+	try 
+	{
+		$conn = new MongoClient('mongodb://admin:root@ds055564.mlab.com:55564/eduvideo');
+		$db = $conn->eduvideo;
+		$channel = $db->channel;
+		$user = $db->user;
+		$video = $db->video;
 
-				printf('<a href="#" onclick="subvids(\'%s\'); return false;"> %s </a><br>', $subject, $subject );
-				echo $totvids . "<br>";
+		echo ' <h2 style="text-align: center;">'. $subj .'</h2> <hr><hr> ';
+		$vidcur = $video->find( array( "category.subject" => $subj ) );
 
-				$chn_cursor = $chn->find( array( "subjects" => $subject ) );
-				foreach( $chn_cursor as $chn_obj )
-				{
-					echo $chn_obj['channel_name'] . "<br>";			
-				}			
-	
-				foreach( $obj['ut'] as $topic )
-				{
-					echo $topic . "<br>";		
-				}
-				echo "<hr>";
-			}
-			$conn->close();
-		} 
-		catch (MongoConnectionException $e) 
-		{
-			die('Error connecting to MongoDB server');
-		} 
-		catch (MongoException $e)
-		{
-		  	die('Error: ' . $e->getMessage());
+		$vidlist = array();
+		foreach( $vidcur as $vobj )
+		{				
+			$vidlist[] = $vobj['_id'];
 		}
-	?>
-		</div>
-		<div class="col-md-2 show-grid-right">
-			<button class="btn btn-md btn-primary btn-block" onclick="newsub();" type="button"> ADD NEW SUBJECT </button>			
-		</div>
-		<div class="clearfix"> </div>
-	</div>			
-    </div>
+	
+		foreach( $vidcur as $vobj )
+		{
+			echo '	
+			<div class="col-md-4 resent-grid recommended-grid slider-top-grids">
+				<div class="resent-grid-img recommended-grid-img"> ';
 
+	printf('<video src="http://localhost:3000/video/%s" controls width="350px" height="200px" onclick="singlevid(\'%s\',\'%s\');"></video>', $vobj['video_id'], $vobj['_id'], implode(";", $vidlist) );
+							
+				echo '	<div class="time">
+						<p style="color:black; font-size:15px;"> '. $vobj['vlength'] .' </p>
+					</div>
+					<div class="clck">
+						<span class="glyphicon glyphicon-time" aria-hidden="true"></span>
+					</div>
+				</div>
+				<div class="resent-grid-info recommended-grid-info"> ';
+	printf('<h3><a href="#" onclick="singlevid(\'%s\',\'%s\'); return false;" class="title title-info"> %s </a></h3>', $vobj['_id'], implode(";", $vidlist), $vobj['title'] );
+			
+				$chnobj = $channel->findOne( array('_id' => new MongoId( $vobj['channel'] ) ) );
+				echo '	<ul> ';
 
-    <div id="addsub" class="modal fade" tabindex="=1" role="dialog" aria-labelledby="addDialogLabel" aria-hidden="true">
-	<div class="modal-dialog">
-	    <div class="modal-content">
-		<div class="modal-header">
-       		    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-       		    <h3 class="modal-title" id="addDialogLabel">Add New Subject</h3>
-       		</div>
-       		<div class="modal-body">
-       		    <form class="form-horizontal">
-		       <div class="container-fluid">
-	       	           <div class="form-group">
-	       		       <label class="control-label" for="subnm" style="float:left">Subject Name:&nbsp;&nbsp;</label>
-	  		       <input type="text" class="form-control" id="subnm" placeholder="Subject Name" style="width: 300px;">
-			   </div> <hr>
-			   <div class="form-group">
-				<label class="control-label">Unit-wise Topic Names:</label>
-			   </div>
-			   <div class="form-group">
-				<label class="control-label" for="unit1" style="float:left">&nbsp;Unit 1:&nbsp;&nbsp;</label>
-				<input type="text" class="form-control" id="unit1" placeholder="Topic Name" style="width: 300px;">
-			   </div>
-			   <div class="form-group">
-				<label class="control-label" for="unit2" style="float:left">&nbsp;Unit 2:&nbsp;&nbsp;</label>
-				<input type="text" class="form-control" id="unit2" placeholder="Topic Name" style="width: 300px;">
-			   </div>
-			   <div class="form-group">
-				<label class="control-label" for="unit3" style="float:left">&nbsp;Unit 3:&nbsp;&nbsp;</label>
-				<input type="text" class="form-control" id="unit3" placeholder="Topic Name" style="width: 300px;">
-			   </div>
-			   <div class="form-group">
-				<label class="control-label" for="unit4" style="float:left">&nbsp;Unit 4:&nbsp;&nbsp;</label>
-				<input type="text" class="form-control" id="unit4" placeholder="Topic Name" style="width: 300px;">
-			   </div>
-			   <div class="form-group">
-				<label class="control-label" for="unit5" style="float:left">&nbsp;Unit 5:&nbsp;&nbsp;</label>
-				<input type="text" class="form-control" id="unit5" placeholder="Topic Name" style="width: 300px;">
-			   </div> <hr>
-		       </div>
-		    </form>
-		    <div id="submsg" style="color:green;"></div>
-		    <br><hr>
+	printf('<li><p class="author author-info"><a href="#" onclick="chnpg(\'%s\'); return false;" class="author"> %s </a></p></li>', $vobj['channel'], $chnobj['channel_name'] );
+		
+				echo '		<li class="right-list"><p class="views views-info"> '. $vobj['view_count'] .'  views</p></li>
+					</ul>
+				</div>
+			</div>	';
+		}
+		$conn->close();
+	} 
+	catch (MongoConnectionException $e) 
+	{
+		die('Error connecting to MongoDB server');
+	} 
+	catch (MongoException $e)
+	{
+	  	die('Error: ' . $e->getMessage());
+	}
+    ?>
 		</div>
-		<div class="modal-footer">
-		    <button onclick="addsub();" class="btn btn-primary">Add Subject</button>
-		    <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
-		</div>
-	    </div>
 	</div>
     </div>
 
 
     <script type="text/javascript">
-
+	
 	videosURI = 'http://localhost:5000/eduvideo/videos';
 	usersURI = 'http://localhost:5000/eduvideo/users';
 	custom_ajax = function( uri, method, data ) 
@@ -519,45 +482,28 @@
 			} );
 	}
 
-	function newsub()
+	function singlevid( vid, vidlist )
 	{
-		$("#submsg").html("");
-		$('#addsub').modal('show');	
+		vidlist = vidlist.split( ";" );
+		vidlist.splice( vidlist.indexOf( vid ) , 1 );
+		vidlist = vidlist.join();
+		vidlist = vid + ";" + vidlist;
+		var vform = $('<form action="singlevid.php" method="post" style="display:none;">' + 
+		'<input type="text" name="vidlist" value="' + vidlist + '" /' + '>' + '</form>');
+		$('body').append( vform );
+		vform.submit();
 	}
 
-	function addsub()
+	function chnpg( cid )
 	{
-		var topics = [];
-		for( var i = 0; i<5; i++ )
-		{
-			topics[ i ] = $( "#unit" + (i+1).toString() ).val();
-		}
-		var newSub = {
-				sub: $("#subnm").val(),
-				ut: topics
-			     };
-		$.ajax({
-		    url: 'newsub.php',
-		    type: 'POST',
-		    data: "obj="+ JSON.stringify( newSub ),
-		    success: function( data )
-			    {
-				if( data )
-					$("#submsg").html("Successfully stored but yet to be approved by admin!");
-			    }
-		});
-	}
-
-	function subvids( subj )
-	{
-		var vform = $('<form action="subjvids.php" method="post" style="display:none;">' + 
-		'<input type="text" name="subj" value="' + subj + '" /' + '>' + '</form>');
+		var vform = $('<form action="channel.php" method="post" style="display:none;">' + 
+		'<input type="text" name="cid" value="' + cid + '" /' + '>' + '</form>');
 		$('body').append( vform );
 		vform.submit();
 	}
 
 
     </script>
-   
- </body>
-</html>		
+						
+</body>
+</html>
