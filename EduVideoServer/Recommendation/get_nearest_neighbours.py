@@ -69,18 +69,18 @@ def index_user_vectors():
 	
 	rbp_conf = {'num_permutation':50,'beam_size':10,'num_neighbour':250}
 	
-    # Add rbp as child hash of permutations hash
+        # Add rbp as child hash of permutations hash
 	permutations.add_child_hash(rbp_perm, rbp_conf)
 	
-    # Create engine
-    engine_perm = Engine(k_dimen, lshashes=[permutations], distance=CosineDistance())
+        # Create engine
+        engine_perm = Engine(k_dimen, lshashes=[permutations], distance=CosineDistance())
     
 	for u in user_vector:
 		
 		engine_perm.store_vector(user_vector[u], data=u)
 		
 	 # Then update permuted index
-    permutations.build_permuted_index()
+        permutations.build_permuted_index()
     
 	t1 = time.time()
 	

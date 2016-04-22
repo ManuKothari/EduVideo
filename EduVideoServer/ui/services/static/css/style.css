@@ -85,11 +85,12 @@ form.navbar-form.navbar-right {
   font-weight: 500;
   border-top-left-radius: 5px;
   border-bottom-left-radius: 5px;
+;
 }
 .file a{
     padding: 8px 20px;
-    background: #F7F7F7;
-    color: #272C2E;
+    background-color: #21deef;
+    color: black;
     font-size: 14px;
     border-radius: 3px;
     -webkit-border-radius: 3px;
@@ -97,12 +98,24 @@ form.navbar-form.navbar-right {
     -o-border-radius: 3px;
     -ms-border-radius: 3px;
     text-decoration: none;
+    position: absolute;
+    right: 50px;
+    top: 4px
 }
 .file a:hover {
   opacity: 0.8;
+  color:white;
 }
 .file a:focus {
     outline: none;
+}
+.user
+{
+	position: relative;
+    right: 10px;
+    top: 4px;
+    background-color: #1ACEDE;
+    border: #121113;
 }
 .signin{
   float: left;
@@ -459,6 +472,11 @@ a.btn.btn-primary.btn-lg.see-button.hvr-shutter-out-horizontal {
 }
 .resent-grid {
 	padding-left: 0.1em;
+}
+
+.list
+{
+	list-style-type:none;
 }
 .resent-grid-img{
 	position:relative;
@@ -2761,4 +2779,23 @@ background: url(../images/social.png) no-repeat 0px 0px;
 	.footer-bottom ul li a.f-history {
 		padding: .52em 1em .52em 3em;
 	}
+}
+
+@media (min-width: 768px) {
+  .sidebar-nav .navbar .navbar-collapse {
+    padding: 0;
+    max-height: none;
+  }
+  .sidebar-nav .navbar ul {
+    float: none;
+    display: block;
+  }
+  .sidebar-nav .navbar li {
+    float: none;
+    display: block;
+  }
+  .sidebar-nav .navbar li a {
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
 }

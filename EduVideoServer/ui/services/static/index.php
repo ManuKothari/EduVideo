@@ -200,7 +200,7 @@
 					<a href="#" onclick="uploadvid(); return false;">Upload</a>
 				</div> </li>
 				<li class="dropdown">
-					<button class="btn btn-default dropdown-toggle" type="button" id="username" data-toggle="dropdown"> <i class="glyphicon glyphicon-user"></i>'. $_SESSION["username"] . '&nbsp; <span class="caret"></span> </button>
+					<button class="btn btn-default dropdown-toggle user" type="button" id="username" data-toggle="dropdown"> <i class="glyphicon glyphicon-user"></i>'. $_SESSION["username"] . '&nbsp; <span class="caret"></span> </button>
 					<ul class="dropdown-menu">
 						<li><a href="chngPwd.php">Change Details</a></li>
 						<li><a href="logout.php">Log Out</a></li>

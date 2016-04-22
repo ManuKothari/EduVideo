@@ -6,11 +6,14 @@ user_info = ''
 
 user_data = dict()
 
+
 def connect_db():
 	
 	global client, db, user_info
 	
 	client = MongoClient()
+  
+        print client
 	
 	if client:
 		
