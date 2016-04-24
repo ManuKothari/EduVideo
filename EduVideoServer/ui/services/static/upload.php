@@ -347,67 +347,82 @@
 			} );
 	}
 
-        function displayinfo()
+         function displayinfo() 
 	{
-            myFile = document.getElementById("vidfile").files[0];
-	    myDiv = document.getElementById("vidinfo");
-	    myDiv.innerHTML = "<p>" + myFile.name + "</p>";
- 
-	    $("#vidtitle").val( myFile.name.split(".")[0] );
-	    $("#descrip").val("");
-	    $("#subtopic").val("");
-	    $("#vlength").val("");
-	    $("#notes").val("");
-	    $("#reference").val("");
+		myFile = document.getElementById("vidfile").files[0];
+		myDiv = document.getElementById("vidinfo");
 
-	    $( "#subject" ).change( function() 
+		window.URL = window.URL || window.webkitURL;
+		var video = document.createElement('video');
+		video.preload = 'metadata';
+		video.onloadedmetadata = function()
 		{
-			var sub = $("#subject").val();
-			var units = document.getElementById("uniTopic");
-			units.options.length = 0;
-			$.ajax({
-			    url: 'subject.php',
-			    data: "sub=" + encodeURIComponent(sub),
-			    type: 'POST',
-			    cache: false,
-			    error: function( jqXHR )
-				   {
-				   	console.log("ajax error " + jqXHR.status);
-				   },
-			    success: function( data )
+		    window.URL.revokeObjectURL( this.src );
+		    if( video.duration <= 180 )
+	    	    {			
+			    myDiv.innerHTML = "<p>" + myFile.name + "</p>";
+			    $( "#subject" ).change( function() 
+			    {
+				var sub = $("#subject").val();
+				var units = document.getElementById("uniTopic");
+				units.options.length = 0;
+				$.ajax({
+				    url: 'subject.php',
+				    data: "sub=" + encodeURIComponent(sub),
+				    type: 'POST',
+				    cache: false,
+				    error: function( jqXHR )
+					   {
+					   	console.log("ajax error " + jqXHR.status);
+					   },
+				    success: function( data )
+					    {
+						 var topics = data.split(";");
+						 for( i=0; i<5; i++ )
+						 {
+							units.options[units.options.length] = new Option(topics[i], topics[i]);
+						 }		
+					    }
+				});	
+		    	    });	
+			   
+			    var formData = new FormData();
+			    formData.append( "video", myFile );
+			    $.ajax({
+				    url: 'http://localhost:3000/video',
+				    contentType: false,
+				    processData: false,
+				    data: formData,
+				    type: 'POST',
+				    cache: false,
+				    dataType: 'json',
+				    accepts: "application/json",
+				    error: function( jqXHR )
+					   {
+					   	console.log("ajax error " + jqXHR.status);
+					   },
+				    success: function( data )
 				    {
-					 var topics = data.split(";");
-					 for( i=0; i<5; i++ )
-					 {
-						units.options[units.options.length] = new Option(topics[i], topics[i]);
-					 }		
+					 vidgrid_id = data["_id"];
+					 var mins = ( video.duration/60 ).toFixed(2);
+					 mins = mins.split('.').join(':');
+					 $("#vidtitle").val( myFile.name.split(".")[0] );
+				         $("#descrip").val("");
+				         $("#subtopic").val("");
+				         $("#vlength").val( mins );
+				         $("#notes").val("");
+				         $("#reference").val("");
+					 $("#new_video_form").show();
+		 			 $("#vidtitle").focus();			
 				    }
-			});
-			
-	    	}); 
-					   
-	    var formData = new FormData();
-            formData.append( "video", myFile );
-	    $.ajax({
-		    url: 'http://localhost:3000/video',
-		    contentType: false,
-		    processData: false,
-		    data: formData,
-		    type: 'POST',
-		    cache: false,
-		    dataType: 'json',
-		    accepts: "application/json",
-		    error: function( jqXHR )
-			   {
-			   	console.log("ajax error " + jqXHR.status);
-			   },
-		    success: function( data )
-		    {
-			 vidgrid_id = data["_id"];
-			 $("#new_video_form").show();
- 			 $("#vidtitle").focus();			
+				});
 		    }
-		});
+		    else
+		    {
+			    alert("Video duration is more than 3 minutes!! Upload a smaller one!");
+		    }
+		}
+		video.src = URL.createObjectURL( myFile );
         }
 
 	function post_vid( cid )
