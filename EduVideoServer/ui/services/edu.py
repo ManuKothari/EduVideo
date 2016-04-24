@@ -7,13 +7,8 @@ from pymongo import MongoClient
 from subprocess import Popen
 import collections, fileinput, pymongo
 
-try:
-    client = MongoClient('mongodb://admin:root@ds055564.mlab.com:55564/eduvideo',serverSelectionTimeoutMS=5000)
-    client.server_info()
-    print("Connceted to MongoDB@online")
-except:
-    client = MongoClient()
-    print("Connected to MongoDB@localhost");
+client = MongoClient()
+print("Connected to MongoDB@localhost")
 
 db = client.eduvideo
 video_col = db.video

@@ -196,11 +196,11 @@
 		{
 			echo '
 			<ul class="nav navbar-nav navbar-right">
-				<li> <div class="file" style="width:1%;font-size:5px;">
-					<a href="index.php"><i class="glyphicon glyphicon-home">&nbsp;Home</i></a>
+				<li> <div class="file" >
+					<a href="index.php"><span class="glyphicon glyphicon-home">&nbsp;Home</span></a>
 				</div> </li>
 				<li class="dropdown">
-					<button class="btn btn-default dropdown-toggle" type="button" id="username" data-toggle="dropdown"> <i class="glyphicon glyphicon-user"></i>'. $_SESSION["username"] . '&nbsp; <span class="caret"></span> </button>
+					<button class="btn btn-default dropdown-toggle user" type="button" id="username" data-toggle="dropdown"> <i class="glyphicon glyphicon-user"></i>'. $_SESSION["username"] . '&nbsp; <span class="caret"></span> </button>
 					<ul class="dropdown-menu">
 						<li><a href="chngPwd.php">Change Details</a></li>
 						<li><a href="logout.php">Log Out</a></li>
@@ -281,7 +281,7 @@
 	<?php
 		try 
 		{
-			$conn = new MongoClient('mongodb://admin:root@ds055564.mlab.com:55564/eduvideo');
+			$conn = new Mongo('localhost');
 			$db = $conn->eduvideo;
 			$vid = $db->video;
 			$chn = $db->channel;
@@ -293,7 +293,7 @@
 				$subject = $obj['sub'];
 				$totvids = $vid->count( array( "category.subject" => $subject ) );
 
-				echo '<li class="active"><a href="#">'.$subject . '<span class="badge">'.$totvids .'</span></a></li>';
+	printf('<li class="active"> <a href="#" onclick="subvids(\'%s\'); return false;"> %s <span class="badge"> %s </span></a></li>', $subject, $subject, $totvids );
 				
 				/*
 				$chn_cursor = $chn->find( array( "subjects" => $subject ) );
@@ -569,6 +569,14 @@
 					$("#submsg").html("Successfully stored but yet to be approved by admin!");
 			    }
 		});
+	}
+
+	function subvids( subj )
+	{
+		var vform = $('<form action="subjvids.php" method="post" style="display:none;">' + 
+		'<input type="text" name="subj" value="' + subj + '" /' + '>' + '</form>');
+		$('body').append( vform );
+		vform.submit();
 	}
 
 

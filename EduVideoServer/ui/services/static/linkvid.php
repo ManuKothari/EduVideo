@@ -2,7 +2,7 @@
 	extract( $_POST );
 	try 
 	{
-		$conn = new MongoClient('mongodb://admin:root@ds055564.mlab.com:55564/eduvideo');
+		$conn = new Mongo('localhost');
 		$db = $conn->eduvideo;
 		$video = $db->video;
 		if( $no == 1 )

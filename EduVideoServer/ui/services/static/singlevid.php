@@ -198,11 +198,11 @@
 			$GLOBALS['uid'] = $_SESSION["uid"];
 			echo '
 			<ul class="nav navbar-nav navbar-right">
-				<li> <div class="file" style="width:1%;font-size:5px;">
+				<li> <div class="file" >
 					<a href="index.php"><i class="glyphicon glyphicon-home">&nbsp;Home</i></a>
 				</div> </li>
 				<li class="dropdown">
-					<button class="btn btn-default dropdown-toggle" type="button" id="username" data-toggle="dropdown"> <i class="glyphicon glyphicon-user"></i>'. $_SESSION["username"] . '&nbsp; <span class="caret"></span> </button>
+					<button class="btn btn-default dropdown-toggle user" type="button" id="username" data-toggle="dropdown"> <i class="glyphicon glyphicon-user"></i>'. $_SESSION["username"] . '&nbsp; <span class="caret"></span> </button>
 					<ul class="dropdown-menu">
 						<li><a href="chngPwd.php">Change Details</a></li>
 						<li><a href="logout.php">Log Out</a></li>
@@ -272,7 +272,7 @@
 		$vlist = explode( ',' , $vlist );
       try 
       {
-		$conn = new MongoClient('mongodb://admin:root@ds055564.mlab.com:55564/eduvideo');
+		$conn = new Mongo('localhost');
 		$db = $conn->eduvideo;
 		$channel = $db->channel;
 		$user = $db->user;
@@ -301,10 +301,12 @@
       echo' <div class="col-sm-8 single-left">
 		<div class="song">
 		    <div class="song-info">
-			<h3>'. $usrvid['title'] .'</h3>	
+			<h3 class= "maintext">'. $usrvid['title'] .'</h3>	
 		    </div>
 		    <div class="video-grid">
-    			<video src="http://localhost:3000/video/'. $usrvid['video_id'] .'" controls width="550px" height="450px" autoplay onended="nextvid();"></video>
+    			<video src="http://localhost:3000/video/'. $usrvid['video_id'] .'" controls width="550px" height="450px" autoplay onended="nextvid();">
+		<track kind="subtitles" src="subtitles/Java Tutorial - 13 - Inheritance.vtt" srclang="en">
+	</video>
           	    </div>
 		</div>
 		<div class="song-grid-right">
@@ -353,11 +355,11 @@
 			$usrwl = $user->findOne( array('_id' => new MongoId( $_SESSION["uid"] ) ) );
 			if( in_array( $vid, $usrwl['watch_later_ids'] ) )
 			{
-			    echo' <li><a href="#" onclick="videtail(5); return false;" class="icon comment-icon">Un-Watch</a></li> ';
+			    echo' <li><a href="#" onclick="videtail(5); return false;" class="icon comment-icon ">Un-Watch</a></li> ';
 			}
 			else
 			{
-			    echo' <li><a href="#" onclick="videtail(4); return false;" class="icon comment-icon">Watch Later</a></li> ';
+			    echo' <li><a href="#" onclick="videtail(4); return false;" class="icon comment-icon ">Watch Later</a></li> ';
 			}
 		}
 		echo '	</ul>
@@ -367,27 +369,27 @@
 		
 		<div class="all-comments"> ';
 			$authusr = $user->findOne( array('_id' => new MongoId( $usrvid['author'] ) ) );
-		echo '	<h5 style="float:left; display:inline; width:25%; color:blue;">'. $authusr['username']  .'</h5>';
+		echo '	<h5 style="float:left; display:inline; width:25%; color:blue;" class = "othername">'. $authusr['username']  .'</h5>';
 			$authchn = $channel->findOne( array('_id' => new MongoId( $usrvid['channel'] ) ) );
-		echo '	<h5 style="float:left; display:inline; width:30%; color:blue;">'. $authchn['channel_name']  .'</h5>
-			<h5 style="float:left; display:inline; width:15%; color:green;">'. $usrvid['rates']['good']  .' good </h5>
-			<h5 style="float:left; display:inline; width:15%; color:purple;">'. $usrvid['rates']['avg']  .' avg </h5>
-			<h5 style="float:left; display:inline; width:15%; color:red;">'. $usrvid['rates']['poor']  .' poor </h5>
+		echo '	<h5 style="float:left; display:inline; width:30%; color:blue;" class = "othername">'. $authchn['channel_name']  .'</h5>
+			<h5 style="float:left; display:inline; width:15%; color:green;" class = "othername">'. $usrvid['rates']['good']  .' good </h5>
+			<h5 style="float:left; display:inline; width:15%; color:purple;" class = "othername">'. $usrvid['rates']['avg']  .' avg </h5>
+			<h5 style="float:left; display:inline; width:15%; color:red;" class = "othername">'. $usrvid['rates']['poor']  .' poor </h5>
 			<div class="clearfix"> </div> <hr> ';
 
 	foreach( $usrvid['category'] as $cat )
 	{
-		echo' <h5 style="float:left; display:inline; width:40%; color:#006400;"> '. $cat['subject'] .' - '. $cat['unitTopic'] .' - '. $cat['subtopic'].' , </h5> ';
+		echo' <h5 style="float:left; display:inline; width:40%; color:#006400;" class = "othername"> '. $cat['subject'] .' - '. $cat['unitTopic'] .' - '. $cat['subtopic'].' , </h5> ';
 	}
 		echo' <div class="clearfix"> </div> <hr> ';
 
 	if( count( $usrvid['tags'] ) > 0 )
 	{
-		echo' <h5 style="color:#191970;"> Tags:  '. implode(" , ", $usrvid['tags']) .' </h5> <hr> ';
+		echo' <h5 style="color:#191970;" class = "othername"> Tags:  '. implode(" , ", $usrvid['tags']) .' </h5> <hr> ';
 	}
 	if( strcmp( $usrvid['description'], "" ) != 0 )
 	{
-		echo' <h5 style="color:#800000;"> Description:  '. $usrvid['description'] .' </h5> <hr>';
+		echo' <h5 style="color:#800000;" class = "othername"> Description:  '. $usrvid['description'] .' </h5> <hr>';
 	}
 
 	    echo '  <div class="all-comments-info"> ';
@@ -417,7 +419,7 @@
 			    </form>
 			</div> <br><hr> ';
 	    }
-		echo '	<h5 style="text-align:center; color:brown;"> '. count( $usrvid['comments'] ) .' Comments </h5>
+		echo '	<h5 style="text-align:center; color:brown;" class = "othername"> '. count( $usrvid['comments'] ) .' Comments </h5>
 		    </div><hr> ';
 
 	if( count( $usrvid['comments'] ) > 0 )

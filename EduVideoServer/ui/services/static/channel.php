@@ -197,11 +197,11 @@
 		{
 			echo '
 			<ul class="nav navbar-nav navbar-right">
-				<li> <div class="file" style="width:1%;font-size:5px;">
+				<li> <div class="file">
 					<a href="index.php"><i class="glyphicon glyphicon-home">&nbsp;Home</i></a>
 				</div> </li>
 				<li class="dropdown">
-					<button class="btn btn-default dropdown-toggle" type="button" id="username" data-toggle="dropdown"> <i class="glyphicon glyphicon-user"></i>'. $_SESSION["username"] . '&nbsp; <span class="caret"></span> </button>
+					<button class="btn btn-default dropdown-toggle user" type="button" id="username" data-toggle="dropdown"> <i class="glyphicon glyphicon-user"></i>'. $_SESSION["username"] . '&nbsp; <span class="caret"></span> </button>
 					<ul class="dropdown-menu">
 						<li><a href="chngPwd.php">Change Details</a></li>
 						<li><a href="logout.php">Log Out</a></li>
@@ -268,13 +268,13 @@
     <?php
 	try 
 	{
-		$conn = new MongoClient('mongodb://admin:root@ds055564.mlab.com:55564/eduvideo');
+		$conn = new Mongo('localhost');
 		$db = $conn->eduvideo;
 		$channel = $db->channel;
 		$user = $db->user;
 		$video = $db->video;
 		$chnobj = $channel->findOne( array('_id' => new MongoId( $cid ) ) );
-		echo ' <h2 style="text-align: center;">'. $chnobj['channel_name'] .'</h2> <hr><hr> ';
+		echo ' <h2 style="text-align: center;" class="maintext">'. $chnobj['channel_name'] .'</h2> <hr><hr> ';
 
 		$chnvid9 = array_slice( $chnobj['video_ids'], 0, 9 );
 		foreach( $chnobj['video_ids'] as $vid )
@@ -284,16 +284,14 @@
 			<div class="col-md-4 resent-grid recommended-grid slider-top-grids">
 				<div class="resent-grid-img recommended-grid-img"> ';
 
-	printf('<video src="http://localhost:3000/video/%s" controls width="350px" height="200px" onclick="singlevid(\'%s\',\'%s\');"></video>', $vobj['video_id'], $vobj['_id'], implode(";", $chnvid9) );
+	printf('<video src="http://localhost:3000/video/%s" controls width="305px" height="225px" onclick="singlevid(\'%s\',\'%s\');"></video>', $vobj['video_id'], $vobj['_id'], implode(";", $chnvid9) );
 							
-				echo '	<div class="time">
-						<p style="color:black; font-size:15px;"> '. $vobj['vlength'] .' </p>
-					</div>
+				echo '	
 					<div class="clck">
 						<span class="glyphicon glyphicon-time" aria-hidden="true"></span>
 					</div>
 				</div>
-				<div class="resent-grid-info recommended-grid-info"> ';
+				<div class="resent-grid-info recommended-grid-info videobox"> ';
 	printf('<h3><a href="#" onclick="singlevid(\'%s\',\'%s\'); return false;" class="title title-info"> %s </a></h3>', $vobj['_id'], implode(";", $chnvid9), $vobj['title'] );
 				echo '	<ul>
 						<li class="right-list"><p class="views views-info"> '. $vobj['view_count'] .'  views</p></li>

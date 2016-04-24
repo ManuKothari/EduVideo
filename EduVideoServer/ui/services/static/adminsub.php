@@ -67,11 +67,11 @@
 
 		<div class="header-top-right">
 			<ul class="nav navbar-nav navbar-right">
-				<li> <div class="file" style="width:1%;font-size:5px;">
+				<li> <div class="file" >
 					<a href="index.php"><i class="glyphicon glyphicon-home">&nbsp;Home</i></a>
 				</div> </li>
 				<li class="dropdown">
-					<button class="btn btn-default dropdown-toggle" type="button" id="username" data-toggle="dropdown"> <i class="glyphicon glyphicon-user"></i> <?php echo $_SESSION["username"]; ?> &nbsp; <span class="caret"></span> </button>
+					<button class="btn btn-default dropdown-toggle user" type="button" id="username" data-toggle="dropdown"> <i class="glyphicon glyphicon-user"></i> <?php echo $_SESSION["username"]; ?> &nbsp; <span class="caret"></span> </button>
 					<ul class="dropdown-menu">
 						<li><a href="chngPwd.php">Change Details</a></li>
 						<li><a href="logout.php">Log Out</a></li>
@@ -119,7 +119,7 @@
 	<?php
 		try 
 		{
-			$conn = new MongoClient('mongodb://admin:root@ds055564.mlab.com:55564/eduvideo');
+			$conn = new Mongo('localhost');
 			$db = $conn->eduvideo;
 			$collection = $db->newsub;
 			$cursor = $collection->find();

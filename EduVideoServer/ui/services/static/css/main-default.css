@@ -52,7 +52,7 @@ template {
   display: none; }
 
 a {
-  background: transparent; }
+  color: black; }
 
 a:active,
 a:hover {
@@ -60,6 +60,7 @@ a:hover {
 
 body a:focus {
   outline: 0 none;
+   color: black; 
   text-decoration: none; }
 
 abbr[title] {
@@ -234,10 +235,10 @@ button {
   text-align: justify; }
 
 a {
-  color: #898989;
+   color: black; 
   text-decoration: none; }
   a:hover {
-    color: #e26228;
+    color: white;
     text-decoration: none; }
 
 .b-remaining {
@@ -12716,5 +12717,26 @@ textarea.b-product-card-textarea {
 .is-visible {
   display: block;
   visibility: visible; }
+.options
+{
+	width:75px;
+	background: #337AB7;
+}
+.options1
+{
+	width:75px;
+	position: absolute;
+    margin-left: 90px;
+    bottom: 74px;
+	background: #337AB7;
+}
+.options2
+{
+	width:75px;
+	position: absolute;
+    margin-left: 180px;
+    bottom: 74px;
+	background: #337AB7;
+}
 
 /*# sourceMappingURL=main-default.css.map */

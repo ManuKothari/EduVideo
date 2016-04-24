@@ -1,6 +1,8 @@
 description
+Char arrays
 best practice
 pointer
-Char arrays
 is-a relation
 reuse
+
+D

@@ -1,6 +1,5 @@
 <?php
 	session_start();
-	extract( $_POST );
 ?>
 
 <!DOCTYPE html>
@@ -263,66 +262,136 @@
 
 
     <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
-	<div class="main-grids">
-		<div class="top-grids">
-    <?php
-	try 
-	{
-		$conn = new MongoClient('mongodb://admin:root@ds055564.mlab.com:55564/eduvideo');
-		$db = $conn->eduvideo;
-		$channel = $db->channel;
-		$user = $db->user;
-		$video = $db->video;
-
-		echo ' <h2 style="text-align: center;">'. $subj .'</h2> <hr><hr> ';
-		$vidcur = $video->find( array( "category.subject" => $subj ) );
-
-		$vidlist = array();
-		foreach( $vidcur as $vobj )
-		{				
-			$vidlist[] = $vobj['_id'];
-		}
-	
-		foreach( $vidcur as $vobj )
+	<div class="main-grids"> <hr>
+	<h2 style="text-align: center;"> ALL CHANNELS </h2> <hr><hr>
+	<?php
+		try 
 		{
-			echo '	
-			<div class="col-md-4 resent-grid recommended-grid slider-top-grids">
-				<div class="resent-grid-img recommended-grid-img"> ';
-
-	printf('<video src="http://localhost:3000/video/%s" controls width="350px" height="200px" onclick="singlevid(\'%s\',\'%s\');"></video>', $vobj['video_id'], $vobj['_id'], implode(";", $vidlist) );
-							
-				echo '	<div class="time">
-						<p style="color:black; font-size:15px;"> '. $vobj['vlength'] .' </p>
+			$conn = new Mongo('localhost');
+			$db = $conn->eduvideo;
+			$channel = $db->channel;
+			$user = $db->user;
+			$video = $db->video;
+			$chncursor = $channel->find();
+			foreach( $chncursor as $chnobj )
+			{
+				$nm = $user->findOne( array('_id' => new MongoId( $chnobj['author_id'] ) ) );
+				echo '
+		<div class="recommended">
+			<div class="recommended-grids english-grid">
+				<div class="recommended-info">
+					<div class="heading">';
+	printf('<h3> <a href="#" onclick="chnpg(\'%s\'); return false;" > %s </a> </h3>', $chnobj['_id'], $chnobj['channel_name']);
+						echo ' <h5> Featuring';
+						foreach( $chnobj['subjects'] as $sub )
+						{
+							echo ' ' . $sub . ' , ';
+						}
+				  		echo '</h5> </div>
+					<div class="heading-right">
+						<h4>' . $nm['username'] . '</h4>
 					</div>
-					<div class="clck">
-						<span class="glyphicon glyphicon-time" aria-hidden="true"></span>
+					<div class="heading-right">
+						<h4>' . count( $chnobj['subscriber_ids'] ) . ' Subscribers</h4>
 					</div>
-				</div>
-				<div class="resent-grid-info recommended-grid-info"> ';
-	printf('<h3><a href="#" onclick="singlevid(\'%s\',\'%s\'); return false;" class="title title-info"> %s </a></h3>', $vobj['_id'], implode(";", $vidlist), $vobj['title'] );
-			
-				$chnobj = $channel->findOne( array('_id' => new MongoId( $vobj['channel'] ) ) );
-				echo '	<ul> ';
+					<div class="heading-right">
+						<h4>' . count( $chnobj['video_ids'] ) . ' Videos</h4>	
+					</div> ';
 
-	printf('<li><p class="author author-info"><a href="#" onclick="chnpg(\'%s\'); return false;" class="author"> %s </a></p></li>', $vobj['channel'], $chnobj['channel_name'] );
-		
-				echo '		<li class="right-list"><p class="views views-info"> '. $vobj['view_count'] .'  views</p></li>
-					</ul>
-				</div>
-			</div>	';
+				if( isset($_SESSION["usertype"]) && isset($_SESSION["uid"]) )
+				{
+				  echo' <div class="heading-right"> ';
+					$usr = $user->findOne( array('_id' => new MongoId( $_SESSION["uid"] ) ) );
+					if( in_array( $chnobj['_id'], $usr['subscribed_ids'] ) )
+					{
+	printf('<button onclick="unsubscribe(\'%s\');" class="btn btn-md btn-primary btn-block" type="button"> UNSUBSCRIBE </button>' ,  $chnobj['_id'] );
+					}
+					else
+					{
+  	printf('<button onclick="subscribeusr(\'%s\',\'%s\');" class="btn btn-md btn-primary btn-block" type="button"> SUBSCRIBE </button>' , $chnobj['_id'], $usr['email'] );
+					}
+				  echo'	</div> ';
+				}
+				echo '	<div class="clearfix"> </div>
+				</div> <br>';
+				$chnvid9 = array_slice( $chnobj['video_ids'], 0, 9 );
+				foreach( array_slice( $chnobj['video_ids'], 0, 5 ) as $vid )
+				{
+					$vobj = $video->findOne( array('_id' => new MongoId( $vid ) ) );
+					echo'
+				<div class="col-md-2 resent-grid recommended-grid sports-recommended-grid">
+					<div class="resent-grid-img recommended-grid-img"> ';
+
+	printf('<video src="http://localhost:3000/video/%s" controls width="150px" height="150px" onclick="singlevid(\'%s\',\'%s\');"></video>', $vobj['video_id'], $vobj['_id'], implode(";", $chnvid9) );
+	
+					echo '	<div class="time small-time sports-tome">
+							<p style="color:black; font-size:15px;">'. $vobj['vlength'] .'</p>
+						</div>
+						<div class="clck sports-clock">
+							<span class="glyphicon glyphicon-time" aria-hidden="true"></span>
+						</div>
+					</div>
+					<div class="resent-grid-info recommended-grid-info"> ';
+	printf('<h5><a href="#" onclick="singlevid(\'%s\',\'%s\'); return false;" class="title"> %s </a></h5>', $vobj['_id'], implode(";", $chnvid9), $vobj['title'] );
+					echo '	<p class="views">'. $vobj['view_count'] .'views</p>
+					</div>
+				</div>';
+				}
+
+				if( count( $chnobj['video_ids'] ) != 0 )
+				{
+					echo'	
+				<div class="heading-right"> So on ... </div> ';
+				}
+
+			echo'	<div class="clearfix"> </div>
+			</div>
+		</div>	<hr> ';
+
+			}
+			$conn->close();
+		} 
+		catch (MongoConnectionException $e) 
+		{
+			die('Error connecting to MongoDB server');
+		} 
+		catch (MongoException $e)
+		{
+		  	die('Error: ' . $e->getMessage());
 		}
-		$conn->close();
-	} 
-	catch (MongoConnectionException $e) 
-	{
-		die('Error connecting to MongoDB server');
-	} 
-	catch (MongoException $e)
-	{
-	  	die('Error: ' . $e->getMessage());
-	}
-    ?>
+	?>
+	</div>
+    </div>
+
+
+    <div id="subscribemail" class="modal fade" tabindex="=1" role="dialog" aria-labelledby="mailDialogLabel" aria-hidden="true">
+	<div class="modal-dialog">
+	    <div class="modal-content">
+		<div class="modal-header">
+       		    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+		    <h3 class="modal-title" id="mailDialogLabel">Do you want Mails also to be sent to you?</h3>
+       		</div>
+       		<div class="modal-body">
+		    <button class="btn btn-block btn-info" onclick="showmail();">YES</button> <hr>
+		    <button id="nomail" class="btn btn-block btn-info" onclick="subscribe(0);">NO</button> <br><hr>
+		    <form id="mailform" class="form-horizontal">
+			<div class="container-fluid">
+	       	           <div class="form-group">
+	       		       <label class="control-label" for="mailid" style="float:left">Email Id:&nbsp;&nbsp;</label>
+	  		       <input type="text" class="form-control email" id="mailid" placeholder="Email" style="width: 400px;"  required="required" pattern="([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?" title="Enter a valid email" />
+			   </div> <hr>
+			   <div class="form-group">
+				<button class="btn btn-md btn-primary btn-block" onclick="subscribe(1);" type="button"> SUBSCRIBE</button>
+			   </div>
+			</div>
+		    </form>
+		    <div id="mailmsg" style="color:green;"></div>
+		    <br><hr>
 		</div>
+		<div class="modal-footer">
+		    <button class="btn" data-dismiss="modal" id="mcancel" aria-hidden="true">Cancel</button>
+		</div>
+	    </div>
 	</div>
     </div>
 
@@ -331,6 +400,7 @@
 	
 	videosURI = 'http://localhost:5000/eduvideo/videos';
 	usersURI = 'http://localhost:5000/eduvideo/users';
+	channelsURI = 'http://localhost:5000/eduvideo/channels';
 	custom_ajax = function( uri, method, data ) 
 	{
 	    var request = 
@@ -482,6 +552,85 @@
 			} );
 	}
 
+	function chnpg( cid )
+	{
+		var vform = $('<form action="channel.php" method="post" style="display:none;">' + 
+		'<input type="text" name="cid" value="' + cid + '" /' + '>' + '</form>');
+		$('body').append( vform );
+		vform.submit();
+	}
+
+	function subscribeusr( cid, email )
+	{
+		$("#nomail").show();
+		$("#mailform").hide();
+		$("#mailmsg").hide();
+		$("#mailmsg").html( cid );		
+		if( email != "" )
+		{
+			$("#mailid").val( email );
+		}
+		$('#subscribemail').modal('show');
+	}
+
+	function showmail()
+	{
+		$("#nomail").hide();
+		$("#mailform").show();
+	}
+
+	function subscribe( mailno )
+	{
+		var cid = $("#mailmsg").html();
+		var uid = <?php echo json_encode($_SESSION["uid"])?> ;
+		var mail = "";
+		if( mailno == 1 )
+		{
+			mail = $("#mailid").val();
+		}
+		$.ajax({
+			    url: 'usrmail.php',
+			    data: "cid=" + cid + "&uid=" + uid + "&mailno=" + mailno + "&email=" + mail + "&no=" + 1 ,
+			    type: 'POST',
+			    cache: false,
+			    error: function( jqXHR )
+				   {
+				   	console.log("ajax error " + jqXHR.status);
+				   },
+			    success: function( data )
+				    {
+					if( data )
+					{
+						$("#mailmsg").html( "Successfully subscribed to the channel");
+						$("#mailmsg").show();
+						$("#mcancel").html('Close');
+					}
+				    }
+			});		
+	}
+
+	function unsubscribe( cid )
+	{
+		var uid = <?php echo json_encode($_SESSION["uid"])?> ;
+		$.ajax({
+			    url: 'usrmail.php',
+			    data: "cid=" + cid + "&uid=" + uid + "&no=" + 2 ,
+			    type: 'POST',
+			    cache: false,
+			    error: function( jqXHR )
+				   {
+				   	console.log("ajax error " + jqXHR.status);
+				   },
+			    success: function( data )
+				    {
+					if( data )
+					{
+						alert("Unsubscribed!");
+					}
+				    }
+			});		
+	}
+
 	function singlevid( vid, vidlist )
 	{
 		vidlist = vidlist.split( ";" );
@@ -490,14 +639,6 @@
 		vidlist = vid + ";" + vidlist;
 		var vform = $('<form action="singlevid.php" method="post" style="display:none;">' + 
 		'<input type="text" name="vidlist" value="' + vidlist + '" /' + '>' + '</form>');
-		$('body').append( vform );
-		vform.submit();
-	}
-
-	function chnpg( cid )
-	{
-		var vform = $('<form action="channel.php" method="post" style="display:none;">' + 
-		'<input type="text" name="cid" value="' + cid + '" /' + '>' + '</form>');
 		$('body').append( vform );
 		vform.submit();
 	}

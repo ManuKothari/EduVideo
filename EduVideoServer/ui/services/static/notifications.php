@@ -66,11 +66,11 @@
 		</div>
 		<div class="header-top-right">
 			<ul class="nav navbar-nav navbar-right">
-				<li> <div class="file" style="width:1%;font-size:5px;">
+				<li> <div class="file" >
 					<a href="index.php"><i class="glyphicon glyphicon-home">&nbsp;Home</i></a>
 				</div> </li>
 				<li class="dropdown">
-					<button class="btn btn-default dropdown-toggle" type="button" id="username" data-toggle="dropdown"> <i class="glyphicon glyphicon-user"></i> <?php echo $_SESSION["username"]; ?> &nbsp; <span class="caret"></span> </button>
+					<button class="btn btn-default dropdown-toggle user" type="button" id="username" data-toggle="dropdown"> <i class="glyphicon glyphicon-user"></i> <?php echo $_SESSION["username"]; ?> &nbsp; <span class="caret"></span> </button>
 					<ul class="dropdown-menu">
 						<li><a href="chngPwd.php">Change Details</a></li>
 						<li><a href="logout.php">Log Out</a></li>
@@ -120,11 +120,11 @@
     <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
 	<div class="show-top-grids">		
 	    <div class="col-sm-10 show-grid-left main-grids"> <hr>
-		<h2 style="text-align: center;"> MY NOTIFICATIONS </h2> <hr><hr>
+		<h2 style="text-align: center;" class= "maintext"> MY NOTIFICATIONS </h2> <hr><hr>
 	<?php
 		try 
 		{
-			$conn = new MongoClient('mongodb://admin:root@ds055564.mlab.com:55564/eduvideo');
+			$conn = new Mongo('localhost');
 			$db = $conn->eduvideo;
 			$channel = $db->channel;
 			$user = $db->user;
@@ -145,18 +145,18 @@
 					{
 						$msg = 'The channel "' . $chnm . '" has been deleted!';
 					}
-					echo $msg . "<br><hr>";
+					echo '<h4 class="maintext">'.$msg . "</h4><br><hr>";
 				}
 			}
 			else if( count( $usrcur['subscribed_ids'] ) != 0 )
 			{
-				echo' <h1> None as yet! </h1> <br>
-				<h1> Subscribe to more Channels meanwhile! </h1> <br> ';
+				echo' <h1 class="maintext"> None as yet! </h1> <br>
+				<h1 class="maintext"> Subscribe to more Channels meanwhile! </h1> <br> ';
 			}
 			else
 			{
-				echo' <h1> None as yet! </h1> <br>
-				<h1> Subscribe to Channels to avail this feature! </h1> <br> ';
+				echo' <h1 class="maintext"> None as yet! </h1> <br>
+				<h1 class="maintext"> Subscribe to Channels to avail this feature! </h1> <br> ';
 			}
 			$conn->close();
 		} 

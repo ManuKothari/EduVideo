@@ -5,13 +5,7 @@ from bson.objectid import ObjectId
 from pymongo import MongoClient
 import collections, pymongo, math, nltk, sys
 
-try:
-    client = MongoClient('mongodb://admin:root@ds055564.mlab.com:55564/eduvideo',serverSelectionTimeoutMS=5000)
-    client.server_info()
-    #print("Connected to MongoDB@online")
-except:
-    client = MongoClient()
-    #print("Connected to MongoDB@localhost");
+client = MongoClient()
 
 db = client.eduvideo
 video_col = db.video

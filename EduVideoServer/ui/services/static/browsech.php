@@ -196,11 +196,11 @@
 		{
 			echo '
 			<ul class="nav navbar-nav navbar-right">
-				<li> <div class="file" style="width:1%;font-size:5px;">
+				<li> <div class="file" >
 					<a href="index.php"><i class="glyphicon glyphicon-home">&nbsp;Home</i></a>
 				</div> </li>
 				<li class="dropdown">
-					<button class="btn btn-default dropdown-toggle" type="button" id="username" data-toggle="dropdown"> <i class="glyphicon glyphicon-user"></i>'. $_SESSION["username"] . '&nbsp; <span class="caret"></span> </button>
+					<button class="btn btn-default dropdown-toggle user" type="button" id="username" data-toggle="dropdown"> <i class="glyphicon glyphicon-user"></i>'. $_SESSION["username"] . '&nbsp; <span class="caret"></span> </button>
 					<ul class="dropdown-menu">
 						<li><a href="chngPwd.php">Change Details</a></li>
 						<li><a href="logout.php">Log Out</a></li>
@@ -263,11 +263,11 @@
 
     <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
 	<div class="main-grids"> <hr>
-	<h2 style="text-align: center;"> ALL CHANNELS </h2> <hr><hr>
+	<h2 style="text-align: center;" class="maintext"> ALL CHANNELS </h2> <hr><hr>
 	<?php
 		try 
 		{
-			$conn = new MongoClient('mongodb://admin:root@ds055564.mlab.com:55564/eduvideo');
+			$conn = new Mongo('localhost');
 			$db = $conn->eduvideo;
 			$channel = $db->channel;
 			$user = $db->user;
@@ -281,21 +281,21 @@
 			<div class="recommended-grids english-grid">
 				<div class="recommended-info">
 					<div class="heading">';
-	printf('<h3> <a href="#" onclick="chnpg(\'%s\'); return false;" > %s </a> </h3>', $chnobj['_id'], $chnobj['channel_name']);
-						echo ' <h5> Featuring';
+	printf('<h3> <a href="#" onclick="chnpg(\'%s\'); return false;" > <center>%s </center></a> </h3>', $chnobj['_id'], $chnobj['channel_name']);
+						echo ' <p style="color:blue;" > Featuring';
 						foreach( $chnobj['subjects'] as $sub )
 						{
 							echo ' ' . $sub . ' , ';
 						}
-				  		echo '</h5> </div>
+				  		echo '</p> </div>
 					<div class="heading-right">
-						<h4>' . $nm['username'] . '</h4>
+						<h4 class = "othername">' . $nm['username'] . '</h4>
 					</div>
 					<div class="heading-right">
-						<h4>' . count( $chnobj['subscriber_ids'] ) . ' Subscribers</h4>
+						<h4 class = "othername">' . count( $chnobj['subscriber_ids'] ) . ' Subscribers</h4>
 					</div>
 					<div class="heading-right">
-						<h4>' . count( $chnobj['video_ids'] ) . ' Videos</h4>	
+						<h4 class = "othername">' . count( $chnobj['video_ids'] ) . ' Videos</h4>	
 					</div> ';
 
 				if( isset($_SESSION["usertype"]) && isset($_SESSION["uid"]) )
@@ -322,17 +322,12 @@
 				<div class="col-md-2 resent-grid recommended-grid sports-recommended-grid">
 					<div class="resent-grid-img recommended-grid-img"> ';
 
-	printf('<video src="http://localhost:3000/video/%s" controls width="250px" height="100px" onclick="singlevid(\'%s\',\'%s\');"></video>', $vobj['video_id'], $vobj['_id'], implode(";", $chnvid9) );
+	printf('<video src="http://localhost:3000/video/%s" controls width="150px" height="150px" onclick="singlevid(\'%s\',\'%s\');"></video>', $vobj['video_id'], $vobj['_id'], implode(";", $chnvid9) );
 	
-					echo '	<div class="time small-time sports-tome">
-							<p style="color:black; font-size:15px;">'. $vobj['vlength'] .'</p>
-						</div>
-						<div class="clck sports-clock">
-							<span class="glyphicon glyphicon-time" aria-hidden="true"></span>
-						</div>
+					echo '	
 					</div>
-					<div class="resent-grid-info recommended-grid-info"> ';
-	printf('<h5><a href="#" onclick="singlevid(\'%s\',\'%s\'); return false;" class="title"> %s </a></h5>', $vobj['_id'], implode(";", $chnvid9), $vobj['title'] );
+					<div class="resent-grid-info recommended-grid-info avgvideobox"> ';
+	printf('<h5><a href="#" onclick="singlevid(\'%s\',\'%s\'); return false;" class="title"> %s</a></h5>', $vobj['_id'], implode(";", $chnvid9), $vobj['title'] );
 					echo '	<p class="views">'. $vobj['view_count'] .'views</p>
 					</div>
 				</div>';
@@ -341,7 +336,7 @@
 				if( count( $chnobj['video_ids'] ) != 0 )
 				{
 					echo'	
-				<div class="heading-right"> So on ... </div> ';
+				<div class="heading-right"> </div> ';
 				}
 
 			echo'	<div class="clearfix"> </div>

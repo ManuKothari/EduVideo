@@ -1,0 +1,174 @@
+WEBVTT
+
+1
+00:00:00.768 --> 00:00:04.608
+Inheritance enables a class to reuse code from another class
+
+2
+00:00:05.376 --> 00:00:06.400
+In this example
+
+3
+00:00:06.656 --> 00:00:07.936
+We have the class Apple
+
+4
+00:00:07.990 --> 00:00:09.700
+That inherits from Fruit
+
+5
+00:00:09.728 --> 00:00:11.776
+Specified by the extends keyword
+
+6
+00:00:12.544 --> 00:00:13.056
+Fruit
+
+7
+00:00:13.312 --> 00:00:15.360
+Then becomes the superclass of Apple
+
+8
+00:00:15.872 --> 00:00:17.920
+Which in turn becomes a subclass of Fruit
+
+9
+00:00:18.944 --> 00:00:24.064
+In addition to its own members, Apple now gains all accessible members in Fruit
+
+10
+00:00:24.320 --> 00:00:25.856
+Except for its constructors
+
+11
+00:00:26.880 --> 00:00:28.416
+The other members seen here
+
+12
+00:00:28.672 --> 00:00:29.184
+All comes from the
+
+13
+00:00:29.440 --> 00:00:30.720
+Root class object
+
+14
+00:00:31.488 --> 00:00:32.512
+A class in java
+
+15
+00:00:32.768 --> 00:00:34.816
+May only inherit from 1 superclass
+
+16
+00:00:35.072 --> 00:00:36.608
+And if you don't specify one,
+
+17
+00:00:36.864 --> 00:00:39.168
+It will implicitly inherit from objects
+
+18
+00:00:40.192 --> 00:00:40.704
+Conceptually
+
+19
+00:00:41.216 --> 00:00:41.728
+A subclass
+
+20
+00:00:41.984 --> 00:00:44.544
+Is a specialization of a superclass
+
+21
+00:00:45.056 --> 00:00:46.592
+This means that Apple here
+
+22
+00:00:46.848 --> 00:00:47.872
+Is a kind of Fruit
+
+23
+00:00:48.128 --> 00:00:49.408
+As well as an Object
+
+24
+00:00:49.664 --> 00:00:53.504
+And can therefore be used anywhere a Fruit or an Object is expected
+
+25
+00:00:54.528 --> 00:00:55.296
+For example,
+
+26
+00:00:55.552 --> 00:00:57.344
+If we create an instance of an Apple
+
+27
+00:00:57.600 --> 00:00:59.392
+We can upcast it to a Fruit
+
+28
+00:00:59.648 --> 00:01:02.464
+Since a subclass contains everything in the superclass
+
+29
+00:01:02.600 --> 00:01:04.400
+The Apple is
+
+30
+00:01:04.512 --> 00:01:05.792
+Now seen as a Fruit
+
+31
+00:01:06.304 --> 00:01:08.608
+So we can only access the Fruit's members
+
+32
+00:01:09.120 --> 00:01:11.936
+When we then downcast the class back into an Apple
+
+33
+00:01:12.192 --> 00:01:15.008
+The fields specific to Apple remains unchanged
+
+34
+00:01:15.520 --> 00:01:17.824
+Beacuse the Fruit only encapsulated the Apple
+
+35
+00:01:18.336 --> 00:01:19.360
+It did not convert it
+
+36
+00:01:20.128 --> 00:01:22.688
+The downcast has to be made explicit
+
+37
+00:01:22.944 --> 00:01:26.784
+Since downcasting an actual Fruit into an Apple is not allowed
+
+38
+00:01:27.552 --> 00:01:30.624
+We can test to see if an object can be cast to a class
+
+39
+00:01:30.880 --> 00:01:32.928
+Using the instanceof operator
+
+40
+00:01:33.696 --> 00:01:34.720
+This operator
+
+41
+00:01:34.976 --> 00:01:35.744
+Returns true
+
+42
+00:01:35.900 --> 00:01:41.376
+If the left side object can be cast into the right side type without causing an exception
+
+43
+00:01:41.377 --> 00:01:41.378
+.
+

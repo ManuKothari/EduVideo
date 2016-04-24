@@ -196,11 +196,11 @@
 		{
 			echo '
 			<ul class="nav navbar-nav navbar-right">
-				<li> <div class="file" style="width:1%;font-size:5px;">
+				<li> <div class="file" >
 					<a href="index.php"><i class="glyphicon glyphicon-home">&nbsp;Home</i></a>
 				</div> </li>
 				<li class="dropdown">
-					<button class="btn btn-default dropdown-toggle" type="button" id="username" data-toggle="dropdown"> <i class="glyphicon glyphicon-user"></i>'. $_SESSION["username"] . '&nbsp; <span class="caret"></span> </button>
+					<button class="btn btn-default dropdown-toggle user" type="button" id="username" data-toggle="dropdown"> <i class="glyphicon glyphicon-user"></i>'. $_SESSION["username"] . '&nbsp; <span class="caret"></span> </button>
 					<ul class="dropdown-menu">
 						<li><a href="chngPwd.php">Change Details</a></li>
 						<li><a href="logout.php">Log Out</a></li>
@@ -267,10 +267,10 @@
 	<?php
 		try 
 		{
-			$conn = new MongoClient('mongodb://admin:root@ds055564.mlab.com:55564/eduvideo');
+			$conn = new Mongo('localhost');
 			$db = $conn->eduvideo;
 			$video = $db->video;
-			echo '<hr> <br> <div> Top 9 videos Most Viewed </div> <br> <hr>';
+			echo '<hr> <br> <div class = maintext> <span class="branded-page-module-title-text">Top 9 videos Most Viewed</span> </div> <br> <hr>';
 			$views = $video->find()->sort( array( "view_count" => -1 ) )->limit( 9 );
 			$vwlist = array();
 			foreach( $views as $vid )
@@ -283,16 +283,11 @@
 				<div class="col-md-4 resent-grid recommended-grid slider-top-grids">
 					<div class="resent-grid-img recommended-grid-img"> ';
 
-	printf('<video src="http://localhost:3000/video/%s" controls width="350px" height="200px" onclick="singlevid(\'%s\',\'%s\');"></video>', $vid['video_id'], $vid['_id'], implode(";", $vwlist) );
+	printf('<video src="http://localhost:3000/video/%s" controls width="305px" height="225px" onclick="singlevid(\'%s\',\'%s\');"></video>', $vid['video_id'], $vid['_id'], implode(";", $vwlist) );
 							
-				echo '	<div class="time">
-							<p style="color:black; font-size:15px;"> '. $vid['vlength'] .' </p>
-						</div>
-						<div class="clck">
-							<span class="glyphicon glyphicon-time" aria-hidden="true"></span>
-						</div>
+				echo '	
 					</div>
-					<div class="resent-grid-info recommended-grid-info"> ';
+					<div class="resent-grid-info recommended-grid-info videobox"> ';
 	printf('<h3><a href="#" onclick="singlevid(\'%s\',\'%s\'); return false;" class="title title-info"> %s </a></h3>', $vid['_id'], implode(";", $vwlist), $vid['title'] );
 					echo '	<ul>
 							<li class="right-list"><p class="views views-info"> '. $vid['view_count'] .'  views</p></li>
@@ -300,7 +295,7 @@
 					</div>
 				</div>	';
 			}
-			echo '<hr><br> <div> Top 9 videos with Maximum Likes </div> <br> <hr>';
+			echo '<hr><br> <div class="maintext second"> Top 9 videos with Maximum Likes</div> <br> <hr>';
 			$likes = $video->find()->sort( array( "rates.good" => -1 ) )->limit( 9 );
 			$lklist = array();
 			foreach( $likes as $vid )
@@ -313,16 +308,11 @@
 				<div class="col-md-4 resent-grid recommended-grid slider-top-grids">
 					<div class="resent-grid-img recommended-grid-img"> ';
 
-	printf('<video src="http://localhost:3000/video/%s" controls width="350px" height="200px" onclick="singlevid(\'%s\',\'%s\');"></video>', $vid['video_id'], $vid['_id'], implode(";", $lklist) );
+	printf('<video src="http://localhost:3000/video/%s" controls width="305px" height="225px" onclick="singlevid(\'%s\',\'%s\');"></video>', $vid['video_id'], $vid['_id'], implode(";", $lklist) );
 							
-				echo '	<div class="time">
-							<p style="color:black; font-size:15px;"> '. $vid['vlength'] .' </p>
-						</div>
-						<div class="clck">
-							<span class="glyphicon glyphicon-time" aria-hidden="true"></span>
-						</div>
+				echo '	
 					</div>
-					<div class="resent-grid-info recommended-grid-info"> ';
+					<div class="resent-grid-info recommended-grid-info videobox"> ';
 	printf('<h3><a href="#" onclick="singlevid(\'%s\',\'%s\'); return false;" class="title title-info"> %s </a></h3>', $vid['_id'], implode(";", $lklist), $vid['title'] );
 					echo '	<ul>
 							<li class="right-list"><p class="views views-info"> '. $vid['view_count'] .'  views</p></li>

@@ -2,21 +2,19 @@
 	extract( $_POST );
 	try 
 	{
-		$conn = new MongoClient('mongodb://admin:root@ds055564.mlab.com:55564/eduvideo');
+		$conn = new Mongo('localhost');
 		$db = $conn->eduvideo;
-		
-			$newsub = $db->newsub;
-			if( $no == 1 )
+		$newsub = $db->newsub;
+		if( $no == 1 )
+		{
+			$category = $db->category;
+			$cursor = $newsub->find( array( "sub" => $sub ) );
+			foreach( $cursor as $obj )
 			{
-				$category = $db->category;
-				$cursor = $newsub->find( array( "sub" => $sub ) );
-				foreach( $cursor as $obj )
-				{
-					echo $category->insert( $obj );
-				}
+				echo $category->insert( $obj );
 			}
-			echo $newsub->remove( array( "sub" => $sub ) );
-		
+		}
+		echo $newsub->remove( array( "sub" => $sub ) );
 		$conn->close();
 	} 
 	catch (MongoConnectionException $e) 
