@@ -55,9 +55,25 @@
         <div id="navbar" class="navbar-collapse collapse">
 		<div class="top-search">
 			<form class="navbar-form navbar-right">
-				<input id="srch" type="text" class="form-control" placeholder="Search..." autocomplete="off" onkeyup="geTitles();" list="titles">
+				<input id="srch" type="text" class="form-control" placeholder="Search..." autocomplete="off" onkeyup="geTitles(0);" list="titles">
 				<datalist id="titles"> </datalist>
-				<input type="submit" value=" " onclick="searchvid(); return false;">
+				<input type="submit" value=" " onclick="searchvid(0); return false;">
+			</form>
+		</div>
+		
+		<div class="main-search top-search">
+			<div style="
+				position: relative;
+				left: 300px;
+				font-size: larger;
+			">
+			<h2 style="font-size:2em;" class="othername">EDUVIDEO</h2>
+			</div>
+			
+			<form class="navbar-form navbar-right">
+				<input id="srch1" type="text" class="form-control" placeholder="Search..." autocomplete="off" onkeyup="geTitles(1);" list="titles1">
+				<datalist id="titles1"> </datalist>
+				<input type="submit" value=" " onclick="searchvid(1); return false;">
 			</form>
 		</div>
 		
@@ -363,9 +379,12 @@
 			} );
 	}
 
-	function searchvid()
+	function searchvid( no )
 	{
-		var query =  $("#srch").val();
+		if( no == 0 )
+			var query =  $("#srch").val();
+		else if( no == 1 )
+			var query =  $("#srch1").val();
 		$.ajax({
 			    url: 'vsearch.php',
 			    data: "qry=" + encodeURIComponent(query),
@@ -384,10 +403,18 @@
 			});
 	}
 
-	function geTitles()
+	function geTitles( no )
 	{
-		var query =  $("#srch").val();
-		$("#titles").empty();
+		if( no == 0 )
+		{
+			var query =  $("#srch").val();
+			$("#titles").empty();
+		}
+		else if( no == 1 )
+		{
+			var query =  $("#srch1").val();
+			$("#titles1").empty();
+		}
 		$.ajax({
 			    url: 'vtitles.php',
 			    data: "qry=" + encodeURIComponent(query),
@@ -401,7 +428,10 @@
 				    {
 					var titles = JSON.parse( data );
 					titles.forEach( function( title ) {
-						$("#titles").append("<option value='" + title + "'></option>");	
+					    if( no == 0 )
+					    	$("#titles").append("<option value='" + title + "'></option>");	
+					    else if( no == 1 )
+						$("#titles1").append("<option value='" + title + "'></option>");	
 					});
 				    }
 			});
