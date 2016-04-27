@@ -237,6 +237,7 @@
 		{
 			echo '
 			<li><a href="mychns.php" class="channel"><span class="glyphicon glyphicon-home glyphicon-blackboard" aria-hidden="true"></span>My Channels</a></li>
+			<li><a href="#" onclick="recommend(); return false;" class="recommendv"><span class="glyphicon glyphicon-home glyphicon-blackboard" aria-hidden="true"></span>Recommendations</a></li>
 			<li><a href="subscription.php" class="subscription"><span class= "glyphicon glyphicon-home glyphicon-check" aria-hidden="true"></span>Subscriptions</a></li>					
 			<li><a href="#" onclick="usrhist(); return false;" class="history"><span class= "glyphicon glyphicon-home glyphicon-hourglass" aria-hidden="true"></span>History</a></li>			
 			<li><a href="#" onclick="usrwatchlater(); return false;" class="watchlater"><span class="glyphicon glyphicon-home glyphicon-time" aria-hidden="true"></span>Watch Later</a></li>	';
@@ -305,9 +306,19 @@
 		    </div>
 		    <div class="video-grid">
     			<video src="http://localhost:3000/video/'. $usrvid['video_id'] .'" controls width="550px" height="450px" autoplay onended="nextvid();">
-		<track kind="subtitles" src="subtitles/Java Tutorial - 13 - Inheritance.vtt" srclang="en">
+		<track kind="captions" src="subtitles/'. $usrvid['title'] .'.vtt" srclang="en" label="English" default>
+		<track kind="captions" src="subtitles/'. $usrvid['title'] .'h.vtt"  srclang="hi" label="Hindi">
+		<track kind="captions" src="subtitles/'. $usrvid['title'] .'k.vtt"  srclang="kn" label="Kannada" >
+		 <p>This browser does not support HTML 5 Video and thus cannot demonstrate this technique.</p>
+		
 	</video>
-          	    </div>
+		<label class = "formclass">Select the language</label>
+		<select id="subtitle" onchange= "changeSubtitle()">
+		<option value = "E">English</option>
+		<option value= "K">Kannada</option>
+		<option value="H">Hindi</option>
+		</select>
+          	   </div>
 		</div>
 		<div class="song-grid-right">
 		    <div class="share">
@@ -525,7 +536,7 @@
 	var cancel_autoplay = 0;
 
 
-	function createvidlist( vids )
+	function createvidlist( vids, chno, qry )
 	{
 		var res = [];
 		var j = 0;
@@ -546,7 +557,9 @@
 				var restr = JSON.stringify( res );
 				restr = encodeURIComponent( restr );
 				var vform = $('<form action="vidlist.php" method="post" style="display:none;">' + 
-			'<input type="textarea" maxlength="5000" name="vidlist" value="' + restr + '" /' + '>' + '</form>');
+			'<input type="textarea" maxlength="5000" name="vidlist" value="' + restr + '" /' + '>' +
+			'<input type="number" name="chno" value="' + chno + '" /' + '>' +
+			'<input type="text" name="qry" value="' + qry + '" /' + '>' + '</form>');
 				$('body').append( vform );
 				vform.submit();
 			} );
@@ -568,7 +581,7 @@
 				    {					
 					var vids = JSON.parse( data );
 					vids.pop();
-					createvidlist( vids );
+					createvidlist( vids, 1, query );
 				    }
 			});
 	}
@@ -643,7 +656,7 @@
 		custom_ajax( usersURI + "/" + <?php echo json_encode($_SESSION["uid"])?> , 'GET' ).done(
 			function( data ) 
 			{
-				createvidlist( data.user.history.reverse() );
+				createvidlist( data.user.history.reverse(), 2, "" );
 			} );
 	}
 
@@ -652,7 +665,7 @@
 		custom_ajax( usersURI + "/" + <?php echo json_encode($_SESSION["uid"])?> , 'GET' ).done(
 			function( data ) 
 			{
-				createvidlist( data.user.watch_later_ids );
+				createvidlist( data.user.watch_later_ids, 3, "" );
 			} );
 	}
 
@@ -744,8 +757,91 @@
 				    }
 			});
 	}
+
+	function recommend()
+	{
+		var uid = <?php echo json_encode($_SESSION["uid"])?> ;
+		$.ajax({
+			    url: 'recommend.php',
+			    data: "uid=" + uid,
+			    type: 'POST',
+			    cache: false,
+			    error: function( jqXHR )
+				   {
+				   	console.log("ajax error " + jqXHR.status);
+				   },
+			    success: function( data )
+				    {	
+					
+					var data = JSON.parse( data );
+					var usrs = []
+					data.forEach(function(d){
+						usrs.push(d)
+					});
+					user_data = usrs[usrs.length-2]
+					
+					user_data = user_data.replace('[','')
+					user_data = user_data.replace(']','')
+			
+					similar_users = user_data.split(",");
+					for( var i = 0; i < similar_users.length; i++ )
+					{
+						similar_users[i] = similar_users[i].trim()
+						similar_users[i] = similar_users[i].slice(1,similar_users[i].length-1)		
+					}
+
+					var res = [];
+					
+					custom_ajax( usersURI, 'GET' ).done(
+						function( usrdata ) 
+						{
+							for( var i = 0; i < similar_users.length; i++ )
+							{
+								usrdata.users.some( function( user ) {	
+								if( user._id.trim() == similar_users[i] )
+									{
+										videos = user['rates']['good']
+										for( var k = 0; k < videos.length; k++ )
+										{
+										   
+										    res.push(videos[k]);
+										}
+										
+										return true;
+								    	}
+								} );
+							}
+							res = res.reduce(function(a,b){
+								if(a.indexOf(b)<0)
+								a.push(b)
+								return a;
+							},[])
+							console.log(res)
+							createvidlist( res, 4, "" );
+	
+						} );
+					
+
+				    }
+			});
+	}
 	
 
+	function changeSubtitle()
+	{
+		sel = document.getElementById('subtitle');
+		tracks = document.getElementsByTagName('track');
+		for(i = 0;i<tracks.length;i++)
+		{
+			tracks[i].default = false;
+		}
+		if(sel.value == 'H')
+			tracks[1].default = true;
+		else if (sel.value == 'K')
+			tracks[2].default = true;
+		else
+			tracks[0].default = true;
+	}
     </script>
 						
 </body>

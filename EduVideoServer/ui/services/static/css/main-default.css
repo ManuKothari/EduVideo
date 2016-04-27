@@ -12727,7 +12727,7 @@ textarea.b-product-card-textarea {
 	width:75px;
 	position: absolute;
     margin-left: 90px;
-    bottom: 74px;
+    bottom: 30px;
 	background: #337AB7;
 }
 .options2
@@ -12735,8 +12735,17 @@ textarea.b-product-card-textarea {
 	width:75px;
 	position: absolute;
     margin-left: 180px;
-    bottom: 74px;
+    bottom: 30px;
 	background: #337AB7;
 }
+.chname
+{
+	
+	font-size: large;
+    font-weight: 800;
+    color:black;
+}
+
+
 
 /*# sourceMappingURL=main-default.css.map */

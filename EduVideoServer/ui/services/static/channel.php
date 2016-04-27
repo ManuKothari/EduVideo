@@ -236,6 +236,7 @@
 		{
 			echo '
 			<li><a href="mychns.php" class="channel"><span class="glyphicon glyphicon-home glyphicon-blackboard" aria-hidden="true"></span>My Channels</a></li>
+			<li><a href="#" onclick="recommend(); return false;" class="recommendv"><span class="glyphicon glyphicon-home glyphicon-blackboard" aria-hidden="true"></span>Recommendations</a></li>
 			<li><a href="subscription.php" class="subscription"><span class= "glyphicon glyphicon-home glyphicon-check" aria-hidden="true"></span>Subscriptions</a></li>					
 			<li><a href="#" onclick="usrhist(); return false;" class="history"><span class= "glyphicon glyphicon-home glyphicon-hourglass" aria-hidden="true"></span>History</a></li>			
 			<li><a href="#" onclick="usrwatchlater(); return false;" class="watchlater"><span class="glyphicon glyphicon-home glyphicon-time" aria-hidden="true"></span>Watch Later</a></li>	';
@@ -277,9 +278,11 @@
 		echo ' <h2 style="text-align: center;" class="maintext">'. $chnobj['channel_name'] .'</h2> <hr><hr> ';
 
 		$chnvid9 = array_slice( $chnobj['video_ids'], 0, 9 );
+		$count = 0;
 		foreach( $chnobj['video_ids'] as $vid )
 		{
 			$vobj = $video->findOne( array('_id' => new MongoId( $vid ) ) );
+			$count = $count+1;
 			echo '	
 			<div class="col-md-4 resent-grid recommended-grid slider-top-grids">
 				<div class="resent-grid-img recommended-grid-img"> ';
@@ -298,6 +301,11 @@
 					</ul>
 				</div>
 			</div>	';
+			if($count==3)
+				{
+					echo "<div class = 'clearfix'></div><br><hr>";
+					$count = 0;
+				}
 		}
 		$conn->close();
 	} 
@@ -339,7 +347,7 @@
 	}
 
 
-	function createvidlist( vids )
+	function createvidlist( vids, chno, qry )
 	{
 		var res = [];
 		var j = 0;
@@ -360,7 +368,9 @@
 				var restr = JSON.stringify( res );
 				restr = encodeURIComponent( restr );
 				var vform = $('<form action="vidlist.php" method="post" style="display:none;">' + 
-			'<input type="textarea" maxlength="5000" name="vidlist" value="' + restr + '" /' + '>' + '</form>');
+			'<input type="textarea" maxlength="5000" name="vidlist" value="' + restr + '" /' + '>' +
+			'<input type="number" name="chno" value="' + chno + '" /' + '>' +
+			'<input type="text" name="qry" value="' + qry + '" /' + '>' + '</form>');
 				$('body').append( vform );
 				vform.submit();
 			} );
@@ -382,7 +392,7 @@
 				    {					
 					var vids = JSON.parse( data );
 					vids.pop();
-					createvidlist( vids );
+					createvidlist( vids, 1, query );
 				    }
 			});
 	}
@@ -457,7 +467,7 @@
 		custom_ajax( usersURI + "/" + <?php echo json_encode($_SESSION["uid"])?> , 'GET' ).done(
 			function( data ) 
 			{
-				createvidlist( data.user.history.reverse() );
+				createvidlist( data.user.history.reverse(), 2, "" );
 			} );
 	}
 
@@ -466,7 +476,7 @@
 		custom_ajax( usersURI + "/" + <?php echo json_encode($_SESSION["uid"])?> , 'GET' ).done(
 			function( data ) 
 			{
-				createvidlist( data.user.watch_later_ids );
+				createvidlist( data.user.watch_later_ids, 3, "" );
 			} );
 	}
 
@@ -480,6 +490,74 @@
 		'<input type="text" name="vidlist" value="' + vidlist + '" /' + '>' + '</form>');
 		$('body').append( vform );
 		vform.submit();
+	}
+
+	function recommend()
+	{
+		var uid = <?php echo json_encode($_SESSION["uid"])?> ;
+		$.ajax({
+			    url: 'recommend.php',
+			    data: "uid=" + uid,
+			    type: 'POST',
+			    cache: false,
+			    error: function( jqXHR )
+				   {
+				   	console.log("ajax error " + jqXHR.status);
+				   },
+			    success: function( data )
+				    {	
+					
+					var data = JSON.parse( data );
+					var usrs = []
+					data.forEach(function(d){
+						usrs.push(d)
+					});
+					user_data = usrs[usrs.length-2]
+					
+					user_data = user_data.replace('[','')
+					user_data = user_data.replace(']','')
+			
+					similar_users = user_data.split(",");
+					for( var i = 0; i < similar_users.length; i++ )
+					{
+						similar_users[i] = similar_users[i].trim()
+						similar_users[i] = similar_users[i].slice(1,similar_users[i].length-1)		
+					}
+
+					var res = [];
+					
+					custom_ajax( usersURI, 'GET' ).done(
+						function( usrdata ) 
+						{
+							for( var i = 0; i < similar_users.length; i++ )
+							{
+								usrdata.users.some( function( user ) {	
+								if( user._id.trim() == similar_users[i] )
+									{
+										videos = user['rates']['good']
+										for( var k = 0; k < videos.length; k++ )
+										{
+										   
+										    res.push(videos[k]);
+										}
+										
+										return true;
+								    	}
+								} );
+							}
+							res = res.reduce(function(a,b){
+								if(a.indexOf(b)<0)
+								a.push(b)
+								return a;
+							},[])
+							console.log(res)
+							createvidlist( res, 4, "" );
+	
+						} );
+					
+
+				    }
+			});
 	}
 
 

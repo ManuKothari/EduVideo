@@ -197,11 +197,11 @@
 		{
 			echo '
 			<ul class="nav navbar-nav navbar-right">
-				<li> <div class="file" style="width:1%;font-size:5px;">
+				<li> <div class="file">
 					<a href="index.php"><i class="glyphicon glyphicon-home">&nbsp;Home</i></a>
 				</div> </li>
 				<li class="dropdown">
-					<button class="btn btn-default dropdown-toggle" type="button" id="username" data-toggle="dropdown"> <i class="glyphicon glyphicon-user"></i>'. $_SESSION["username"] . '&nbsp; <span class="caret"></span> </button>
+					<button class="btn btn-default dropdown-toggle user" type="button" id="username" data-toggle="dropdown"> <i class="glyphicon glyphicon-user"></i>'. $_SESSION["username"] . '&nbsp; <span class="caret"></span> </button>
 					<ul class="dropdown-menu">
 						<li><a href="chngPwd.php">Change Details</a></li>
 						<li><a href="logout.php">Log Out</a></li>
@@ -236,6 +236,7 @@
 		{
 			echo '
 			<li><a href="mychns.php" class="channel"><span class="glyphicon glyphicon-home glyphicon-blackboard" aria-hidden="true"></span>My Channels</a></li>
+			<li><a href="#" onclick="recommend(); return false;" class="recommendv"><span class="glyphicon glyphicon-home glyphicon-blackboard" aria-hidden="true"></span>Recommendations</a></li>
 			<li><a href="subscription.php" class="subscription"><span class= "glyphicon glyphicon-home glyphicon-check" aria-hidden="true"></span>Subscriptions</a></li>					
 			<li><a href="#" onclick="usrhist(); return false;" class="history"><span class= "glyphicon glyphicon-home glyphicon-hourglass" aria-hidden="true"></span>History</a></li>			
 			<li><a href="#" onclick="usrwatchlater(); return false;" class="watchlater"><span class="glyphicon glyphicon-home glyphicon-time" aria-hidden="true"></span>Watch Later</a></li>	';
@@ -274,7 +275,7 @@
 		$user = $db->user;
 		$video = $db->video;
 		$chnobj = $channel->findOne( array('_id' => new MongoId( $cid ) ) );
-		echo ' <h2 style="text-align: center;">'. $chnobj['channel_name'] .'</h2> <hr><hr> ';
+		echo ' <h2 style="text-align: center;" class="maintext">'. $chnobj['channel_name'] .'</h2> <hr><hr> ';
 
 		$chnvid9 = array_slice( $chnobj['video_ids'], 0, 9 );
 		foreach( $chnobj['video_ids'] as $vid )
@@ -284,16 +285,14 @@
 			<div class="col-md-4 resent-grid recommended-grid slider-top-grids">
 				<div class="resent-grid-img recommended-grid-img"> ';
 
-	printf('<video src="http://localhost:3000/video/%s" controls width="350px" height="200px" onclick="singlevid(\'%s\',\'%s\');"></video>', $vobj['video_id'], $vobj['_id'], implode(";", $chnvid9) );
+	printf('<video src="http://localhost:3000/video/%s" controls width="305px" height="225px" onclick="singlevid(\'%s\',\'%s\');"></video>', $vobj['video_id'], $vobj['_id'], implode(";", $chnvid9) );
 							
-				echo '	<div class="time">
-						<p style="color:black; font-size:15px;"> '. $vobj['vlength'] .' </p>
-					</div>
+				echo '	
 					<div class="clck">
 						<span class="glyphicon glyphicon-time" aria-hidden="true"></span>
 					</div>
 				</div>
-				<div class="resent-grid-info recommended-grid-info"> ';
+				<div class="resent-grid-info recommended-grid-info videobox"> ';
 	printf('<h3><a href="#" onclick="singlevid(\'%s\',\'%s\'); return false;" class="title title-info"> %s </a></h3>', $vobj['_id'], implode(";", $chnvid9), $vobj['title'] );
 				echo '	<ul>
 						<li class="right-list"><p class="views views-info"> '. $vobj['view_count'] .'  views</p></li>
@@ -341,7 +340,7 @@
 	}
 
 
-	function createvidlist( vids )
+	function createvidlist( vids, chno, qry )
 	{
 		var res = [];
 		var j = 0;
@@ -362,7 +361,9 @@
 				var restr = JSON.stringify( res );
 				restr = encodeURIComponent( restr );
 				var vform = $('<form action="vidlist.php" method="post" style="display:none;">' + 
-			'<input type="textarea" maxlength="5000" name="vidlist" value="' + restr + '" /' + '>' + '</form>');
+			'<input type="textarea" maxlength="5000" name="vidlist" value="' + restr + '" /' + '>' +
+			'<input type="number" name="chno" value="' + chno + '" /' + '>' +
+			'<input type="text" name="qry" value="' + qry + '" /' + '>' + '</form>');
 				$('body').append( vform );
 				vform.submit();
 			} );
@@ -384,7 +385,7 @@
 				    {					
 					var vids = JSON.parse( data );
 					vids.pop();
-					createvidlist( vids );
+					createvidlist( vids, 1, query );
 				    }
 			});
 	}
@@ -459,7 +460,7 @@
 		custom_ajax( usersURI + "/" + <?php echo json_encode($_SESSION["uid"])?> , 'GET' ).done(
 			function( data ) 
 			{
-				createvidlist( data.user.history.reverse() );
+				createvidlist( data.user.history.reverse(), 2, "" );
 			} );
 	}
 
@@ -468,7 +469,7 @@
 		custom_ajax( usersURI + "/" + <?php echo json_encode($_SESSION["uid"])?> , 'GET' ).done(
 			function( data ) 
 			{
-				createvidlist( data.user.watch_later_ids );
+				createvidlist( data.user.watch_later_ids, 3, "" );
 			} );
 	}
 
@@ -482,6 +483,74 @@
 		'<input type="text" name="vidlist" value="' + vidlist + '" /' + '>' + '</form>');
 		$('body').append( vform );
 		vform.submit();
+	}
+
+	function recommend()
+	{
+		var uid = <?php echo json_encode($_SESSION["uid"])?> ;
+		$.ajax({
+			    url: 'recommend.php',
+			    data: "uid=" + uid,
+			    type: 'POST',
+			    cache: false,
+			    error: function( jqXHR )
+				   {
+				   	console.log("ajax error " + jqXHR.status);
+				   },
+			    success: function( data )
+				    {	
+					
+					var data = JSON.parse( data );
+					var usrs = []
+					data.forEach(function(d){
+						usrs.push(d)
+					});
+					user_data = usrs[usrs.length-2]
+					
+					user_data = user_data.replace('[','')
+					user_data = user_data.replace(']','')
+			
+					similar_users = user_data.split(",");
+					for( var i = 0; i < similar_users.length; i++ )
+					{
+						similar_users[i] = similar_users[i].trim()
+						similar_users[i] = similar_users[i].slice(1,similar_users[i].length-1)		
+					}
+
+					var res = [];
+					
+					custom_ajax( usersURI, 'GET' ).done(
+						function( usrdata ) 
+						{
+							for( var i = 0; i < similar_users.length; i++ )
+							{
+								usrdata.users.some( function( user ) {	
+								if( user._id.trim() == similar_users[i] )
+									{
+										videos = user['rates']['good']
+										for( var k = 0; k < videos.length; k++ )
+										{
+										   
+										    res.push(videos[k]);
+										}
+										
+										return true;
+								    	}
+								} );
+							}
+							res = res.reduce(function(a,b){
+								if(a.indexOf(b)<0)
+								a.push(b)
+								return a;
+							},[])
+							console.log(res)
+							createvidlist( res );
+	
+						} );
+					
+
+				    }
+			});
 	}
 
 

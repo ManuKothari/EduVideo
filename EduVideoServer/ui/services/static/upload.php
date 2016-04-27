@@ -272,6 +272,16 @@
 								</div>
 							</div>
 						</form>
+						<div class="subtitle">
+							<h2 class="maintext">Want to Upload subtitles?</h2>
+							<form action="file_upload.php" method="POST" enctype="multipart/form-data">
+							<label style = "font-size: large;"><br/>Choose subtitle file/s:<br/>
+							<p style="font-weight:200;">Please note: Subtitles can be in English, Kannada or Hindi. Support for the other languages are yet to be provided.</p>
+							<input type="file" style="color:white;background:blue;" id="cv" name="upload[]" multiple /></label><br/><br/>&nbsp;&nbsp;
+							<input type="submit" value="SUBMIT" class="btn btn-primary" >
+							</form>
+						</div>
+						
 					</div>
 				</div>
 			</div>
@@ -347,7 +357,7 @@
 			} );
 	}
 
-         function displayinfo() 
+        function displayinfo() 
 	{
 		myFile = document.getElementById("vidfile").files[0];
 		myDiv = document.getElementById("vidinfo");
@@ -536,6 +546,7 @@
 				    }
 			});
 	}
+
 
 
     </script>

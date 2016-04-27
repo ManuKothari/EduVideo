@@ -24,3 +24,4 @@
 571488f40a9ded0f40a2517d $@$ CSS Tutorial - 09 - Specificity $@$  unit4-css web css 1 - 09 tutorial tech intermediate specificity
 571489b00a9ded0f40a2517f $@$ XML Tutorial - 01 - Introduction to XML $@$  basics introduction 01 xml web to unit4-xml asp.net - 2 and tech tutorial
 57148a930a9ded0f40a25182 $@$ ASP.NET Tutorial - 10 - User Controls $@$  unit5-asp.net user web controls 10 asp.net advanced - 2 tech tutorial
+5720513233eb751aa0aa9417 $@$ delete $@$  sql unit1-sql and algorithms introduction delete

@@ -26,6 +26,10 @@
 	    {
 		echo $user->update( array('_id' => new MongoId( $uid ) ), array('$set' => array('notify' => array() ) ) );
 	    }
+	    else if( $no == 4 )
+	    {
+		echo $user->update( array('_id' => new MongoId( $uid ) ), array('$set' => array('history' => array() ) ) );
+	    }
 
 		$conn->close();
 	} 

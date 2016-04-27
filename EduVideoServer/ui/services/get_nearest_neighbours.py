@@ -6,6 +6,8 @@ from nearpy.distances import CosineDistance
 from nearpy.hashes import RandomBinaryProjections, RandomBinaryProjectionTree, HashPermutations, HashPermutationMapper
 from get_data import *
 import time
+from redis import Redis
+from nearpy.storage import RedisStorage
 '''
 
 user_rating -  Mapping between userid and map ( video id and and it's rating)
@@ -46,6 +48,7 @@ def get_user_vectors():
 				if list_of_videos[vid] == v_id[0]:
 					
 					user_vector[user][vid] = v_id[1]
+
 					
 		user_vector[user] = np.array(user_vector[user],dtype=float)
 

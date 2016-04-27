@@ -198,11 +198,11 @@
 			$GLOBALS['uid'] = $_SESSION["uid"];
 			echo '
 			<ul class="nav navbar-nav navbar-right">
-				<li> <div class="file" style="width:1%;font-size:5px;">
+				<li> <div class="file" >
 					<a href="index.php"><i class="glyphicon glyphicon-home">&nbsp;Home</i></a>
 				</div> </li>
 				<li class="dropdown">
-					<button class="btn btn-default dropdown-toggle" type="button" id="username" data-toggle="dropdown"> <i class="glyphicon glyphicon-user"></i>'. $_SESSION["username"] . '&nbsp; <span class="caret"></span> </button>
+					<button class="btn btn-default dropdown-toggle user" type="button" id="username" data-toggle="dropdown"> <i class="glyphicon glyphicon-user"></i>'. $_SESSION["username"] . '&nbsp; <span class="caret"></span> </button>
 					<ul class="dropdown-menu">
 						<li><a href="chngPwd.php">Change Details</a></li>
 						<li><a href="logout.php">Log Out</a></li>
@@ -237,6 +237,7 @@
 		{
 			echo '
 			<li><a href="mychns.php" class="channel"><span class="glyphicon glyphicon-home glyphicon-blackboard" aria-hidden="true"></span>My Channels</a></li>
+			<li><a href="#" onclick="recommend(); return false;" class="recommendv"><span class="glyphicon glyphicon-home glyphicon-blackboard" aria-hidden="true"></span>Recommendations</a></li>
 			<li><a href="subscription.php" class="subscription"><span class= "glyphicon glyphicon-home glyphicon-check" aria-hidden="true"></span>Subscriptions</a></li>					
 			<li><a href="#" onclick="usrhist(); return false;" class="history"><span class= "glyphicon glyphicon-home glyphicon-hourglass" aria-hidden="true"></span>History</a></li>			
 			<li><a href="#" onclick="usrwatchlater(); return false;" class="watchlater"><span class="glyphicon glyphicon-home glyphicon-time" aria-hidden="true"></span>Watch Later</a></li>	';
@@ -301,10 +302,12 @@
       echo' <div class="col-sm-8 single-left">
 		<div class="song">
 		    <div class="song-info">
-			<h3>'. $usrvid['title'] .'</h3>	
+			<h3 class= "maintext">'. $usrvid['title'] .'</h3>	
 		    </div>
 		    <div class="video-grid">
-    			<video src="http://localhost:3000/video/'. $usrvid['video_id'] .'" controls width="550px" height="450px" autoplay onended="nextvid();"></video>
+    			<video src="http://localhost:3000/video/'. $usrvid['video_id'] .'" controls width="550px" height="450px" autoplay onended="nextvid();">
+		<track kind="subtitles" src="subtitles/Java Tutorial - 13 - Inheritance.vtt" srclang="en">
+	</video>
           	    </div>
 		</div>
 		<div class="song-grid-right">
@@ -353,11 +356,11 @@
 			$usrwl = $user->findOne( array('_id' => new MongoId( $_SESSION["uid"] ) ) );
 			if( in_array( $vid, $usrwl['watch_later_ids'] ) )
 			{
-			    echo' <li><a href="#" onclick="videtail(5); return false;" class="icon comment-icon">Un-Watch</a></li> ';
+			    echo' <li><a href="#" onclick="videtail(5); return false;" class="icon comment-icon ">Un-Watch</a></li> ';
 			}
 			else
 			{
-			    echo' <li><a href="#" onclick="videtail(4); return false;" class="icon comment-icon">Watch Later</a></li> ';
+			    echo' <li><a href="#" onclick="videtail(4); return false;" class="icon comment-icon ">Watch Later</a></li> ';
 			}
 		}
 		echo '	</ul>
@@ -367,27 +370,27 @@
 		
 		<div class="all-comments"> ';
 			$authusr = $user->findOne( array('_id' => new MongoId( $usrvid['author'] ) ) );
-		echo '	<h5 style="float:left; display:inline; width:25%; color:blue;">'. $authusr['username']  .'</h5>';
+		echo '	<h5 style="float:left; display:inline; width:25%; color:blue;" class = "othername">'. $authusr['username']  .'</h5>';
 			$authchn = $channel->findOne( array('_id' => new MongoId( $usrvid['channel'] ) ) );
-		echo '	<h5 style="float:left; display:inline; width:30%; color:blue;">'. $authchn['channel_name']  .'</h5>
-			<h5 style="float:left; display:inline; width:15%; color:green;">'. $usrvid['rates']['good']  .' good </h5>
-			<h5 style="float:left; display:inline; width:15%; color:purple;">'. $usrvid['rates']['avg']  .' avg </h5>
-			<h5 style="float:left; display:inline; width:15%; color:red;">'. $usrvid['rates']['poor']  .' poor </h5>
+		echo '	<h5 style="float:left; display:inline; width:30%; color:blue;" class = "othername">'. $authchn['channel_name']  .'</h5>
+			<h5 style="float:left; display:inline; width:15%; color:green;" class = "othername">'. $usrvid['rates']['good']  .' good </h5>
+			<h5 style="float:left; display:inline; width:15%; color:purple;" class = "othername">'. $usrvid['rates']['avg']  .' avg </h5>
+			<h5 style="float:left; display:inline; width:15%; color:red;" class = "othername">'. $usrvid['rates']['poor']  .' poor </h5>
 			<div class="clearfix"> </div> <hr> ';
 
 	foreach( $usrvid['category'] as $cat )
 	{
-		echo' <h5 style="float:left; display:inline; width:40%; color:#006400;"> '. $cat['subject'] .' - '. $cat['unitTopic'] .' - '. $cat['subtopic'].' , </h5> ';
+		echo' <h5 style="float:left; display:inline; width:40%; color:#006400;" class = "othername"> '. $cat['subject'] .' - '. $cat['unitTopic'] .' - '. $cat['subtopic'].' , </h5> ';
 	}
 		echo' <div class="clearfix"> </div> <hr> ';
 
 	if( count( $usrvid['tags'] ) > 0 )
 	{
-		echo' <h5 style="color:#191970;"> Tags:  '. implode(" , ", $usrvid['tags']) .' </h5> <hr> ';
+		echo' <h5 style="color:#191970;" class = "othername"> Tags:  '. implode(" , ", $usrvid['tags']) .' </h5> <hr> ';
 	}
 	if( strcmp( $usrvid['description'], "" ) != 0 )
 	{
-		echo' <h5 style="color:#800000;"> Description:  '. $usrvid['description'] .' </h5> <hr>';
+		echo' <h5 style="color:#800000;" class = "othername"> Description:  '. $usrvid['description'] .' </h5> <hr>';
 	}
 
 	    echo '  <div class="all-comments-info"> ';
@@ -417,7 +420,7 @@
 			    </form>
 			</div> <br><hr> ';
 	    }
-		echo '	<h5 style="text-align:center; color:brown;"> '. count( $usrvid['comments'] ) .' Comments </h5>
+		echo '	<h5 style="text-align:center; color:brown;" class = "othername"> '. count( $usrvid['comments'] ) .' Comments </h5>
 		    </div><hr> ';
 
 	if( count( $usrvid['comments'] ) > 0 )
@@ -523,7 +526,7 @@
 	var cancel_autoplay = 0;
 
 
-	function createvidlist( vids )
+	function createvidlist( vids, chno, qry )
 	{
 		var res = [];
 		var j = 0;
@@ -544,7 +547,9 @@
 				var restr = JSON.stringify( res );
 				restr = encodeURIComponent( restr );
 				var vform = $('<form action="vidlist.php" method="post" style="display:none;">' + 
-			'<input type="textarea" maxlength="5000" name="vidlist" value="' + restr + '" /' + '>' + '</form>');
+			'<input type="textarea" maxlength="5000" name="vidlist" value="' + restr + '" /' + '>' +
+			'<input type="number" name="chno" value="' + chno + '" /' + '>' +
+			'<input type="text" name="qry" value="' + qry + '" /' + '>' + '</form>');
 				$('body').append( vform );
 				vform.submit();
 			} );
@@ -566,7 +571,7 @@
 				    {					
 					var vids = JSON.parse( data );
 					vids.pop();
-					createvidlist( vids );
+					createvidlist( vids, 1, query );
 				    }
 			});
 	}
@@ -641,7 +646,7 @@
 		custom_ajax( usersURI + "/" + <?php echo json_encode($_SESSION["uid"])?> , 'GET' ).done(
 			function( data ) 
 			{
-				createvidlist( data.user.history.reverse() );
+				createvidlist( data.user.history.reverse(), 2, "" );
 			} );
 	}
 
@@ -650,7 +655,7 @@
 		custom_ajax( usersURI + "/" + <?php echo json_encode($_SESSION["uid"])?> , 'GET' ).done(
 			function( data ) 
 			{
-				createvidlist( data.user.watch_later_ids );
+				createvidlist( data.user.watch_later_ids, 3, "" );
 			} );
 	}
 
@@ -739,6 +744,74 @@
 					{
 						alert("Done!");
 					}
+				    }
+			});
+	}
+
+	function recommend()
+	{
+		var uid = <?php echo json_encode($_SESSION["uid"])?> ;
+		$.ajax({
+			    url: 'recommend.php',
+			    data: "uid=" + uid,
+			    type: 'POST',
+			    cache: false,
+			    error: function( jqXHR )
+				   {
+				   	console.log("ajax error " + jqXHR.status);
+				   },
+			    success: function( data )
+				    {	
+					
+					var data = JSON.parse( data );
+					var usrs = []
+					data.forEach(function(d){
+						usrs.push(d)
+					});
+					user_data = usrs[usrs.length-2]
+					
+					user_data = user_data.replace('[','')
+					user_data = user_data.replace(']','')
+			
+					similar_users = user_data.split(",");
+					for( var i = 0; i < similar_users.length; i++ )
+					{
+						similar_users[i] = similar_users[i].trim()
+						similar_users[i] = similar_users[i].slice(1,similar_users[i].length-1)		
+					}
+
+					var res = [];
+					
+					custom_ajax( usersURI, 'GET' ).done(
+						function( usrdata ) 
+						{
+							for( var i = 0; i < similar_users.length; i++ )
+							{
+								usrdata.users.some( function( user ) {	
+								if( user._id.trim() == similar_users[i] )
+									{
+										videos = user['rates']['good']
+										for( var k = 0; k < videos.length; k++ )
+										{
+										   
+										    res.push(videos[k]);
+										}
+										
+										return true;
+								    	}
+								} );
+							}
+							res = res.reduce(function(a,b){
+								if(a.indexOf(b)<0)
+								a.push(b)
+								return a;
+							},[])
+							console.log(res)
+							createvidlist( res, 4, "" );
+	
+						} );
+					
+
 				    }
 			});
 	}

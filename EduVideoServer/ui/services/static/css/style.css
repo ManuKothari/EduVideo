@@ -158,6 +158,9 @@ ul.nav.nav-sidebar li a{
 }
 .main-grids {
   padding: 0 0 1em 1em;
+  background: rgba(99, 135, 138, 0.05);
+   
+    height: 5000px;
 }
 .sidebar ul.nav-sidebar li a:hover{
     background-color: #232323 !important;
@@ -936,6 +939,7 @@ select.form-control.bfh-countries:hover {
 /*-- shows --*/
 .show-top-grids {
   padding: 0 1em 0 0;
+ 
 }
 .show-grid-right{
     background: #f7f7f7;
@@ -1825,6 +1829,10 @@ background: url(../images/social.png) no-repeat 0px 0px;
 	}
 	.show-grid-right {
 		padding: 2em 0 0 2em;
+		position: absolute;
+		top: 66px;
+		left: 890px;
+		
 	}
 	.resent-grid-info p.author-info {
 		font-size: 12px;
@@ -1916,6 +1924,9 @@ background: url(../images/social.png) no-repeat 0px 0px;
 	}
 	.show-grid-right {
 		padding: 1em 0 0 1em;
+		position: absolute;
+		top: 66px;
+		left: 890px;
 	}
 	.show-grid-left {
 		width: 80%;
@@ -2831,10 +2842,10 @@ background: url(../images/social.png) no-repeat 0px 0px;
 
 .second
 {
-	position: absolute;
+	position: relative;
     width: 1067px;
     height: 36px;
-    top: 75pc;
+   
 }
 
 .smallvideobox
@@ -2872,4 +2883,22 @@ background: url(../images/social.png) no-repeat 0px 0px;
 {
 	font-size: larger;
     font-weight: 800;
+}
+
+.subtitle
+{
+	background: #f7f7f7;
+    border: 2px solid #555;
+    width: 1000px;
+    height: 250px;
+    position: relative;
+    left: 150px;
+}
+.main-search
+{
+	position: absolute;
+    top: 300px;
+    left: 400px;
+    width: 1000px;
+    height: 200px;
 }

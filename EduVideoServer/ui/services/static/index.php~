@@ -318,7 +318,7 @@
 	}
 
 
-	function createvidlist( vids )
+	function createvidlist( vids, chno, qry )
 	{
 		var res = [];
 		var j = 0;
@@ -339,7 +339,8 @@
 				var restr = JSON.stringify( res );
 				restr = encodeURIComponent( restr );
 				var vform = $('<form action="vidlist.php" method="post" style="display:none;">' + 
-			'<input type="textarea" maxlength="5000" name="vidlist" value="' + restr + '" /' + '>' + '</form>');
+			'<input type="textarea" maxlength="5000" name="vidlist" value="' + restr + '" /' + '>' +
+			'<input type="number" name="chno" value="' + chno + '" /' + '>' + '</form>');
 				$('body').append( vform );
 				vform.submit();
 			} );
@@ -361,7 +362,7 @@
 				    {					
 					var vids = JSON.parse( data );
 					vids.pop();
-					createvidlist( vids );
+					createvidlist( vids, 1, query );
 				    }
 			});
 	}
@@ -436,7 +437,7 @@
 		custom_ajax( usersURI + "/" + <?php echo json_encode($_SESSION["uid"])?> , 'GET' ).done(
 			function( data ) 
 			{
-				createvidlist( data.user.history.reverse() );
+				createvidlist( data.user.history.reverse(), 2, "" );
 			} );
 	}
 
@@ -445,7 +446,7 @@
 		custom_ajax( usersURI + "/" + <?php echo json_encode($_SESSION["uid"])?> , 'GET' ).done(
 			function( data ) 
 			{
-				createvidlist( data.user.watch_later_ids );
+				createvidlist( data.user.watch_later_ids, 3, "" );
 			} );
 	}
 
@@ -547,9 +548,7 @@
 										videos = user['rates']['good']
 										for( var k = 0; k < videos.length; k++ )
 										{
-										    if (videos[k] in res)
-											continue;
-										    else
+										   
 										    res.push(videos[k]);
 										}
 										
@@ -557,8 +556,13 @@
 								    	}
 								} );
 							}
+							res = res.reduce(function(a,b){
+								if(a.indexOf(b)<0)
+								a.push(b)
+								return a;
+							},[])
 							console.log(res)
-							createvidlist( res );
+							createvidlist( res, 4, "" );
 	
 						} );
 					

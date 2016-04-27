@@ -60,6 +60,22 @@
 				<input type="submit" value=" " onclick="searchvid(); return false;">
 			</form>
 		</div>
+		
+		<div class="main-search top-search">
+			<div style="
+				position: relative;
+				left: 300px;
+				font-size: larger;
+			">
+			<h2 style="font-size:2em;" class="othername">EDUVIDEO</h2>
+			</div>
+			
+			<form class="navbar-form navbar-right">
+				<input id="srch" type="text" class="form-control" placeholder="Search..." autocomplete="off" onkeyup="geTitles();" list="titles">
+				<datalist id="titles"> </datalist>
+				<input type="submit" value=" " onclick="searchvid(); return false;">
+			</form>
+		</div>
 
 		<div class="header-top-right">
 	<?php
@@ -318,7 +334,7 @@
 	}
 
 
-	function createvidlist( vids )
+	function createvidlist( vids, chno, qry )
 	{
 		var res = [];
 		var j = 0;
@@ -339,7 +355,9 @@
 				var restr = JSON.stringify( res );
 				restr = encodeURIComponent( restr );
 				var vform = $('<form action="vidlist.php" method="post" style="display:none;">' + 
-			'<input type="textarea" maxlength="5000" name="vidlist" value="' + restr + '" /' + '>' + '</form>');
+			'<input type="textarea" maxlength="5000" name="vidlist" value="' + restr + '" /' + '>' +
+			'<input type="number" name="chno" value="' + chno + '" /' + '>' +
+			'<input type="text" name="qry" value="' + qry + '" /' + '>' + '</form>');
 				$('body').append( vform );
 				vform.submit();
 			} );
@@ -361,7 +379,7 @@
 				    {					
 					var vids = JSON.parse( data );
 					vids.pop();
-					createvidlist( vids );
+					createvidlist( vids, 1, query );
 				    }
 			});
 	}
@@ -436,7 +454,7 @@
 		custom_ajax( usersURI + "/" + <?php echo json_encode($_SESSION["uid"])?> , 'GET' ).done(
 			function( data ) 
 			{
-				createvidlist( data.user.history.reverse() );
+				createvidlist( data.user.history.reverse(), 2, "" );
 			} );
 	}
 
@@ -445,7 +463,7 @@
 		custom_ajax( usersURI + "/" + <?php echo json_encode($_SESSION["uid"])?> , 'GET' ).done(
 			function( data ) 
 			{
-				createvidlist( data.user.watch_later_ids );
+				createvidlist( data.user.watch_later_ids, 3, "" );
 			} );
 	}
 
@@ -561,7 +579,7 @@
 								return a;
 							},[])
 							console.log(res)
-							createvidlist( res );
+							createvidlist( res, 4, "" );
 	
 						} );
 					

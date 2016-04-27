@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>FILE UPLOAD WITH PHP</title>
+</head>
+<body>
+<form action="file_upload.php" method="POST" enctype="multipart/form-data">
+<label>CHOOSE FILE:<input type="file" id="cv" name="cv" multiple /></label>
+<input type="submit"/>
+</form>
+</body>
+</html>
